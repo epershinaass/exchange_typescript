@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOCKER_COMPOSE_VERSION="v2.3.3"
+DOCKER_COMPOSE_VERSION="v2.6.1"
 
 #Парсим имя и версию ОС
 declare $(lsb_release -d | awk '{ match($0, /(.+)\s+(.+) ([0-9]+\.[0-9]+)(.[0-9]+)?\s.+/, os);}
@@ -22,7 +22,7 @@ if [[ $OS_NAME -eq "Ubuntu" ]]; then
 
       echo "Starting installation of Docker compose"
       mkdir -pv ~/.docker/cli-plugins/
-      curl -SL "https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64" -o ~/.docker/cli-plugins/docker-compose
+      curl -SL "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-linux-x86_64" -o ~/.docker/cli-plugins/docker-compose
       sudo chmod +x ~/.docker/cli-plugins/docker-compose
       if [[ -e /usr/local/bin/docker-compose ]]; then
         rm /usr/local/bin/docker-compose
@@ -42,8 +42,8 @@ if [[ $OS_NAME -eq "Ubuntu" ]]; then
       sudo sudo apt install docker-ce
 
       echo "Starting installation of Docker compose"
-      sudo curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      chmod +x /usr/local/bin/docker-compose
+      sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      sudo chmod +x /usr/local/bin/docker-compose
       docker-compose --version
       echo "Docker compose installed successfully"
     fi
