@@ -19,17 +19,6 @@ if [[ $OS_NAME -eq "Ubuntu" ]]; then
       apt-cache policy docker-ce
       sudo apt install docker-ce
       echo "Docker installed successfully"
-
-      echo "Starting installation of Docker compose"
-      mkdir -pv ~/.docker/cli-plugins/
-      curl -SL "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-linux-x86_64" -o ~/.docker/cli-plugins/docker-compose
-      sudo chmod +x ~/.docker/cli-plugins/docker-compose
-      if [[ -e /usr/local/bin/docker-compose ]]; then
-        rm /usr/local/bin/docker-compose
-      fi
-      sudo ln -s ~/.docker/cli-plugins/docker-compose /usr/local/bin
-      docker-compose --version
-      echo "Docker compose installed successfully"
     fi
 
     if [[ $OS_VERSION == "20.04" ]]; then
@@ -40,13 +29,13 @@ if [[ $OS_NAME -eq "Ubuntu" ]]; then
       sudo apt update
       apt-cache policy docker-ce
       sudo sudo apt install docker-ce
-
-      echo "Starting installation of Docker compose"
-      sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      sudo chmod +x /usr/local/bin/docker-compose
-      docker-compose --version
-      echo "Docker compose installed successfully"
     fi
+
+    echo "Starting installation of Docker compose"
+    sudo curl -SL "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    docker-compose --version
+    echo "Docker compose installed successfully"
     #Добавляем пользователя в группу docker
     sudo usermod -aG docker ${USER}
 fi
