@@ -39,4 +39,4 @@ if [[ $OS_NAME -eq "Ubuntu" ]]; then
     #Добавляем пользователя в группу docker
     sudo usermod -aG docker ${USER}
 fi
-echo -e "\033[41m\033[30mFor the changes to take effect, please login again"
+echo -e "\033[41m\033[30mFor the changes to take effect, please login again\033[0m"
