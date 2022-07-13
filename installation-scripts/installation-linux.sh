@@ -1,35 +1,52 @@
 #!/bin/bash
 
-#Проверка на запуск от root
-if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root"
-    exit 1
-fi
+DOCKER_COMPOSE_VERSION="v2.3.3"
 
 #Парсим имя и версию ОС
 declare $(lsb_release -d | awk '{ match($0, /(.+)\s+(.+) ([0-9]+\.[0-9]+)(.[0-9]+)?\s.+/, os);}
                         {if (os[1] != "" && os[2] != "") print "OS_NAME="os[2], "OS_VERSION="os[3]}')
 echo "Checked OS: $OS_NAME $OS_VERSION"
+echo "Starting Docker installation script for $OS_NAME $OS_VERSION"
 
 if [[ $OS_NAME -eq "Ubuntu" ]]; then
     if [[ $OS_VERSION == "22.04" ]]; then
-        apt update
-        apt install apt-transport-https ca-certificates curl software-properties-common
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        apt update
-        apt-cache policy docker-ce
-        apt install docker-ce
+      echo "Starting installation of Docker"
+      sudo apt update
+      sudo apt install apt-transport-https ca-certificates curl software-properties-common
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      sudo apt update
+      apt-cache policy docker-ce
+      sudo apt install docker-ce
+      echo "Docker installed successfully"
 
+      echo "Starting installation of Docker compose"
+      mkdir -pv ~/.docker/cli-plugins/
+      curl -SL "https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64" -o ~/.docker/cli-plugins/docker-compose
+      sudo chmod +x ~/.docker/cli-plugins/docker-compose
+      if [[ -e /usr/local/bin/docker-compose ]]; then
+        rm /usr/local/bin/docker-compose
+      fi
+      sudo ln -s ~/.docker/cli-plugins/docker-compose /usr/local/bin
+      docker-compose --version
+      echo "Docker compose installed successfully"
     fi
 
     if [[ $OS_VERSION == "20.04" ]]; then
-        apt update
-        apt install apt-transport-https ca-certificates curl software-properties-common
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-        add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu focal stable"
-        apt update
-        apt-cache policy docker-ce
-        sudo apt install docker-ce
+      sudo apt update
+      sudo apt install apt-transport-https ca-certificates curl software-properties-common
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      sudo add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu focal stable"
+      sudo apt update
+      apt-cache policy docker-ce
+      sudo sudo apt install docker-ce
+
+      echo "Starting installation of Docker compose"
+      sudo curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      chmod +x /usr/local/bin/docker-compose
+      docker-compose --version
+      echo "Docker compose installed successfully"
     fi
+    #Добавляем пользователя в группу docker
+    sudo usermod -aG docker ${USER}
 fi
