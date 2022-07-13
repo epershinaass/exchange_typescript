@@ -1,0 +1,115 @@
+version: "3.8"
+
+x-app: &default-svc
+    restart: always
+    networks:
+    - dev-net
+x-log: &log-driver
+    logging:
+      driver: "json-file"
+      options:
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+services:
+  mongo:
+    image: mongo:latest
+    hostname: mongo
+    container_name: mongo
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    <<: [*default-svc, *log-driver]
+    volumes:
+    - db-data:/data/db
+
+  zoo1:
+    image: confluentinc/cp-zookeeper:7.2.0
+    hostname: zoo1
+    container_name: zoo1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+    <<: [*default-svc, *log-driver]
+
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.2.0
+    hostname: kafka1
+    container_name: kafka1
+    depends_on:
+    - zoo1
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    <<: [*default-svc, *log-driver]
+
+
+  loki:
+    image: grafana/loki:2.6.0
+    hostname: loki
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    configs:
+    - source: loki_config
+      target: /etc/loki/loki-config.yaml
+    <<: [*default-svc, *log-driver]
+
+
+
+  promtail:
+    image: grafana/promtail:2.6.0
+    hostname: promtail
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/promtail_config.yaml
+    configs:
+    - source: promtail_config
+      target: /etc/promtail/promtail_config.yaml
+    <<: [*default-svc, *log-driver]
+
+
+  grafana:
+    image: grafana/grafana:9.0.2
+    hostname: grafana
+    container_name: grafana
+    ports: ["3000:3000"]
+    volumes:
+      - grafana:/var/lib/grafana
+    configs:
+    - source: datasource
+      target: /etc/grafana/provisioning/datasources/monitoring.yaml
+    <<: [*default-svc, *log-driver]
+
+configs:
+  loki_config:
+    file: ./loki-config.yaml
+  promtail_config:
+    file: ./promtail-config.yaml
+  datasource:
+    file: ./datasource.yaml
+
+volumes:
+  grafana:
+  db-data:
+
+
+networks:
+  dev-net:
+    name: dev-net
