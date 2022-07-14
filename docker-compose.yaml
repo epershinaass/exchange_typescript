@@ -115,8 +115,8 @@ services:
     volumes:
       - jars:/etc/kafka-connect/jars
     depends_on:
-      - zookeeper
-      - kafka
+      - zoo1
+      - kafka1
       - schema-registry
     <<: [*default-svc, *log-driver]
 
