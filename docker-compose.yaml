@@ -84,8 +84,11 @@ services:
     image: confluentinc/cp-kafka-connect:7.2.0
     hostname: kafka-connect
     container_name: kafka-connect
+    build:
+      context: .
+      dockerfile: Dockerfile-MongoConnect
     ports:
-      - "8083:8083"
+      - 8083:8083
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka1:9092
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
@@ -108,12 +111,12 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
       CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR,com.mongodb.kafka=DEBUG"
       CONNECT_ZOOKEEPER_CONNECT: 'zoo1:2181'
-      CONNECT_PLUGIN_PATH: /usr/share/java,/etc/kafka-connect/jars
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
       CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.2.0.jar
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
     volumes:
-      - jars:/etc/kafka-connect/jars
+      - jars:/usr/share/confluent-hub-components
     depends_on:
       - zoo1
       - kafka1
@@ -125,7 +128,7 @@ services:
     hostname: loki
     container_name: loki
     ports:
-      - "3100:3100"
+      - 3100:3100
     command: -config.file=/etc/loki/loki-config.yaml
     configs:
     - source: loki_config
