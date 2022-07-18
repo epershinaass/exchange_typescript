@@ -1,13 +1,13 @@
 ---
 - name: Collect distribution facts if not already done
-  setup:
+  ansible.builtin.setup:
     gather_subset:
       - min
   when: not ansible_distribution_major_version is defined
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Set distribution and python facts
-  set_fact:
+  ansible.builtin.set_fact:
     _docker_os_dist: "{{ ansible_distribution }}"
     _docker_os_dist_release: "{{ ansible_distribution_release }}"
     _docker_os_dist_major_version: "{{ ansible_distribution_major_version }}"
@@ -18,7 +18,7 @@
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Reinterpret distribution facts for Linux Mint
-  set_fact:
+  ansible.builtin.set_fact:
     _docker_os_dist: "Ubuntu"
     _docker_os_dist_release: "{{ docker_x_mint_ubuntu_mapping[ansible_distribution_major_version | int].release }}"
     _docker_os_dist_major_version: "{{ docker_x_mint_ubuntu_mapping[ansible_distribution_major_version | int ].major_version }}"
@@ -26,7 +26,7 @@
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Reinterpret distribution facts for CentOS Stream 8
-  set_fact:
+  ansible.builtin.set_fact:
     _docker_os_dist_file_varity: "RedHat"
   when: 
     - _docker_os_dist == "CentOS"
@@ -34,7 +34,7 @@
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Reinterpret distribution facts for Debian 10 (Buster) due to bug
-  set_fact:
+  ansible.builtin.set_fact:
     _docker_os_dist: "Debian"
     _docker_os_dist_release: "buster"
     _docker_os_dist_major_version: 10
@@ -45,20 +45,20 @@
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: OS release info
-  raw: cat /etc/os-release
+  ansible.builtin.raw: cat /etc/os-release
   check_mode: no
   changed_when: no
   register: _docker_os_release_info
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Print OS release information
-  debug:
+  ansible.builtin.debug:
     var: _docker_os_release_info
     verbosity: 1
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Print LSB information
-  debug:
+  ansible.builtin.debug:
     var: ansible_lsb
     verbosity: 1
   when:
@@ -66,21 +66,21 @@
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Reinterpret distribution facts for Raspbian
-  set_fact:
+  ansible.builtin.set_fact:
     _docker_os_arch: "armhf"
   when:
     - _docker_os_release_info.stdout is search('raspbian')
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Reset role variables
-  set_fact:
+  ansible.builtin.set_fact:
     _docker_systemd_service_config_tweaks: []
     _docker_service_envs: {}
     _docker_restart_required: false
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
 
 - name: Print interpreted distribution information
-  debug:
+  ansible.builtin.debug:
     msg: "distribution={{ _docker_os_dist }}, release={{ _docker_os_dist_release }}, major_version={{ _docker_os_dist_major_version }}"
     verbosity: 1
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
@@ -93,7 +93,7 @@
 - name: Install and configure Docker CE
   block:
     - name: Network access disabled
-      debug:
+      ansible.builtin.debug:
         msg: "Tasks requiring network access will be skipped!"
       when: not docker_network_access | bool
 

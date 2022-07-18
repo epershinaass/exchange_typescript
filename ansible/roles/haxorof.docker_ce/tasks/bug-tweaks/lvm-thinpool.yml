@@ -1,6 +1,6 @@
 - name: Ensure lvm2 is installed
   become: true
-  package:
+  ansible.builtin.package:
     name: lvm2
     state: present
   register: _pkg_result
@@ -16,7 +16,7 @@
 
 - name: Check if data volume exists
   become: true
-  stat:
+  ansible.builtin.stat:
     path: '/dev/mapper/{{ pool.volume_group }}-{{ pool.name }}'
   ignore_errors: true
   register: _volume
