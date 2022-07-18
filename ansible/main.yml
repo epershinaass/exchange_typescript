@@ -9,4 +9,4 @@
     docker_compose: true
 
   roles:
-  - role: docker_ce
+  - role: haxorof.docker_ce
