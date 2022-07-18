@@ -1,0 +1,13 @@
+*.log
+*.retry
+*.vdi
+/.cache
+/.project
+/.vscode
+/tests/.vagrant
+/tests/scripts/yamlparser.sh.inc
+/tests/test-dbg.sh
+/tests/unversioned
+/tests/vagrant_testcase.yml
+/tests/yaml.sh
+/tests/yamlparser.sh.inc

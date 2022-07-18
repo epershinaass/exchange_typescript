@@ -1,0 +1,12 @@
+---
+- name: install docker ce
+  hosts: servers
+  gather_facts: no
+  become: yes
+  tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
+  vars:
+    docker_sdk: true
+    docker_compose: true
+
+  roles:
+  - role: docker_ce

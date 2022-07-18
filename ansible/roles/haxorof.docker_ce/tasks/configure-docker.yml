@@ -1,0 +1,138 @@
+---
+# https://wiki.ubuntu.com/SystemdForUpstartUsers
+# Important! systemd is only fully supported in Ubuntu 15.04 and later releases
+- name: Determine usage of systemd
+  become: true
+  shell: "ps -p1 | grep systemd 1>/dev/null && echo systemd || echo upstart"
+  changed_when: no
+  check_mode: no
+  register: _determine_systemd_usage
+  tags:
+    - skip_ansible_lint
+
+- name: Set fact to indicate systemd is used or not
+  set_fact:
+    _docker_systemd_used: "{{ _determine_systemd_usage is defined and _determine_systemd_usage.stdout == 'systemd' }}"
+
+- name: Configure systemd service
+  include_tasks: configure-docker/configure-systemd.yml
+  when: _docker_systemd_used | bool
+
+- name: Configure non-systemd service
+  include_tasks: configure-docker/configure-non-systemd.yml
+  when: not _docker_systemd_used | bool
+
+- name: Ensure /etc/docker directory exists
+  become: true
+  file:
+    path: /etc/docker
+    state: directory
+    mode: 0755
+
+- name: Configure Docker daemon (file)
+  become: true
+  copy:
+    src: "{{ docker_daemon_config_file }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  register: _docker_config_file
+  when: docker_daemon_config_file is defined
+
+- name: Configure Docker daemon (variables)
+  become: true
+  copy:
+    content: "{{ docker_daemon_config | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  register: _docker_config_var
+  when:
+    - docker_daemon_config_file is not defined
+    - docker_daemon_config is defined
+
+- name: Ensure Docker default user namespace is defined in subuid and subgid
+  become: true
+  lineinfile:
+    path: "{{ item }}"
+    regexp: '^dockremap'
+    line: 'dockremap:500000:65536'
+  loop:
+    - /etc/subuid
+    - /etc/subgid
+  when: (_docker_os_dist == "CentOS" or _docker_os_dist == "RedHat") and
+        ((docker_daemon_config is defined and
+        docker_daemon_config['userns-remap'] is defined and
+        docker_daemon_config['userns-remap'] == 'default') or
+        docker_bug_usermod | bool)
+
+- name: Ensure Docker users are added to the docker group
+  become: true
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ docker_users }}"
+
+- name: Ensure devicemapper prerequisites are fulfilled
+  block:
+    - name: Ensure lvm2 is installed
+      become: true
+      package:
+        name: lvm2
+        state: present
+      register: _pkg_result
+      until: _pkg_result is succeeded
+
+    - name: Ensure thin-provisioning-tools is installed
+      become: true
+      package:
+        name: thin-provisioning-tools
+        state: present
+      register: _pkg_result
+      until: _pkg_result is succeeded
+      when: (_docker_os_dist == "Ubuntu" or (_docker_os_dist == "Debian" and _docker_os_dist_major_version | int > 7))
+  when:
+    - docker_daemon_config['storage-driver'] is defined
+    - docker_daemon_config['storage-driver'] == 'devicemapper'
+
+- name: Enable Docker service
+  become: true
+  service:
+    use: "{{ docker_x_service_mgr }}"
+    name: docker
+    enabled: yes
+  register: _docker_service
+
+- name: Docker daemon restart is required
+  set_fact:
+    _docker_restart_required: true
+  when: (
+         _docker_service.status is defined
+         and _docker_service.status.SubState is defined
+         and _docker_service.status.SubState != "running"
+        ) or (
+          _docker_config_file is changed
+          or _docker_config_var is changed
+        )
+
+- name: Install and configure Docker plugins
+  include_tasks: configure-docker/configure-docker-plugins.yml
+  when: docker_plugins | length > 0
+
+- name: Trigger restart of Docker daemon
+  become: yes
+  service:
+    use: "{{ docker_x_service_mgr }}"
+    name: docker
+    state: restarted
+  when: _docker_restart_required | bool
+
+- name: Ensure Docker daemon is running
+  become: yes
+  service:
+    use: "{{ docker_x_service_mgr }}"
+    name: docker
+    state: started
