@@ -1,12 +1,18 @@
 ---
 - name: install docker ce
   hosts: servers
-  gather_facts: no
-  become: yes
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
   vars:
     docker_sdk: true
     docker_compose: true
+    docker_enable_audit: true
+    docker_daemon_config:
+      icc: false
+      userns-remap: default
+      no-new-privileges: true
+      live-restore: true
+      userland-proxy: false
+      log-driver: json-file
 
   roles:
-  - role: haxorof.docker_ce
+    - role: haxorof.docker_ce
