@@ -28,10 +28,10 @@ sequenceDiagram
 participant F as Facade
 participant B as Balance
 participant A as Account
+  A--)B: Create new balance (при регистрации)
   F->>+B: Emit "Balance refilled" request
   Note right of B: Procces request
   B->>-F: Return result of operation
-  B--)A: Sync with Account...
 ```
 
 ### Выдача уникального id транзакции
@@ -67,23 +67,25 @@ participant A as Account
 
 - Новый баланс создается при регистрации пользователя автоматически.
 
-```
+```ts
 Balance {
-  "total": number;
-  "transanctions": transaction[];
+  total: number;
+  transanctions: transaction[];
 }
 ```
 
-```js
-transaction {
+```ts
+Transaction {
   transactionId: string,
   currentBalance: number,
   refillSum: number,
-  sendTime: Date
+  transactionTime: Date
 }
 ```
 
 - Читаем последнюю транзакцию по событию, пересчитываем общую сумму и сохраняем в БД в поле total. Добавляем информацию о последней транзакции в массив транзакций.
+
+- Время проведения транзакции или обновления будет автоматически генерироваться mongoDB.
 
 ### Формат передачи данных о транзакции
 
@@ -98,7 +100,7 @@ transaction {
 message refillAccount {
   string account_id = 1;
   string transaction_id = 2;
-  uint64 refillSum = 3;
+  uint64 refill_sum = 3;
 }
 ```
 
@@ -126,7 +128,7 @@ message refillAccount {
 Формат передачи:
 ```proto3
 message CurrentBalance {
-  double total = 1;
+  uint64 total = 1;
 }
 ```
 
