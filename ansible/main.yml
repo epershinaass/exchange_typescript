@@ -3,8 +3,7 @@
   hosts: servers
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
   vars:
-    docker_sdk: true
-    docker_compose: true
+    docker_compose_no_pip: true
     docker_enable_audit: true
     docker_daemon_config:
       icc: false

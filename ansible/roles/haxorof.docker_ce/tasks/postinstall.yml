@@ -318,5 +318,4 @@
         force: yes
       when: _docker_compose_install | bool
   when:
-    - docker_compose | bool
-    - docker_compose_no_pip | bool
+    - docker_compose | bool or docker_compose_no_pip | bool

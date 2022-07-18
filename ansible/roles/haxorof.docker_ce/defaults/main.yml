@@ -140,7 +140,7 @@ docker_compose_no_pip: false
 docker_compose_no_pip_detect_version: true
 # Docker compose version to use if no automatic lookup is used
 # Available versions: https://github.com/docker/compose/releases
-docker_compose_no_pip_version: 1.29.2
+docker_compose_no_pip_version: 2.6.1
 # Ensures dependencies are installed so that 'docker_stack' Ansible module will work.
 docker_stack: false
 # Additional PiP packages to install after Docker is configured and started.
