@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package hero;
 
-service HeroesService {
+service HeroService {
   rpc GetHello (Empty) returns (Hello) {}
 }
 
