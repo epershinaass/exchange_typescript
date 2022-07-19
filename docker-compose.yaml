@@ -130,6 +130,14 @@ services:
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/loki-config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+          cpus: '0.5'
+        reservations:
+          memory: 70M
+          cpus: '0.1'
     configs:
     - source: loki_config
       target: /etc/loki/loki-config.yaml
@@ -146,6 +154,14 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: -config.file=/etc/promtail/promtail_config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 35M
+          cpus: '0.2'
+        reservations:
+          memory: 25M
+          cpus: '0.1'
     configs:
     - source: promtail_config
       target: /etc/promtail/promtail_config.yaml
@@ -159,6 +175,14 @@ services:
     ports: ["3000:3000"]
     volumes:
       - grafana:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+          cpus: '0.5'
+        reservations:
+          memory: 30M
+          cpus: '0.25'
     configs:
     - source: datasource
       target: /etc/grafana/provisioning/datasources/monitoring.yaml
