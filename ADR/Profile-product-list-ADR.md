@@ -1,4 +1,4 @@
-# Просмотр списков
+# Просмотр списков добавленных товаров в портфель пользователя
 
 Дата: 2022-07-13
 
@@ -34,11 +34,11 @@ UserProducts {
 Product {
   product_id:string,
   name:string,
-  count:number
+  quantity:number
 }
 ```
 
-- Запись в БД будет создаваться, в тот момент, когда пользователь зарегистрировался.
+- Запись с пустым списком товаров в БД будет создаваться, в тот момент, когда пользователь зарегистрировался.
 
 + (+) Простота реализации
 + (-) Дублирование и расхождение данных при их изменении
@@ -50,7 +50,7 @@ Product {
 ```js
 product {
   product_id:string,
-  count:number
+  quantity:number
 }
 ```
 + (+) Консистентность данных в случае изменения товара
@@ -61,19 +61,21 @@ product {
 
 ```proto3
 service ProductService {
-  rpc GetProduct (Empty) returns (ProductResponse) {}
+  rpc GetUserProductsList (GetUserProductsListRequest) returns (GetUserProductsListResponse) {}
 }
 
-message Empty {}
+message GetUserProductsListRequest {
+  string user_id = 1;
+}
 
-message ProductResponse {
+message GetUserProductsListResponse {
   repeated Product items = 1;
 }
 
 message Product {
     string id = 1;
     string name = 2;
-    number count = 3;
+    number quantity = 3;
 }
 ```
 
