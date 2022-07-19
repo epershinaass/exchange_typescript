@@ -72,7 +72,7 @@ services:
     ports:
       - 8081:8081
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
       # SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081" # Default
     depends_on:
