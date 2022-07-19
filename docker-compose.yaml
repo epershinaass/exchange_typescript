@@ -58,6 +58,11 @@ services:
         condition: service_healthy
     ports:
       - 29092:29092
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka1:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       # KAFKA_BROKER_ID: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
@@ -84,12 +89,19 @@ services:
     ports:
       - 8081:8081
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
       # SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081" # Default
+    healthcheck:
+      test: curl --output /dev/null --silent --head --fail http://schema-registry:8081/subjects
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
-      - zoo1
-      - kafka1
+      zoo1:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   kafka-connect:
@@ -97,8 +109,8 @@ services:
     hostname: kafka-connect
     container_name: kafka-connect
     build:
-      context: .
-      dockerfile: Dockerfile-MongoConnect
+      context: infra
+      dockerfile: ./Dockerfile-MongoConnect
     ports:
       - 8083:8083
     environment:
@@ -130,9 +142,12 @@ services:
     volumes:
       - jars:/usr/share/confluent-hub-components
     depends_on:
-      - zoo1
-      - kafka1
-      - schema-registry
+      zoo1:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   loki:
@@ -142,6 +157,14 @@ services:
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/loki-config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 100M
+          cpus: '0.5'
+        reservations:
+          memory: 70M
+          cpus: '0.1'
     configs:
     - source: loki_config
       target: /etc/loki/loki-config.yaml
@@ -158,6 +181,14 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: -config.file=/etc/promtail/promtail_config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 35M
+          cpus: '0.2'
+        reservations:
+          memory: 25M
+          cpus: '0.1'
     configs:
     - source: promtail_config
       target: /etc/promtail/promtail_config.yaml
@@ -171,6 +202,14 @@ services:
     ports: ["3000:3000"]
     volumes:
       - grafana:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+          cpus: '0.5'
+        reservations:
+          memory: 30M
+          cpus: '0.25'
     configs:
     - source: datasource
       target: /etc/grafana/provisioning/datasources/monitoring.yaml
@@ -178,11 +217,11 @@ services:
 
 configs:
   loki_config:
-    file: ./loki-config.yaml
+    file: ./infra/loki-config.yaml
   promtail_config:
-    file: ./promtail-config.yaml
+    file: ./infra/promtail-config.yaml
   datasource:
-    file: ./datasource.yaml
+    file: ./infra/datasource.yaml
 
 volumes:
   grafana:
