@@ -11,7 +11,7 @@ interface HeroService {
   getHello(data: Empty): Observable<Hello>;
 }
 
-@Controller()
+@Controller('hero')
 export class HeroController {
 // implements OnModuleInit {
   
