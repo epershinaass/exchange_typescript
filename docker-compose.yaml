@@ -52,6 +52,11 @@ services:
         condition: service_healthy
     ports:
       - 29092:29092
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka1:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       # KAFKA_BROKER_ID: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
@@ -75,9 +80,16 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
       # SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081" # Default
+    healthcheck:
+      test: curl --output /dev/null --silent --head --fail http://schema-registry:8081/subjects
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
-      - zoo1
-      - kafka1
+      zoo1:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   kafka-connect:
@@ -118,9 +130,12 @@ services:
     volumes:
       - jars:/usr/share/confluent-hub-components
     depends_on:
-      - zoo1
-      - kafka1
-      - schema-registry
+      zoo1:
+        condition: service_healthy
+      kafka1:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   loki:
