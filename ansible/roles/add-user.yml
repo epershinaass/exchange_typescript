@@ -4,7 +4,7 @@
   tasks:
 
     - name: Add user to remote hosts
-      user: name=administrator groups=sudo shell=/bin/bash password=$6$KjyfytoJ$hoQdVIGcRZgje2HpHFf8ldvooLfY774SrEpHkADUf3d7uGBSwVLeMXsPIfb4l2TaXWvprMz868ZbH8HLaiDeh.
+      user: name=admin groups=sudo shell=/bin/bash password=$6$KjyfytoJ$hoQdVIGcRZgje2HpHFf8ldvooLfY774SrEpHkADUf3d7uGBSwVLeMXsPIfb4l2TaXWvprMz868ZbH8HLaiDeh.
 
     - name: Add SSH keys to remote hosts
       authorized_key: user=administrator key="{{ lookup('file', "../ssh-keys/key.pub") }}"
