@@ -1,0 +1,7 @@
+users_users:
+  - user: deploy
+    name: "CI server"
+    key: deploy.pub
+  - user: jo
+    name: "devops"
+    key: jo.pub
