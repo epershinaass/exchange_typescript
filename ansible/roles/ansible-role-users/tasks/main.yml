@@ -2,7 +2,7 @@
 # tasks file for users
 
 - name: Include OS-specific variables
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - "distribution-{{ ansible_distribution }}.yml"
     - distribution-default.yml
@@ -11,36 +11,36 @@
   include_tasks: "setup-{{ ansible_os_family }}.yml"
 
 - name: Set admin_groups
-  set_fact: users_admin_groups={{ [users_admin_group] | union(users_admin_groups) }}
+  ansible.builtin.set_fact: users_admin_groups={{ [users_admin_group] | union(users_admin_groups) }}
 
 - name: Create admin groups
-  group: name={{ item }} state=present
+  ansible.builtin.group: name={{ item }} state=present
   with_items: "{{ users_admin_groups }}"
 
 - name: Define admin users
-  set_fact:
-    admin_users: "{{ users_global_admin_users | union(users_admin_users) | unique}}"
+  ansible.builtin.set_fact:
+    admin_users: "{{ users_global_admin_users | union(users_admin_users) | unique }}"
 
 - name: Define authorized users
-  set_fact:
-    all_users: "{{ users_global_admin_users | union(users_admin_users) | union(users_regular_users) | unique}}"
+  ansible.builtin.set_fact:
+    all_users: "{{ users_global_admin_users | union(users_admin_users) | union(users_regular_users) | unique }}"
 
 - name: Allow users in admin group to run sudo
-  template: src=etc/sudoers.d/00-admin dest=/etc/sudoers.d/00-admin owner=root group=root mode=0440
+  ansible.builtin.template: src=etc/sudoers.d/00-admin dest=/etc/sudoers.d/00-admin owner=root group=root mode=0440
   when: admin_users|length > 0
 
 - name: Retrieve existing users
-  shell: "cat /etc/passwd | awk -F ':' '$5 ~ /^ansible-/' | cut -d ':' -f 1"
+  ansible.builtin.shell: "cat /etc/passwd | awk -F ':' '$5 ~ /^ansible-/' | cut -d ':' -f 1"
   register: existing_users
   check_mode: no
   changed_when: false
 
 - name: Define deleted users
-  set_fact:
+  ansible.builtin.set_fact:
     deleted_users: "{{ existing_users.stdout_lines | difference(all_users) }}"
 
 - name: Remove deleted users
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     state: absent
     remove: "{{ item.remove | default(users_delete_remove) }}"
@@ -48,7 +48,7 @@
   with_items: "{{ deleted_users }}"
 
 - name: Remove deleted legacy user accounts
-  user:
+  ansible.builtin.user:
     name: "{{ item.user }}"
     state: absent
     remove: "{{ item.remove | default(users_delete_remove) }}"
@@ -58,7 +58,7 @@
 
 # http://docs.ansible.com/ansible/user_module.html
 - name: Add admin users
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     groups: "{{ users_admin_groups | join(',') }}"
     comment: "ansible-{{ item }}"
@@ -85,11 +85,11 @@
   when: "item.github is defined and item.user in admin_users"
 
 - name: Create regular groups
-  group: name={{ item }} state=present
+  ansible.builtin.group: name={{ item }} state=present
   with_items: "{{ users_regular_groups }}"
 
 - name: Add regular users
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     groups: "{{ users_regular_groups | join(',') }}"
     comment: "ansible-{{ item }}"
@@ -113,83 +113,83 @@
   # with_items: "{{ users_regular_users | selectattr('github', 'defined') }}"
   with_items: "{{ users_users }}"
   when: item.github is defined and item.user in users_regular_users
+- name: Deploy users
+  block:
 
-- block:
+    - name: Add deploy group
+      ansible.builtin.group: name={{ users_deploy_group }} state=present
 
-  - name: Add deploy group
-    group: name={{ users_deploy_group }} state=present
+    - name: Create deploy groups
+      ansible.builtin.group: name={{ item }} state=present
+      with_items: "{{ users_deploy_groups }}"
 
-  - name: Create deploy groups
-    group: name={{ item }} state=present
-    with_items: "{{ users_deploy_groups }}"
+    - name: Add deploy user
+      ansible.builtin.user:
+        name: "{{ users_deploy_user }}"
+        group: "{{ users_deploy_group }}"
+        groups: "{{ users_deploy_groups | join(',') }}"
+        shell: /bin/bash
 
-  - name: Add deploy user
-    user:
-      name: "{{ users_deploy_user }}"
-      group: "{{ users_deploy_group }}"
-      groups: "{{ users_deploy_groups | join(',') }}"
-      shell: /bin/bash
+    - name: Remove deploy user ssh keys
+      ansible.builtin.file:
+        path: "/home/{{ users_deploy_user }}/.ssh/authorized_keys"
+        state: absent
 
-  - name: Remove deploy user ssh keys
-    file:
-      path: "/home/{{ users_deploy_user }}/.ssh/authorized_keys"
-      state: absent
+    - name: Add ssh keys for deploy users from files
+      authorized_key:
+        user: "{{ users_deploy_user }}"
+        key: "{{ lookup('file', item.key) }}"
+      with_items: "{{ users_users }}"
+      when: item.key is defined and item.user in users_deploy_users
 
-  - name: Add ssh keys for deploy users from files
-    authorized_key:
-      user: "{{ users_deploy_user }}"
-      key: "{{ lookup('file', item.key) }}"
-    with_items: "{{ users_users }}"
-    when: item.key is defined and item.user in users_deploy_users
-
-  - name: Add ssh keys for deploy users from GitHub
-    authorized_key:
-      user: "{{ users_deploy_user }}"
-      key: "https://github.com/{{ item.github }}.keys"
-    with_items: "{{ users_users }}"
-    when: item.github is defined and item.user in users_deploy_users and not ansible_check_mode
+    - name: Add ssh keys for deploy users from GitHub
+      authorized_key:
+        user: "{{ users_deploy_user }}"
+        key: "https://github.com/{{ item.github }}.keys"
+      with_items: "{{ users_users }}"
+      when: item.github is defined and item.user in users_deploy_users and not ansible_check_mode
 
   when: users_deploy_user is defined
+- name: App users
+  block:
 
-- block:
+    - name: Add app group
+      ansible.builtin.group: name={{ users_app_group }} state=present
 
-  - name: Add app group
-    group: name={{ users_app_group }} state=present
+    - name: Create app groups
+      ansible.builtin.group: name={{ item }} state=present
+      with_items: "{{ users_app_groups }}"
 
-  - name: Create app groups
-    group: name={{ item }} state=present
-    with_items: "{{ users_app_groups }}"
+    - name: Add app user
+      ansible.builtin.user:
+        name: "{{ users_app_user }}"
+        group: "{{ users_app_group }}"
+        groups: "{{ users_app_groups | join(',') }}"
+        shell: /bin/bash
 
-  - name: Add app user
-    user:
-      name: "{{ users_app_user }}"
-      group: "{{ users_app_group }}"
-      groups: "{{ users_app_groups | join(',') }}"
-      shell: /bin/bash
+    - name: Remove app user ssh keys
+      ansible.builtin.file:
+        path: "/home/{{ users_app_user }}/.ssh/authorized_keys"
+        state: absent
 
-  - name: Remove app user ssh keys
-    file:
-      path: "/home/{{ users_app_user }}/.ssh/authorized_keys"
-      state: absent
+    - name: Add ssh keys for app users from files
+      authorized_key:
+        user: "{{ users_app_user }}"
+        key: "{{ lookup('file', item.key) }}"
+      with_items: "{{ users_users }}"
+      when: item.key is defined and item.user in users_app_users
 
-  - name: Add ssh keys for app users from files
-    authorized_key:
-      user: "{{ users_app_user }}"
-      key: "{{ lookup('file', item.key) }}"
-    with_items: "{{ users_users }}"
-    when: item.key is defined and item.user in users_app_users
-
-  - name: Add ssh keys for app users from GitHub
-    authorized_key:
-      user: "{{ users_app_user }}"
-      key: "https://github.com/{{ item.github }}.keys"
-    with_items: "{{ users_users }}"
-    when: item.github is defined and item.user in users_app_users and not ansible_check_mode
+    - name: Add ssh keys for app users from GitHub
+      authorized_key:
+        user: "{{ users_app_user }}"
+        key: "https://github.com/{{ item.github }}.keys"
+      with_items: "{{ users_users }}"
+      when: item.github is defined and item.user in users_app_users and not ansible_check_mode
 
   when: users_app_user is defined
 
 - name: Remove authorized_keys for system accounts
-  file:
+  ansible.builtin.file:
     path: "{{ item }}/.ssh/authorized_keys"
     state: absent
   with_items:

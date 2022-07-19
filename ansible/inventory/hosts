@@ -1,3 +1,14 @@
-[servers]
+[server1]
 92.53.65.114
+[server2]
 91.206.15.220
+
+[stage]
+server1
+server2
+
+[prod]
+
+[servers:children]
+stage
+prod
