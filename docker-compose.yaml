@@ -85,8 +85,8 @@ services:
     hostname: kafka-connect
     container_name: kafka-connect
     build:
-      context: .
-      dockerfile: Dockerfile-MongoConnect
+      context: infra
+      dockerfile: ./Dockerfile-MongoConnect
     ports:
       - 8083:8083
     environment:
@@ -166,11 +166,11 @@ services:
 
 configs:
   loki_config:
-    file: ./loki-config.yaml
+    file: ./infra/loki-config.yaml
   promtail_config:
-    file: ./promtail-config.yaml
+    file: ./infra/promtail-config.yaml
   datasource:
-    file: ./datasource.yaml
+    file: ./infra/datasource.yaml
 
 volumes:
   grafana:
