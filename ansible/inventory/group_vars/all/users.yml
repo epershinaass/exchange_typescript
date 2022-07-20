@@ -1,7 +1,7 @@
 users_users:
-  - user: deploy
+  - user: nikitos_deploy
     name: "CI server"
-    key: deploy.pub
-  - user: jo
+    key: nikitos_deploy_rsa.pub
+  - user: nikita_admin
     name: "devops"
-    key: jo.pub
+    key: nikita_ed.pub
