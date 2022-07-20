@@ -22,6 +22,17 @@ services:
       - 4001:4001
     <<: [*default-svc, *log-driver]
 
+  balance:
+    image: ourrepo/balance:0.1.0
+    hostname: balance
+    container_name: balance
+    build:
+      context: balance
+      dockerfile: ./Dockerfile
+    ports:
+      - 4002:4002
+    <<: [*default-svc, *log-driver]
+
   mongo:
     image: mongo:latest
     hostname: mongo
