@@ -14,5 +14,4 @@ import { HeroController } from './hero.controller';
   ],
   controllers: [HeroController],
 })
-
 export class HeroModule {}
