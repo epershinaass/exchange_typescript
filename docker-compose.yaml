@@ -15,6 +15,11 @@ services:
     image: mongo:latest
     hostname: mongo
     container_name: mongo
+    profiles:
+    - mongo
+    - kafkamng
+    - kafkafull
+    - full
     ports:
       - 27017:27017
     healthcheck:
@@ -30,6 +35,11 @@ services:
     image: confluentinc/cp-zookeeper:7.2.0
     hostname: zoo1
     container_name: zoo1
+    profiles:
+    - kafka
+    - kafkamng
+    - kafkafull
+    - full
     healthcheck:
       test: echo srvr | nc zoo1 2181 || exit 1
       retries: 20
@@ -53,6 +63,11 @@ services:
     image: confluentinc/cp-kafka:7.2.0
     hostname: kafka1
     container_name: kafka1
+    profiles:
+    - kafka
+    - kafkamng
+    - kafkafull
+    - full
     depends_on:
       zoo1:
         condition: service_healthy
@@ -86,6 +101,9 @@ services:
     image: confluentinc/cp-schema-registry:7.2.0
     hostname: schema-registry
     container_name: schema-registry
+    profiles:
+    - kafkafull
+    - full
     ports:
       - 8081:8081
     environment:
@@ -108,6 +126,10 @@ services:
     image: confluentinc/cp-kafka-connect:7.2.0
     hostname: kafka-connect
     container_name: kafka-connect
+    profiles:
+    - kafkamng
+    - kafkafull
+    - full
     build:
       context: infra
       dockerfile: ./Dockerfile-MongoConnect
@@ -154,6 +176,9 @@ services:
     image: grafana/loki:2.6.0
     hostname: loki
     container_name: loki
+    profiles:
+    - logs
+    - full
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/loki-config.yaml
@@ -176,6 +201,9 @@ services:
     image: grafana/promtail:2.6.0
     hostname: promtail
     container_name: promtail
+    profiles:
+    - logs
+    - full
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -199,6 +227,9 @@ services:
     image: grafana/grafana:9.0.2
     hostname: grafana
     container_name: grafana
+    profiles:
+    - logs
+    - full
     ports: ["3000:3000"]
     volumes:
       - grafana:/var/lib/grafana
