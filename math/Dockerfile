@@ -7,6 +7,8 @@ RUN yarn install --production=false --frozen-lockfile && \
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN yarn build
+ARG buildDate=today
+LABEL buildDate=${buildDate}
 
 FROM node:16-alpine
 WORKDIR /app
@@ -18,3 +20,5 @@ RUN yarn install --production=false --frozen-lockfile && \
 COPY --from=builder /app/dist /app/dist
 
 CMD [ "yarn", "start:prod" ]
+ARG buildDate=today
+LABEL buildDate=${buildDate}

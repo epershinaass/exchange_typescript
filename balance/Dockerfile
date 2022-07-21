@@ -8,10 +8,12 @@ RUN yarn install  && \
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN yarn build
+ARG buildDate=today
+LABEL buildDate=${buildDate}
 
 FROM node:16-alpine
 WORKDIR /app
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock nest-cli.json ./
 RUN yarn install  && \
     yarn cache clean && \
     yarn global add @nestjs/cli
@@ -20,4 +22,5 @@ COPY tsconfig.json tsconfig.build.json ./
 COPY --from=builder /app/dist /app/dist
 
 CMD [ "yarn", "start" ]
-
+ARG buildDate=today
+LABEL buildDate=${buildDate}

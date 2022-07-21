@@ -12,7 +12,7 @@ x-log: &log-driver
 
 services:
   facade:
-    image: ourrepo/facade:0.1.0
+    image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
     hostname: facade
     container_name: facade
     build:
@@ -23,7 +23,7 @@ services:
     <<: [*default-svc, *log-driver]
 
   balance:
-    image: ourrepo/balance:0.1.0
+    image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
     hostname: balance
     container_name: balance
     build:
@@ -31,6 +31,26 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 4002:4002
+    <<: [*default-svc, *log-driver]
+  gateway:
+    image: ourrepo/gateway:${GATEWAY_VERSION:-0.1.0}
+    hostname: gateway
+    container_name: gateway
+    build:
+      context: gateway
+      dockerfile: ./Dockerfile
+    ports:
+      - 4003:3000
+    <<: [*default-svc, *log-driver]
+  math:
+    image: ourrepo/math:${MATH_VERSION:-0.1.0}
+    hostname: math
+    container_name: math
+    build:
+      context: math
+      dockerfile: ./Dockerfile
+    ports:
+      - 4004:4004
     <<: [*default-svc, *log-driver]
 
   mongo:
