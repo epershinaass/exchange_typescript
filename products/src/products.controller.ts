@@ -8,8 +8,8 @@ import { IArrayOfObjects } from './interfaces/object.interface';
 export class ProductsController {
   constructor(private productsService: ProductsService) { }
 
-  @GrpcMethod('ProductsController', 'Accumulate')
-  accumulate(data: IObject): IArrayOfObjects {
-    return {total: this.productsService.accumulate(data)};
+  @GrpcMethod('ProductsController', 'AllProducts')
+  allProducts(data: IObject): IArrayOfObjects {
+    return {total: this.productsService.allProducts(data)};
   }
 }

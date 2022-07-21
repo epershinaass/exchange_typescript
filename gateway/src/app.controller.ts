@@ -16,7 +16,7 @@ export class AppController implements OnModuleInit {
   }
 
   @Post('add')
-  async accumulate(@Body('data') data: IObject) {
-    return this.grpcService.accumulate(data);
+  async allProducts(@Body('data') data: IObject) {
+    return this.grpcService.allProducts(data);
   }
 }

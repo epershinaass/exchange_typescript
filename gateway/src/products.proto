@@ -3,7 +3,7 @@ syntax = "proto3";
 package products;
 
 service ProductsController {
-  rpc Accumulate (Object) returns (ArrayObjects);
+  rpc AllProducts (Object) returns (ArrayObjects);
 }
 
 message Object {
