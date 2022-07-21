@@ -19,6 +19,6 @@
     - kafkafull - kafka, zookeeper, schema registry, kafka connect
     - full - все контейнеры
     - logs - promtail, loki, grafana
-- Флаг `--build` используеться, если нужно собирать образы из dockerfile.
+- Флаг `--build` используется, если нужно собирать образы из dockerfile.
 - В каждой папке с кодом для сборки в образ должен быть файл .dockerignore, в котором указаны файлы/папки. [подробнее](https://www.tutorialspoint.com/using-dockerignore-file)
 - Возможно версионирование собираемых образов через переменные (по-умолчанию версии 0.1.0). Например: `BALANCE_VERSION=0.2.1 docker-compose up -d --build balance`
