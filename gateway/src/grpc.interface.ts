@@ -5,5 +5,7 @@ export interface IGrpcService {
 }
 
 interface IObject {
-  data: object;
+  id: string;
+  name: string;
+  count: number;
 }

@@ -8,6 +8,8 @@ service ProductsController {
 
 message Object {
   string id = 1;
+  string name = 2;
+  uint64 count = 3;
 }
 message ArrayObjects {
   repeated Object total = 1;

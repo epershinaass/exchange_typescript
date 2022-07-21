@@ -1,3 +1,4 @@
+import { IObject } from './../../products/src/interfaces/object.interface';
 import { Body, Controller, OnModuleInit, Post } from '@nestjs/common';
 import { Client, ClientGrpc } from '@nestjs/microservices';
 import { IGrpcService } from './grpc.interface';
@@ -15,7 +16,7 @@ export class AppController implements OnModuleInit {
   }
 
   @Post('add')
-  async accumulate(@Body('data') data: object) {
-    return this.grpcService.accumulate({ data });
+  async accumulate(@Body('data') data: IObject) {
+    return this.grpcService.accumulate(data);
   }
 }

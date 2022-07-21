@@ -5,8 +5,8 @@ const userProducts = [];
 
 @Injectable()
 export class ProductsService {
-  public accumulate({data}): any {
-    userProducts.push({data});
+  public accumulate(data): any {
+    userProducts.push(data);
     return userProducts;
   }
 }
