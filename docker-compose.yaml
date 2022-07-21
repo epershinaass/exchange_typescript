@@ -18,8 +18,8 @@ services:
     build:
       context: facade
       dockerfile: ./Dockerfile
-    ports:
-      - 4001:4001
+    expose:
+      - 4001
     <<: [*default-svc, *log-driver]
 
   balance:
@@ -29,16 +29,16 @@ services:
     build:
       context: balance
       dockerfile: ./Dockerfile
-    ports:
-      - 4002:4002
+    expose:
+      - 4002
     <<: [*default-svc, *log-driver]
 
   mongo:
     image: mongo:latest
     hostname: mongo
     container_name: mongo
-    ports:
-      - 27017:27017
+    expose:
+      - 27017
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -60,8 +60,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - 2181:2181
+    expose:
+      - 2181
     <<: [*default-svc, *log-driver]
 
 
@@ -72,8 +72,8 @@ services:
     depends_on:
       zoo1:
         condition: service_healthy
-    ports:
-      - 29092:29092
+    expose:
+      - 29092
     healthcheck:
       test: kafka-topics --bootstrap-server kafka1:9092 --list
       interval: 30s
@@ -96,8 +96,8 @@ services:
     image: confluentinc/cp-schema-registry:7.2.0
     hostname: schema-registry
     container_name: schema-registry
-    ports:
-      - 8081:8081
+    expose:
+      - 8081
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
@@ -121,8 +121,8 @@ services:
     build:
       context: infra
       dockerfile: ./Dockerfile-MongoConnect
-    ports:
-      - 8083:8083
+    expose:
+      - 8083
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka1:9092
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
@@ -164,8 +164,8 @@ services:
     image: grafana/loki:2.6.0
     hostname: loki
     container_name: loki
-    ports:
-      - 3100:3100
+    expose:
+      - 3100
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
       resources:
@@ -204,26 +204,124 @@ services:
       target: /etc/promtail/promtail_config.yaml
     <<: [*default-svc, *log-driver]
 
+  prometheus:
+    image: prom/prometheus:v2.37.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    expose:
+      - 9090
+    labels:
+      org.label-schema.group: "monitoring"
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    restart: unless-stopped
+    expose:
+      - 9093
+    labels:
+      org.label-schema.group: "monitoring"
+
+  nodeexporter:
+    image: prom/node-exporter:v1.3.1
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    expose:
+      - 9100
+    labels:
+      org.label-schema.group: "monitoring"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.44.0
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    restart: unless-stopped
+    expose:
+      - 8080
+    labels:
+      org.label-schema.group: "monitoring"
+
 
   grafana:
-    image: grafana/grafana:9.0.2
-    hostname: grafana
+    image: grafana/grafana:9.0.3
     container_name: grafana
-    ports: ["3000:3000"]
     volumes:
       - grafana:/var/lib/grafana
-    deploy:
-      resources:
-        limits:
-          memory: 50M
-          cpus: '0.5'
-        reservations:
-          memory: 30M
-          cpus: '0.25'
-    configs:
-    - source: datasource
-      target: /etc/grafana/provisioning/datasources/monitoring.yaml
-    <<: [*default-svc, *log-driver]
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    expose:
+      - 3000
+    labels:
+      org.label-schema.group: "monitoring"
+
+  pushgateway:
+    image: prom/pushgateway:v1.4.3
+    container_name: pushgateway
+    restart: unless-stopped
+    expose:
+      - 9091
+    labels:
+      org.label-schema.group: "monitoring"
+
+  caddy:
+    image: caddy:2.3.0
+    container_name: caddy
+    ports:
+      - "3000:3000"
+      - "9090:9090"
+      - "9093:9093"
+      - "9091:9091"
+      - "8080:8080"
+      - "3100:3100"
+      - "27017:27017"
+      - "2181:2181"
+      - "29092:29092"
+      - "8081:8083"
+      - "4001:4001"
+      - "4002:4002"
+    volumes:
+      - ./caddy:/etc/caddy
+    restart: unless-stopped
+
+    labels:
+      org.label-schema.group: "monitoring"
 
 configs:
   loki_config:
@@ -235,6 +333,7 @@ configs:
 
 volumes:
   grafana:
+  prometheus:
   db-data:
   jars:
 
