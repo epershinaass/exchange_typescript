@@ -28,6 +28,7 @@ export class BalanceService {
     if (balance.transactions.find((t) => t === transactionId)) {
       return balance.balance;
     }
+    balance.transactions.push(transactionId);
     return (balance.balance += Number(refillSum));
   }
 }
