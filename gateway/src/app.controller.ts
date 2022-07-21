@@ -18,4 +18,8 @@ export class AppController implements OnModuleInit {
   async accumulate(@Body('data') data: number[]) {
     return this.grpcService.accumulate({ data });
   }
+  @Get('add')
+  async products(@Body('data') data: number[]) {
+    return this.grpcService.accumulate({ data });
+  }
 }

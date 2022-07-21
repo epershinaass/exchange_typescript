@@ -6,3 +6,4 @@ export class MathService {
     return (data || []).reduce((a, b) => Number(a) + Number(b));
   }
 }
+
