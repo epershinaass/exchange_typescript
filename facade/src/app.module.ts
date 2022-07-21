@@ -4,4 +4,4 @@ import { HeroModule } from './hero/hero.module';
 @Module({
   imports: [HeroModule],
 })
-export class AppModule {}
+export class AppModule { }

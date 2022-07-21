@@ -5,7 +5,7 @@ import { HelloWithId } from './interfaces/helloWithId.interface';
 
 @Controller('hello')
 export class HelloController {
-  @GrpcMethod('HelloService')
+  @GrpcMethod('HelloService', 'GetHello')
   getHello({ id }: HelloId): HelloWithId {
     return { message: 'hello with ' + id };
   }
