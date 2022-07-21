@@ -11,6 +11,28 @@ x-log: &log-driver
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  facade:
+    image: ourrepo/facade:0.1.0
+    hostname: facade
+    container_name: facade
+    build:
+      context: facade
+      dockerfile: ./Dockerfile
+    ports:
+      - 4001:4001
+    <<: [*default-svc, *log-driver]
+
+  balance:
+    image: ourrepo/balance:0.1.0
+    hostname: balance
+    container_name: balance
+    build:
+      context: balance
+      dockerfile: ./Dockerfile
+    ports:
+      - 4002:4002
+    <<: [*default-svc, *log-driver]
+
   mongo:
     image: mongo:latest
     hostname: mongo
