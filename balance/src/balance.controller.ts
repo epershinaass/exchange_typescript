@@ -11,11 +11,20 @@ export class BalanceController {
     return { sum: this.balanceService.accumulate(numberArray.data) };
   }
 
+  /* запрос через grpc делаем такого вида
+  http://localhost:5000/      RefillBalance
+
+  {
+    "balanceId": "62d9abf5c79d1502fdf98d97",
+    "transactionId": "1233213",
+    "refillSum": 100
+  }
+  */
   @GrpcMethod('BalanceController', 'RefillBalance')
-  refillBalance(
-    refillBalanceInfo: IRefillBalanceInfo,
-    metadata: any,
-  ): ICurrentBalance {
-    return { total: this.balanceService.refillBalance(refillBalanceInfo) };
+  async refillBalance(refillBalanceInfo: IRefillBalanceInfo, metadata: any) {
+    const newBalance = await this.balanceService.refillBalance(
+      refillBalanceInfo,
+    );
+    return { total: newBalance.total };
   }
 }

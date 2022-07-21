@@ -34,6 +34,15 @@ export class BalanceController implements OnModuleInit {
     return this.grpcService.accumulate({ data });
   }
 
+  /* запрос через http делаем такого вида
+  http://localhost:3000/balance/refill
+
+  {
+    "balanceId": "62d9abf5c79d1502fdf98d97",
+    "transactionId": "1233213",
+    "refillSum": 100
+  }
+  */
   @Post('balance/refill')
   async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
     return this.grpcService.refillBalance(refillBalanceDto);

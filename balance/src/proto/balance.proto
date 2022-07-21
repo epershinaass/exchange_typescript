@@ -16,9 +16,9 @@ message SumOfNumberArray {
 }
 
 message RefillBalanceInfo {
-  string balance_id = 1;
-  string transaction_id = 2;
-  uint64 refill_sum = 3;
+  string balanceId = 1;
+  string transactionId = 2;
+  uint64 refillSum = 3;
 }
 
 message CurrentBalance {
