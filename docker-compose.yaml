@@ -230,6 +230,7 @@ services:
     profiles:
     - logs
     - full
+    - monitoring
     ports: ["3000:3000"]
     volumes:
       - grafana:/var/lib/grafana
