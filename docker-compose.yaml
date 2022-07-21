@@ -18,8 +18,8 @@ services:
     build:
       context: facade
       dockerfile: ./Dockerfile
-    expose:
-      - 4001
+    ports:
+      - 4001:4001
     <<: [*default-svc, *log-driver]
 
   balance:
@@ -29,16 +29,16 @@ services:
     build:
       context: balance
       dockerfile: ./Dockerfile
-    expose:
-      - 4002
+    ports:
+      - 4002:4002
     <<: [*default-svc, *log-driver]
 
   mongo:
     image: mongo:latest
     hostname: mongo
     container_name: mongo
-    expose:
-      - 27017
+    ports:
+      - 27017:27017
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -72,8 +72,8 @@ services:
     depends_on:
       zoo1:
         condition: service_healthy
-    expose:
-      - 29092
+    ports:
+      - 29092:29092
     healthcheck:
       test: kafka-topics --bootstrap-server kafka1:9092 --list
       interval: 30s
@@ -96,8 +96,8 @@ services:
     image: confluentinc/cp-schema-registry:7.2.0
     hostname: schema-registry
     container_name: schema-registry
-    expose:
-      - 8081
+    ports:
+      - 8081:8081
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
@@ -121,8 +121,8 @@ services:
     build:
       context: infra
       dockerfile: ./Dockerfile-MongoConnect
-    expose:
-      - 8083
+    ports:
+      - 8083:8083
     environment:
       CONNECT_BOOTSTRAP_SERVERS: kafka1:9092
       CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
@@ -164,8 +164,8 @@ services:
     image: grafana/loki:2.6.0
     hostname: loki
     container_name: loki
-    expose:
-      - 3100
+    ports:
+      - 3100:3100
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
       resources:
@@ -208,7 +208,7 @@ services:
     image: prom/prometheus:v2.37.0
     container_name: prometheus
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./infra/prometheus:/etc/prometheus
       - prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -218,22 +218,23 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: unless-stopped
-    expose:
-      - 9090
+    ports:
+      - 9090:9090
     labels:
       org.label-schema.group: "monitoring"
+
 
   alertmanager:
     image: prom/alertmanager:v0.24.0
     container_name: alertmanager
     volumes:
-      - ./alertmanager:/etc/alertmanager
+      - ./infra/alertmanager:/etc/alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
     restart: unless-stopped
-    expose:
-      - 9093
+    ports:
+      - 9093:9093
     labels:
       org.label-schema.group: "monitoring"
 
@@ -250,8 +251,8 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     restart: unless-stopped
-    expose:
-      - 9100
+    ports:
+      - 9100:9100
     labels:
       org.label-schema.group: "monitoring"
 
@@ -268,8 +269,8 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
     restart: unless-stopped
-    expose:
-      - 8080
+    ports:
+      - 8080:8080
     labels:
       org.label-schema.group: "monitoring"
 
@@ -279,47 +280,15 @@ services:
     container_name: grafana
     volumes:
       - grafana:/var/lib/grafana
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     environment:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
-    expose:
-      - 3000
-    labels:
-      org.label-schema.group: "monitoring"
-
-  pushgateway:
-    image: prom/pushgateway:v1.4.3
-    container_name: pushgateway
-    restart: unless-stopped
-    expose:
-      - 9091
-    labels:
-      org.label-schema.group: "monitoring"
-
-  caddy:
-    image: caddy:2.3.0
-    container_name: caddy
     ports:
-      - "3000:3000"
-      - "9090:9090"
-      - "9093:9093"
-      - "9091:9091"
-      - "8080:8080"
-      - "3100:3100"
-      - "27017:27017"
-      - "2181:2181"
-      - "29092:29092"
-      - "8081:8083"
-      - "4001:4001"
-      - "4002:4002"
-    volumes:
-      - ./caddy:/etc/caddy
-    restart: unless-stopped
-
+      - 3000:3000
     labels:
       org.label-schema.group: "monitoring"
 
@@ -330,6 +299,8 @@ configs:
     file: ./infra/promtail-config.yaml
   datasource:
     file: ./infra/datasource.yaml
+  prometheus_config:
+    file: ./infra/prometheus/prometheus.yml
 
 volumes:
   grafana:
