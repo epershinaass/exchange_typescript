@@ -2,8 +2,8 @@
 
 ### Usage docker compose
 
-- В файле docker-compose.yaml описаны сервисы для локальной разработки. 
-- Перечень доступных сервисов: 
+- В файле docker-compose.yaml описаны сервисы для локальной разработки.
+- Перечень доступных сервисов:
   - mongo (параметр в команде запуска: `mongo`)
   - zookeeper (параметр в команде запуска: `zoo1`)
   - kafka (параметр в команде запуска: `kafka1`)
@@ -13,7 +13,7 @@
 - Запуск всех сервисов одновременно: `docker-compose up -d --build` [подробнее](https://docs.docker.com/engine/reference/commandline/compose_up/)
 - Если нужды в запуске одновременно всех контейнеров нет, то можно:
   - указывать отдельные сервисы для запуска. Например нужно запустить только сервисы kafka+zookeeper: `docker-compose up -d kafka1 zoo1`
-  - Указывать профили: `docker-compose up -d logs` [подробнее](https://docs.docker.com/compose/profiles/). На данный момент доступныt профили:
+  - Указывать профили: `docker-compose --profile logs up -d` или через переменную окружения `COMPOSE_PROFILES` [подробнее](https://docs.docker.com/compose/profiles/). На данный момент доступныt профили:
     - mongo - mongo
     - kafkamng - kafka, zookeeper, kafka connect, mongo
     - kafkafull - kafka, zookeeper, schema registry, kafka connect
