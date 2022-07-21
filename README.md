@@ -15,7 +15,7 @@
   - указывать отдельные сервисы для запуска. Например нужно запустить только сервисы kafka+zookeeper: `docker-compose up -d kafka1 zoo1`
   - Указывать профили: `docker-compose up -d logs` [подробнее](https://docs.docker.com/compose/profiles/). На данный момент доступныt профили:
     - mongo - mongo
-    - kafkamng - kafka, zookeeper, kafka connect
+    - kafkamng - kafka, zookeeper, kafka connect, mongo
     - kafkafull - kafka, zookeeper, schema registry, kafka connect
     - full - все контейнеры
     - logs - promtail, loki, grafana
