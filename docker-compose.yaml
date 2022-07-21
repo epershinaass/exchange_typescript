@@ -268,8 +268,11 @@ services:
     image: prom/prometheus:v2.9.2
     hostname: prometheus
     container_name: prometheus
-    ports:
-    - 9090:9090
+    profiles:
+    - monitoring
+    - full
+    # ports: # No need to publish
+    # - 9090:9090
     volumes:
     - prometheus_data:/prometheus
     configs:
@@ -285,12 +288,14 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.44.0
     hostname: cadvisor
     container_name: cadvisor
+    profiles:
+    - monitoring
+    - full
     volumes:
     - /:/rootfs:ro
     - /var/run:/var/run:rw
     - /sys:/sys:ro
-    # - /var/lib/docker/:/var/lib/docker:ro
-    - /mnt/vms/docker/:/var/lib/docker:ro
+    - /var/lib/docker/:/var/lib/docker:ro
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -299,6 +304,9 @@ services:
     image: prom/node-exporter:v1.3.1
     hostname: node-exporter
     container_name: node-exporter
+    profiles:
+    - monitoring
+    - full
     command:
     - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
     # ports: # No need to publish
@@ -311,6 +319,9 @@ services:
     image: prom/alertmanager:v0.24.0
     hostname: alertmanager
     container_name: alertmanager
+    profiles:
+    - monitoring
+    - full
     command:
       - '--config.file=/etc/alertmanager/config.yml'
     # ports: # No need to publish
@@ -326,9 +337,15 @@ services:
     image: dabealu/zookeeper-exporter:v0.1.12
     hostname: zookeeper-exporter
     container_name: zookeeper-exporter
+    profiles:
+    - monitoring
+    - full
     # ports: # No need to publish
     #   - 9141:9141
     command: --zk-hosts="zoo1:2181" --timeout=5
+    depends_on:
+      zoo1:
+        condition: service_healthy
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -338,8 +355,14 @@ services:
     hostname: kafka-exporter
     container_name: kafka-exporter
     command: --kafka.server=kafka1:9092
+    profiles:
+    - monitoring
+    - full
     # ports: # No need to publish
     #   - 9308:9308
+    depends_on:
+      kafka1:
+        condition: service_healthy
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
