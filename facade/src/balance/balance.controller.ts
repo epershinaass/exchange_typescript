@@ -2,11 +2,12 @@ import { Body, Controller, OnModuleInit, Post } from '@nestjs/common';
 import {
   Client,
   ClientGrpc,
-  Transport,
   ClientOptions,
+  Transport,
 } from '@nestjs/microservices';
-import { IGrpcService } from './interfaces/grpc.interface';
 import { join } from 'path';
+import { RefillBalanceDto } from './dto/refill-balance.dto';
+import { IGrpcService } from './interfaces/grpc.interface';
 
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
@@ -17,7 +18,7 @@ export const microserviceOptions: ClientOptions = {
 };
 
 @Controller()
-export class AppController implements OnModuleInit {
+export class BalanceController implements OnModuleInit {
   @Client(microserviceOptions)
   private client: ClientGrpc;
 
@@ -31,5 +32,10 @@ export class AppController implements OnModuleInit {
   @Post('add')
   async accumulate(@Body('data') data: number[]) {
     return this.grpcService.accumulate({ data });
+  }
+
+  @Post('balance/refill')
+  async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
+    return this.grpcService.refillBalance(refillBalanceDto);
   }
 }

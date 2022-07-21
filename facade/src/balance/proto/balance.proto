@@ -4,6 +4,7 @@ package balance;
 
 service BalanceController {
   rpc Accumulate (NumberArray) returns (SumOfNumberArray);
+  rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalance);
 }
 
 message NumberArray {
@@ -12,4 +13,14 @@ message NumberArray {
 
 message SumOfNumberArray {
   double sum = 1;
+}
+
+message RefillBalanceInfo {
+  string balance_id = 1;
+  string transaction_id = 2;
+  uint64 refill_sum = 3;
+}
+
+message CurrentBalance {
+  uint64 total = 1;
 }
