@@ -293,16 +293,24 @@ services:
     volumes:
       - grafana:/var/lib/grafana
       - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
+
     ports:
       - 3000:3000
     labels:
       org.label-schema.group: "monitoring"
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+          cpus: '0.5'
+        reservations:
+          memory: 30M
+          cpus: '0.25'
+    configs:
+      - source: datasource
+        target: /etc/grafana/provisioning/datasources/datasource.yaml
+
 
 configs:
   loki_config:
