@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package app;
+
+service ProductController {
+  rpc Accumulate (UserQuery) returns (ProductResponse) {
+  }
+}
+
+message UserQuery {
+  int32 id = 1;
+}
+message ProductResponse {
+  repeated Item items = 1;
+}
+message Item {
+  int32 product_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+}
