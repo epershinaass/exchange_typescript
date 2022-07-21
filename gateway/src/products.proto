@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package products;
+
+service ProductsController {
+  rpc Accumulate (Object) returns (ArrayObjects);
+}
+
+message Object {
+  string id = 1;
+}
+message ArrayObjects {
+  repeated Object total = 1;
+}

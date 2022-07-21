@@ -11,11 +11,11 @@ export class AppController implements OnModuleInit {
   private grpcService: IGrpcService;
 
   onModuleInit() {
-    this.grpcService = this.client.getService<IGrpcService>('AppController');
+    this.grpcService = this.client.getService<IGrpcService>('ProductsController');
   }
 
   @Post('add')
-  async accumulate(@Body('data') data: number[]) {
+  async accumulate(@Body('data') data: object) {
     return this.grpcService.accumulate({ data });
   }
 }

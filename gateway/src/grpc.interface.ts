@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
 
 export interface IGrpcService {
-  accumulate(numberArray: INumberArray): Observable<any>;
+  accumulate(Object: IObject): Observable<any>;
 }
 
-interface INumberArray {
-  data: number[];
+interface IObject {
+  data: object;
 }
