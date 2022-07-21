@@ -1,7 +1,7 @@
 users_deploy_user: deploy
 users_deploy_group: deploy
 users_deploy_users:
-  - nikitos_deploy
+  - deploy
 
 users_global_admin_users:
-  - nikita_admin
+  - jo
