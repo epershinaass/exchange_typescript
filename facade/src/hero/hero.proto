@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package hero;
+
+service HeroService {
+  rpc GetHello (Empty) returns (Hello) {}
+}
+
+message Empty {}
+
+message Hello {
+  string message = 1;
+  // optional bool deprecated = 34 [default = NO_SIDE_EFFECTS]; 
+}
+
+// message MethodOptions {
+
+//   // Note:  Field numbers 1 through 32 are reserved for Google's internal RPC
+//   //   framework.  We apologize for hoarding these numbers to ourselves, but
+//   //   we were already using them long before we decided to release Protocol
+//   //   Buffers.
+
+//   // Is this method deprecated?
+//   // Depending on the target platform, this can emit Deprecated annotations
+//   // for the method, or it will be completely ignored; in the very least,
+//   // this is a formalization for deprecating methods.
+//   optional bool deprecated = 33 [default = false];
+
+//   // Is this method side-effect-free (or safe in HTTP parlance), or idempotent,
+//   // or neither? HTTP based RPC implementation may choose GET verb for safe
+//   // methods, and PUT verb for idempotent methods instead of the default POST.
+//   enum IdempotencyLevel {
+//     IDEMPOTENCY_UNKNOWN = 0;
+//     NO_SIDE_EFFECTS = 1;  // implies idempotent
+//     IDEMPOTENT = 2;       // idempotent, but may have side effects
+//   }
+//   optional IdempotencyLevel idempotency_level = 34
+//       [default = IDEMPOTENCY_UNKNOWN];
+
+//   // The parser stores options it doesn't recognize here. See above.
+//   repeated UninterpretedOption uninterpreted_option = 999;
+
+//   // Clients can define custom options in extensions of this message. See above.
+//   extensions 1000 to max;
+// }
