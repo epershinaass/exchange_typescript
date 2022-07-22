@@ -1,0 +1,12 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.j2 text eol=lf
+
+# Do not export github and test related files to archive
+.github/ export-ignore
+tests/ export-ignore

@@ -1,0 +1,26 @@
+route:
+  receiver: telegram
+  continue: false
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  group_by: ['alertname', 'cluster', 'service']
+
+receivers:
+  # - name: 'slack'
+  #   slack_configs:
+  #       - send_resolved: true
+  #         username: '<username>'
+  #         channel: '#<channel-name>'
+  #         api_url: '<incomming-webhook-url>'
+  - name: telegram
+    telegram_configs:
+    - send_resolved: true
+      api_url: https://api.telegram.org # default = global.telegram_api_url - > default = "https://api.telegram.org"
+      bot_token: ${TELEGRAM_BOT_TOKEN}
+      chat_id: ${TELEGRAM_CHAT_ID}
+        # message: '{{ template "telegram.default.message" .}}' # Default
+  #       # parse_mode: "MarkdownV2" # Default
+      message:  "Alertname: {{ .GroupLabels.alertname }}\n Severity: {{ .CommonLabels.severity }}\n {{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+      # <b>  parse_mode: ''</b>
+      parse_mode: ''

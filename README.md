@@ -10,7 +10,7 @@
   - loki (параметр в команде запуска: `loki`)
   - promtail (параметр в команде запуска: `promtail`)
   - grafana (параметр в команде запуска: `grafana`)
-- Запуск всех сервисов одновременно: `docker-compose up -d --build` [подробнее](https://docs.docker.com/engine/reference/commandline/compose_up/)
+- Запуск всех сервисов одновременно: `docker-compose --profile full up -d --build` [подробнее](https://docs.docker.com/engine/reference/commandline/compose_up/)
 - Если нужды в запуске одновременно всех контейнеров нет, то можно:
   - указывать отдельные сервисы для запуска. Например нужно запустить только сервисы kafka+zookeeper: `docker-compose up -d kafka1 zoo1`
   - Указывать профили: `docker-compose --profile logs up -d` или через переменную окружения `COMPOSE_PROFILES` [подробнее](https://docs.docker.com/compose/profiles/). На данный момент доступныt профили:
