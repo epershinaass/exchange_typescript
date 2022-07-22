@@ -1,0 +1,164 @@
+# Best effort to remove Docker CE and related configuration
+
+- name: Stop Docker service
+  become: yes
+  ansible.builtin.service:
+    use: "{{ docker_x_service_mgr }}"
+    name: docker
+    state: stopped
+  failed_when: "'FAILED' in command_result.stderr"
+
+- name: Ensure Docker CE is removed (CentOS/Fedora/RedHat)
+  become: yes
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ docker_packages }}"
+  register: _pkg_result
+  until: _pkg_result is succeeded
+  when: _docker_os_dist != "Ubuntu" and
+        _docker_os_dist != "Debian"
+
+- name: Ensure Docker CE is removed (Ubuntu/Debian)
+  become: yes
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: absent
+    purge: yes
+  loop: "{{ docker_packages }}"
+  register: _pkg_result
+  until: _pkg_result is succeeded
+  when: _docker_os_dist == "Ubuntu" or
+        _docker_os_dist == "Debian"
+
+- name: Remove network interface docker0
+  become: yes
+  ansible.builtin.command: ip link del docker0
+  args:
+    warn: no
+  ignore_errors: yes
+  changed_when: no
+  tags:
+    - skip_ansible_lint
+
+- name: Remove dockerd from alternatives configuration
+  become: yes
+  ansible.builtin.shell: alternatives --remove dockerd /usr/bin/dockerd-ce
+  ignore_errors: yes
+  changed_when: no
+  tags:
+    - skip_ansible_lint
+
+- name: Clean yum cache (CentOS/RedHat 7)
+  become: yes
+  ansible.builtin.command: yum clean all --enablerepo=\*
+  args:
+    warn: no
+  changed_when: no
+  when: (_docker_os_dist == "CentOS" and _docker_os_dist_major_version | int == 7) or
+        (_docker_os_dist == "RedHat" and _docker_os_dist_major_version | int == 7)
+
+- name: Clean dnf cache (CentOS/Fedora/RedHat)
+  become: yes
+  ansible.builtin.command: dnf clean all --enablerepo=\*
+  args:
+    warn: no
+  changed_when: no
+  when: _docker_os_dist == "Fedora" or
+        (_docker_os_dist == "RedHat" and _docker_os_dist_major_version | int > 7) or
+        (_docker_os_dist == "CentOS" and _docker_os_dist_major_version | int > 7)
+
+- name: Clean apt cache
+  become: yes
+  ansible.builtin.command: apt-get clean
+  changed_when: no
+  when: _docker_os_dist == "Ubuntu" or
+        _docker_os_dist == "Debian"
+  tags:
+    - skip_ansible_lint
+
+- name: Remove repository docker specific repo file
+  become: yes
+  ansible.builtin.yum_repository:
+    name: docker-ce
+    file: docker-ce
+    state: absent
+  when: _docker_os_dist != "Ubuntu" and
+        _docker_os_dist != "Debian"
+
+- name: Ensure Docker CE and configuration files are removed
+  become: yes
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    # all distributions
+    - "{{ docker_envs_dir[_docker_os_dist_file_varity] }}/docker"
+    - "{{ docker_envs_dir[_docker_os_dist_file_varity] }}/docker-envs"
+    - /etc/audit/rules.d/docker.rules
+    # centos/rhel
+    - /etc/yum.repos.d/docker-ce.repo
+    - /etc/systemd/system/docker.service.d
+    - /etc/docker
+    - /usr/bin/dockerd
+    - /run/docker
+    # ubuntu/debian
+    - /etc/apt/sources.list.d/docker-ce.list
+
+- name: Ensure additional files and data directories are removed
+  become: yes
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/lib/docker
+    - /var/lib/docker-engine
+    - /usr/libexec/docker
+    - /var/lib/yum/repos/x86_64/7/docker-ce-nightly
+    - /var/lib/yum/repos/x86_64/7/docker-ce-nightly
+    - /var/lib/yum/repos/x86_64/7/docker-ce-test
+    - /var/lib/yum/repos/x86_64/7/docker-ce-stable
+    - /var/lib/yum/repos/x86_64/7/docker-ce-nightly-debuginfo
+    - /var/lib/yum/repos/x86_64/7/docker-ce-nightly-source
+    - /var/lib/yum/repos/x86_64/7/docker-ce-stable-debuginfo
+    - /var/lib/yum/repos/x86_64/7/docker-ce-stable-source
+    - /var/lib/yum/repos/x86_64/7/docker-ce-test-debuginfo
+    - /var/lib/yum/repos/x86_64/7/docker-ce-test-source
+    - "{{ docker_remove_additional }}"
+  when: docker_remove_all | bool
+
+- name: Find Docker related diretories in package cache (CentOS/Fedora/RHEL)
+  become: yes
+  ansible.builtin.find:
+    paths: "{{ (_docker_os_dist_major_version | int > 7) | ternary('/var/cache/dnf', '/var/cache/yum') }}"
+    file_type: directory
+    recurse: yes
+    patterns: "docker-ce*"
+  register: _remove_cache_dirs
+  when: _docker_os_dist == "Fedora" or
+        _docker_os_dist == "CentOS" or
+        _docker_os_dist == "RedHat"
+
+- name: Remove dangeling files/directories in package cache
+  become: yes
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ _remove_cache_dirs.files }}"
+  when:
+    - _remove_cache_dirs.files is defined
+    - _docker_os_dist == "Fedora" or
+      _docker_os_dist == "CentOS" or
+      _docker_os_dist == "RedHat"
+
+- name: Update repository cache
+  become: true
+  ansible.builtin.shell: "{{ docker_cmd_update_repo_cache[_docker_os_dist_file_varity] }}"
+  args:
+    warn: false
+  changed_when: false
+  register: _result
+  until: _result is succeeded
+  when: docker_network_access | bool
+  tags:
+    - skip_ansible_lint
