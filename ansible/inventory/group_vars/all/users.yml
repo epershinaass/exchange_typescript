@@ -5,3 +5,6 @@ users_users:
   - user: jo
     name: "devops"
     key: jo.pub
+  - user: nikita
+      name: "devops"
+      key: nikita.pub

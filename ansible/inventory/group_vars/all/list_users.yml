@@ -5,3 +5,4 @@ users_deploy_users:
 
 users_global_admin_users:
   - jo
+  - nikita
