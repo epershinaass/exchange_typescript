@@ -1,4 +1,6 @@
+import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Balance, BalanceDocument } from './schemas/balance.schema';
@@ -18,8 +20,13 @@ export class BalanceService {
     transactionId,
     refillSum,
   }): Promise<ICurrentBalance> {
-    // TODO добавить обработку ошибок
     const balance = await this.balanceModel.findById(balanceId);
+    if (!balance) {
+      throw new RpcException({
+        message: 'Balance not found',
+        code: status.NOT_FOUND,
+      });
+    }
 
     if (balance.transactions.find((t) => t === transactionId)) {
       return balance;
