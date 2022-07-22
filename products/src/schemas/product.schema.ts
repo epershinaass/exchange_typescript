@@ -6,7 +6,7 @@ export type ProductDocument = Product & Document;
 @Schema()
 export class Product {
 
-@Prop([Object])
+@Prop(Object)
   total: object[];
 }
 

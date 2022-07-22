@@ -6,7 +6,7 @@ import { Product, ProductSchema } from './schemas/product.schema';
 
 @Module({
   imports: [
-  MongooseModule.forRoot('mongodb://localhost:27017/admin'),
+  MongooseModule.forRoot('mongodb://localhost:27017/user-products'),
   MongooseModule.forFeature([{name: Product.name, schema: ProductSchema}])],
   controllers: [ProductsController],
   providers: [ProductsService],
