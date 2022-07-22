@@ -1,14 +1,14 @@
 version: "3.8"
 
 x-app: &default-svc
-    restart: always
-    networks:
+  restart: always
+  networks:
     - dev-net
 x-log: &log-driver
-    logging:
-      driver: "json-file"
-      options:
-        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+  logging:
+    driver: "json-file"
+    options:
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
   mongo:
@@ -16,10 +16,10 @@ services:
     hostname: mongo
     container_name: mongo
     profiles:
-    - mongo
-    - kafkamng
-    - kafkafull
-    - full
+      - mongo
+      - kafkamng
+      - kafkafull
+      - full
     ports:
       - 27017:27017
     healthcheck:
@@ -31,18 +31,18 @@ services:
     labels:
       org.label-schema.group: "monitoring"
     volumes:
-    - db-data:/data/db
+      - db-data:/data/db
 
   zoo1:
     image: confluentinc/cp-zookeeper:7.2.0
     hostname: zoo1
     container_name: zoo1
     profiles:
-    - kafka
-    - kafkamng
-    - kafkafull
-    - full
-    - monitoring
+      - kafka
+      - kafkamng
+      - kafkafull
+      - full
+      - monitoring
     healthcheck:
       test: echo srvr | nc zoo1 2181 || exit 1
       retries: 20
@@ -51,7 +51,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_HEAP_OPTS: -Xmx150M -Xms50M
+      ZOOKEEPER_HEAP_OPTS: -Xmx512M -Xms256M
     labels:
       org.label-schema.group: "monitoring"
     ports:
@@ -60,7 +60,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 1024M
 
 
   kafka1:
@@ -68,11 +68,11 @@ services:
     hostname: kafka1
     container_name: kafka1
     profiles:
-    - kafka
-    - kafkamng
-    - kafkafull
-    - full
-    - monitoring
+      - kafka
+      - kafkamng
+      - kafkafull
+      - full
+      - monitoring
     depends_on:
       zoo1:
         condition: service_healthy
@@ -108,8 +108,8 @@ services:
     hostname: schema-registry
     container_name: schema-registry
     profiles:
-    - kafkafull
-    - full
+      - kafkafull
+      - full
     ports:
       - 8081:8081
     environment:
@@ -135,9 +135,9 @@ services:
     hostname: kafka-connect
     container_name: kafka-connect
     profiles:
-    - kafkamng
-    - kafkafull
-    - full
+      - kafkamng
+      - kafkafull
+      - full
     build:
       context: infra
       dockerfile: ./Dockerfile-MongoConnect
@@ -187,22 +187,22 @@ services:
     hostname: loki
     container_name: loki
     profiles:
-    - logs
-    - full
+      - logs
+      - full
     ports:
       - 3100:3100
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
       resources:
         limits:
-          memory: 100M
+          memory: 256M
           cpus: '0.5'
         reservations:
-          memory: 70M
+          memory: 128M
           cpus: '0.1'
     configs:
-    - source: loki_config
-      target: /etc/loki/loki-config.yaml
+      - source: loki_config
+        target: /etc/loki/loki-config.yaml
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -214,8 +214,8 @@ services:
     hostname: promtail
     container_name: promtail
     profiles:
-    - logs
-    - full
+      - logs
+      - full
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -230,8 +230,8 @@ services:
           memory: 25M
           cpus: '0.1'
     configs:
-    - source: promtail_config
-      target: /etc/promtail/promtail_config.yaml
+      - source: promtail_config
+        target: /etc/promtail/promtail_config.yaml
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -242,9 +242,9 @@ services:
     hostname: grafana
     container_name: grafana
     profiles:
-    - logs
-    - full
-    - monitoring
+      - logs
+      - full
+      - monitoring
     ports: ["3000:3000"]
     volumes:
       - grafana:/var/lib/grafana
@@ -258,8 +258,8 @@ services:
           memory: 30M
           cpus: '0.25'
     configs:
-    - source: datasource
-      target: /etc/grafana/provisioning/datasources/monitoring.yaml
+      - source: datasource
+        target: /etc/grafana/provisioning/datasources/monitoring.yaml
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -269,17 +269,17 @@ services:
     hostname: prometheus
     container_name: prometheus
     profiles:
-    - monitoring
-    - full
+      - monitoring
+      - full
     # ports: # No need to publish
     # - 9090:9090
     volumes:
-    - prometheus_data:/prometheus
+      - prometheus_data:/prometheus
     configs:
-    - source: prometheus
-      target: /etc/prometheus/prometheus.yml
-    - source: prometheus-alerts
-      target: /etc/prometheus/alert.rules
+      - source: prometheus
+        target: /etc/prometheus/prometheus.yml
+      - source: prometheus-alerts
+        target: /etc/prometheus/alert.rules
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -289,13 +289,13 @@ services:
     hostname: cadvisor
     container_name: cadvisor
     profiles:
-    - monitoring
-    - full
+      - monitoring
+      - full
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -305,10 +305,10 @@ services:
     hostname: node-exporter
     container_name: node-exporter
     profiles:
-    - monitoring
-    - full
+      - monitoring
+      - full
     command:
-    - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
     # ports: # No need to publish
     #   - 9100:9100
     labels:
@@ -320,15 +320,15 @@ services:
     hostname: alertmanager
     container_name: alertmanager
     profiles:
-    - monitoring
-    - full
+      - monitoring
+      - full
     command:
       - '--config.file=/etc/alertmanager/config.yml'
     # ports: # No need to publish
     #   - 9093:9093
     configs:
-    - source: alertmanager
-      target: /etc/alertmanager/config.yml
+      - source: alertmanager
+        target: /etc/alertmanager/config.yml
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
@@ -338,8 +338,8 @@ services:
     hostname: zookeeper-exporter
     container_name: zookeeper-exporter
     profiles:
-    - monitoring
-    - full
+      - monitoring
+      - full
     # ports: # No need to publish
     #   - 9141:9141
     command: --zk-hosts="zoo1:2181" --timeout=5
@@ -356,8 +356,8 @@ services:
     container_name: kafka-exporter
     command: --kafka.server=kafka1:9092
     profiles:
-    - monitoring
-    - full
+      - monitoring
+      - full
     # ports: # No need to publish
     #   - 9308:9308
     depends_on:
