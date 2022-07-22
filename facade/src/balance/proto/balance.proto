@@ -3,16 +3,7 @@ syntax = "proto3";
 package balance;
 
 service BalanceController {
-  rpc Accumulate (NumberArray) returns (SumOfNumberArray);
   rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalanceResponse);
-}
-
-message NumberArray {
-  repeated double data = 1;
-}
-
-message SumOfNumberArray {
-  double sum = 1;
 }
 
 message RefillBalanceInfo {

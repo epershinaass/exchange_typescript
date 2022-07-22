@@ -10,10 +10,6 @@ export class BalanceService {
     @InjectModel(Balance.name) private balanceModel: Model<BalanceDocument>,
   ) { }
 
-  public accumulate(data: number[]): number {
-    return (data || []).reduce((a, b) => Number(a) + Number(b));
-  }
-
   public async refillBalance({
     balanceId,
     transactionId,

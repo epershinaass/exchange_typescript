@@ -26,13 +26,7 @@ export class BalanceController implements OnModuleInit {
   private grpcService: IGrpcService;
 
   onModuleInit() {
-    this.grpcService =
-      this.client.getService<IGrpcService>('BalanceController');
-  }
-
-  @Post('add')
-  async accumulate(@Body('data') data: number[]) {
-    return this.grpcService.accumulate({ data });
+    this.grpcService = this.client.getService<IGrpcService>('BalanceController');
   }
 
   /* запрос через grpc делаем такого вида
