@@ -1,8 +1,7 @@
-import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { getStatusGrpcError, statusGrpc } from './errors/balance.error';
 import { Balance, BalanceDocument } from './schemas/balance.schema';
 
 @Injectable()
@@ -19,29 +18,31 @@ export class BalanceService {
     balanceId,
     transactionId,
     refillSum,
-  }): Promise<ICurrentBalance> {
-    const exception = new RpcException({
-      message: 'Balance not found',
-      code: status.NOT_FOUND,
-    });
+  }): Promise<ICurrentBalance | IError> {
+    const err = getStatusGrpcError(statusGrpc.NOT_FOUND);
 
     // TODO кажется криво проверять id по длине для соответствия Id
     // хотелось бы делать это в proto файле
-    if (balanceId.length !== 24) throw exception;
+    if (balanceId.length !== 24) {
+      return err;
+    }
     const balance = await this.balanceModel.findById(balanceId);
     if (!balance) {
-      throw exception;
+      return err;
     }
 
     if (balance.transactions.find((t) => t === transactionId)) {
-      return balance;
+      return { total: balance.total };
     }
     balance.transactions.push(String(transactionId));
     balance.total = Number(balance.total) + Number(refillSum);
 
     // TODO красиво избавиться от дублирования поиска транзакции
-    return this.balanceModel.findByIdAndUpdate(balanceId, balance, {
-      new: true,
-    });
+    const newBalance = await this.balanceModel.findByIdAndUpdate(
+      balanceId,
+      balance,
+      { new: true },
+    );
+    return { total: newBalance.total };
   }
 }
