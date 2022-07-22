@@ -20,12 +20,17 @@ export class BalanceService {
     transactionId,
     refillSum,
   }): Promise<ICurrentBalance> {
+    const exception = new RpcException({
+      message: 'Balance not found',
+      code: status.NOT_FOUND,
+    });
+
+    // TODO кажется криво проверять id по длине для соответствия Id
+    // хотелось бы делать это в proto файле
+    if (balanceId.length !== 24) throw exception;
     const balance = await this.balanceModel.findById(balanceId);
     if (!balance) {
-      throw new RpcException({
-        message: 'Balance not found',
-        code: status.NOT_FOUND,
-      });
+      throw exception;
     }
 
     if (balance.transactions.find((t) => t === transactionId)) {
