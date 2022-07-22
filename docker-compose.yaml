@@ -42,6 +42,7 @@ services:
     - kafkamng
     - kafkafull
     - full
+    - monitoring
     healthcheck:
       test: echo srvr | nc zoo1 2181 || exit 1
       retries: 20
@@ -59,8 +60,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.30'
-          memory: 200M
+          memory: 512M
 
 
   kafka1:
@@ -72,6 +72,7 @@ services:
     - kafkamng
     - kafkafull
     - full
+    - monitoring
     depends_on:
       zoo1:
         condition: service_healthy
@@ -93,15 +94,14 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_HEAP_OPTS: -Xmx512M -Xms200M
+      KAFKA_HEAP_OPTS: -Xmx1024M -Xms512M
     <<: [*default-svc, *log-driver]
     labels:
       org.label-schema.group: "monitoring"
     deploy:
       resources:
         limits:
-          cpus: '0.50'
-          memory: 600M
+          memory: 2048M
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.2.0
