@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 export interface IGrpcService {
-  signIn(Credentials): Observable<string>;
+  signIn(credentials: Credentials): Observable<string>;
 }
 
 export interface Credentials {

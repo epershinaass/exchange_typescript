@@ -14,7 +14,7 @@ export class AppController implements OnModuleInit {
     this.grpcService = this.client.getService<IGrpcService>('AppController');
   }
 
-  @Get('/sign-in')
+  @Get('sign-in')
   async signIn(@Body('credentials') credentials: Credentials) {
     return this.grpcService.signIn(credentials);
   }

@@ -3,9 +3,6 @@ import { Credentials } from './grpc.interface';
 
 @Injectable()
 export class AccountService {
-  public accumulate(data: number[]): number {
-    return (data || []).reduce((a, b) => Number(a) + Number(b));
-  }
 
   public signIn(credentials: Credentials): string {
     if(!credentials) return 'error, body is empty';
@@ -14,6 +11,7 @@ export class AccountService {
       return 'invalid credentials';
     return 'YourAwesomeToken';
   }
+
 }
 
 const users = new Map();
