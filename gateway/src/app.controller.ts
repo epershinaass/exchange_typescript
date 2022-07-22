@@ -1,4 +1,4 @@
-import { Body, Controller, OnModuleInit, Post } from '@nestjs/common';
+import { Body, Controller, Get, OnModuleInit, Post } from '@nestjs/common';
 import { Client, ClientGrpc } from '@nestjs/microservices';
 import { IGrpcService } from './grpc.interface';
 import { microserviceOptions } from './grpc.options';
@@ -14,8 +14,8 @@ export class AppController implements OnModuleInit {
     this.grpcService = this.client.getService<IGrpcService>('AppController');
   }
 
-  @Post('add')
-  async accumulate(@Body('data') data: number[]) {
-    return this.grpcService.accumulate({ data });
+  @Get('/sign-in')
+  async signIn(@Body('credentials') credentials: { login: string, password: string}) {
+    return this.grpcService.signIn(credentials);
   }
 }

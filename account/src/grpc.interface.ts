@@ -4,7 +4,11 @@ export interface IGrpcService {
   signIn(Credentials): Observable<string>;
 }
 
-interface Credentials {
+export interface Credentials {
   login: string;
   password: string;
+}
+
+export interface AuthToken {
+  token: string;
 }

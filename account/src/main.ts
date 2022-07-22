@@ -16,6 +16,6 @@ async function bootstrap() {
     AppModule,
     microserviceOptions,
   );
-  app.listen();
+  await app.listen();
 }
 bootstrap();
