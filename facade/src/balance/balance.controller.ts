@@ -1,13 +1,15 @@
+import { status } from '@grpc/grpc-js';
 import { Body, Controller, OnModuleInit, Post } from '@nestjs/common';
 import {
   Client,
   ClientGrpc,
   ClientOptions,
   GrpcMethod,
+  RpcException,
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
-import { RefillBalanceDto } from './dto/refill-balance.dto';
+import { BalanceIdDto, RefillBalanceDto } from './dto/refill-balance.dto';
 import { IGrpcService } from './interfaces/grpc.interface';
 
 export const microserviceOptions: ClientOptions = {
@@ -46,5 +48,10 @@ export class BalanceController implements OnModuleInit {
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
     return this.grpcService.refillBalance(refillBalanceDto);
+  }
+
+  @GrpcMethod('BalanceController', 'GetBalance')
+  async getBalance(@Body() balanceIdDto: BalanceIdDto) {
+    return this.grpcService.getBalance(balanceIdDto);
   }
 }
