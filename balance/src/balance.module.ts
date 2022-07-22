@@ -3,10 +3,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BalanceController } from './balance.controller';
 import { BalanceService } from './balance.service';
 import { Balance, BalanceSchema } from './schemas/balance.schema';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/myapp'),
+    ConfigModule.forRoot({
+      envFilePath: '.config.env',
+    }),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    ),
     MongooseModule.forFeature([
       {
         name: Balance.name,
