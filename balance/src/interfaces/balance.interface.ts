@@ -14,5 +14,8 @@ interface IRefillBalanceInfo {
 
 interface ICurrentBalance {
   total: number;
-  transactions: string[];
+}
+
+interface IBalanceId {
+  balanceId: string;
 }

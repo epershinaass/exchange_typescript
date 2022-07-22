@@ -44,4 +44,19 @@ export class BalanceService {
       new: true,
     });
   }
+
+  // TODO вынести проверку id в отдельный метод
+  // TODO вынести отдельно exception
+  public async getBalance({ balanceId }): Promise<ICurrentBalance> {
+    const exception = new RpcException({
+      message: 'Balance not found',
+      code: status.NOT_FOUND,
+    });
+    if (balanceId.length !== 24) throw exception;
+    const balance = await this.balanceModel.findById(balanceId);
+    if (!balance) {
+      throw exception;
+    }
+    return { total: balance.total };
+  }
 }
