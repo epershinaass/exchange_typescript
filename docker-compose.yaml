@@ -19,7 +19,7 @@ services:
       context: balance
       dockerfile: ./Dockerfile
     ports:
-      - 5000:5000
+      - 3000:3000
     <<: [*default-svc, *log-driver]
     environment:
       - DB_PORT=27017
