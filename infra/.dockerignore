@@ -2,3 +2,6 @@
 .git
 *.yaml
 *.yml
+*.rules
+*.json
+dashboards/

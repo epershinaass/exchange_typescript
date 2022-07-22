@@ -1,0 +1,8 @@
+users_deploy_user: deploy
+users_deploy_group: deploy
+users_deploy_users:
+  - deploy
+
+users_global_admin_users:
+  - jo
+  - nikita

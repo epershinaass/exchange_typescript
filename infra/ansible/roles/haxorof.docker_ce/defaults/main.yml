@@ -1,0 +1,188 @@
+---
+# IMPORTANT! All variables with prefix 'docker_x_' is experimental and can be
+#            changed at any time.
+################################################################################
+# Docker install configuration
+################################################################################
+# Docker repo channel: stable, nigthly, test (more info: https://docs.docker.com/install/)
+docker_channel: stable
+# Always ensure latest version of Docker CE
+docker_latest_version: true
+# Docker version
+# Relation with other variables:
+# - If docker_version is set to a non-empty value (e.g. 18.06.1.ce-3.el7) then that is used.
+# - If docker_version is empty (default) and docker_latest_version is set to true (default)
+#   then latest version will be installed and if older version is installed it will be upgraded.
+# - If docker_version is empty (default) and docker_latest_version is set to false then it
+#   will only install latest version if not some Docker version is already installed.
+docker_version: ""
+# If below variable is set to true it will remove older Docker installation before Docker CE.
+# DEPRECATED! nothing replaces this feature
+docker_remove_pre_ce: false
+# Users to be part of the docker group
+docker_users: []
+# Docker plugins.
+# Item fields:
+# * type - Valid types: volumedriver,networkdriver,ipamdriver,authz,logdriver,metricscollector
+# * alias - Alias of plugin
+# * name - Name of plugin
+# * args - Plugin arguments
+#
+# Example:
+# docker_plugins:
+#   - type: authz
+#     alias: opa-docker-authz
+#     name: openpolicyagent/opa-docker-authz-v2:0.8
+#     args: opa-args="-policy-file /opa/policies/authz.rego"
+docker_plugins: []
+
+# Setup Docker CE apt/dnf/yum repos or assume it has already been done
+docker_setup_repos: true
+# Repositories required to be enabled or disabled on RHEL
+#  id: <id of repo>
+#  state: enabled || disabled
+#  repo_manager: sm (subsription manager) || yum
+docker_rhel_repos:
+  - id: rhel-7-server-extras-rpms
+    repo_manager: sm
+    state: enabled
+  # disable rt-beta so we don't get a 403 error retrieving repomd.xml
+  - id: rhel-7-server-rt-beta-rpms
+    repo_manager: sm
+    state: disabled
+# Repositories required to be enabled or disabled on RHEL on ppc64le architecture
+docker_rhel_ppc64le_repos:
+  - id: rhel-7-for-power-le-extras-rpms
+    repo_manager: sm
+    state: enabled
+
+# If Docker is installed this can stop the role from accessing network.
+# IMPORTANT! Role will fail is some external resource is necessary for some
+# tasks to run. Assumption is that this role has been run once before.
+docker_network_access: true
+
+# Workaround for RHEL/CentOS 8
+# Reason: Fails to install because YUM cannot find a good candidate for the library containerd.
+docker_x_redhat_centos_8_workaround: no
+# containerd RPM URL
+docker_x_redhat_centos_8_containerd_rpm: https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.4.4-3.1.el7.x86_64.rpm
+
+# Workaround for - CentOS 7/RHEL 7 installations broken where $releasever is '7Server'
+# https://github.com/docker/for-linux/issues/1111
+docker_x_fix_centos_redhat_7_releasever: yes
+
+# Experimental - Linux Mint reinterpretation mapping
+docker_x_mint_ubuntu_mapping:
+      18:
+        release: "xenial"
+        major_version: 16
+      19:
+        release: "bionic"
+        major_version: 18
+      20:
+        release: "focal"
+        major_version: 20
+
+# Change OS service manager. Can be used to work around issues related
+# to Ubuntu on WSL2 or similar.
+# Valid values: auto, systemd, service
+docker_x_service_mgr: auto
+################################################################################
+# Docker daemon configuration
+################################################################################
+# Daemon configuration (https://docs.docker.com/engine/reference/commandline/dockerd/)
+# Example:
+# docker_daemon_config:
+#   experimental: true
+docker_daemon_config: {}
+# Map of environment variables to Docker daemon
+docker_daemon_envs: {}
+# Docker daemon options
+#  Docker daemon is configured with '-H fd://' by default in Ubuntu/Debian which cause problems.
+#  https://github.com/moby/moby/issues/25471
+docker_daemon_opts: ""
+# List of additional service configuration options for systemd
+# Important! Configuring this can cause Docker to not start at all.
+docker_systemd_service_config: []
+
+################################################################################
+# Audit configuration
+################################################################################
+# Enable auditing of Docker related files and directories
+docker_enable_audit: false
+
+################################################################################
+# Configuration to handle bugs/deviations
+################################################################################
+# To compensate for situation where Docker daemon fails because of usermod incompatibility.
+# Ensures that 'dockremap:500000:65536' is present in /etc/subuid and /etc/subgid.
+# Note! If userns-remap is set to 'default' in docker_daemon_config this config will be unnecessary.
+docker_bug_usermod: false
+# Set `MountFlags=slave`
+#  https://github.com/haxorof/ansible-role-docker-ce/issues/34
+docker_enable_mount_flag_fix: no
+# Do compatibility and distribution checks (can be disable for debugging etc if required)
+docker_do_checks: yes
+
+################################################################################
+# Postinstall related configuration
+################################################################################
+# Ensures dependencies are installed so that most of the 'docker' Ansible modules will work.
+docker_sdk: false
+# Ensures dependencies are installed so that 'docker_service' Ansible module will work.
+docker_compose: false
+# Ensures that docker-compose is installed without pip, meaning 'docker_service' will NOT work.
+# Important! This only has any affect when 'docker_compose' is set to true.
+docker_compose_no_pip: false
+# Uses GitHub API to lookup latest version of docker compose
+# Important! GitHub API has a rate limit and if that is exceeded value from variable
+# docker_compose_no_pip_version will be used instead.
+docker_compose_no_pip_detect_version: true
+# Docker compose version to use if no automatic lookup is used
+# Available versions: https://github.com/docker/compose/releases
+docker_compose_no_pip_version: 2.6.1
+# Ensures dependencies are installed so that 'docker_stack' Ansible module will work.
+docker_stack: false
+# Additional PiP packages to install after Docker is configured and started.
+docker_additional_packages_pip: []
+# Additional OS packages to install after Docker is configured and started.
+docker_additional_packages_os: []
+# Forces a PiP upgraded before further use.
+# IMPORTANT! Be carful to set this because it might cause dependency problems.
+docker_pip_upgrade: false
+# This variable is used when docker_pip_upgrade is true to upgrade/reinstall pip.
+# Override if you want older version than latest during upgrade, e.g. pip==19.3.1
+docker_pip_package_pip: pip
+# Default python pip package to install if missing
+docker_pip_package: python-pip
+docker_pip3_package: python3-pip
+# PiP extra args
+docker_pip_extra_args:
+# PiP install packages using sudo
+docker_pip_sudo: true
+
+# Workaround for - No module named ssl_match_hostname
+# https://github.com/docker/docker-py/issues/1502
+docker_x_ssl_match_hostname: true
+# Workaround for - No module named zipp
+# https://github.com/haxorof/ansible-role-docker-ce/issues/112
+docker_x_fix_no_zipp_module: true
+# Workaround for - No module named shutil_get_terminal_size
+# https://github.com/haxorof/ansible-role-docker-ce/issues/121
+docker_x_shutil_get_terminal_size: true
+# Experimental - ensure that PiP is not upgraded automatically
+# Setting this to true will break installation of some parts
+# e.g. Python based docker-compose.
+docker_x_skip_pip_auto_upgrade: false
+################################################################################
+# Docker removal configuration
+################################################################################
+# CAUTION! If below variable is set to true it will remove Docker CE
+# installation and all related configuation.
+docker_remove: false
+# CAUTION! If below variable and docker_remove is set to true it will also remove
+# everything under for example /var/lib/docker
+docker_remove_all: false
+# Additional files or directories to be remove if for example non-standard locations
+# was previously configured for data storage etc.
+docker_remove_additional: []
