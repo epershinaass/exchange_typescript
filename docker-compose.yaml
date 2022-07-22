@@ -195,10 +195,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 100M
+          memory: 256M
           cpus: '0.5'
         reservations:
-          memory: 70M
+          memory: 128M
           cpus: '0.1'
     configs:
       - source: loki_config
