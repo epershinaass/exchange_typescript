@@ -1,21 +1,26 @@
-import { Controller } from '@nestjs/common';
-import { ProductsService } from './products.service';
-import { GrpcMethod } from '@nestjs/microservices';
+import {Controller} from '@nestjs/common';
+import {ProductsService} from './products.service';
+import {GrpcMethod} from '@nestjs/microservices';
 
-interface INumberArray {
-  data: number[];
+interface ProductResponseArray {
+    data: ProductResponse[];
 }
 
-interface ISumOfNumberArray {
-  sum: number;
+export interface ProductResponse {
+    product_id: number,
+    name: string,
+    quantity: number
 }
 
 @Controller()
 export class AppController {
-  constructor(private mathService: ProductsService) { }
+    constructor(private productsService: ProductsService) {
+    }
 
-  @GrpcMethod('AppController', 'Accumulate')
-  accumulate(userId: number, metadata: any): ISumOfNumberArray {
-    return { sum: this.mathService.accumulate(userId) };
-  }
+    @GrpcMethod('ProductController', 'Accumulate')
+    accumulate(userId: number): any {
+        // return {sum: this.productsService.accumulate(userId)};
+        return {items:[{product_id: 1000, name: "HI15", quantity: 1}]}
+    };
+
 }

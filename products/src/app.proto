@@ -18,3 +18,11 @@ message Item {
   string name = 2;
   int32 quantity = 3;
 }
+
+//message UserQuery {
+//double data = 1;
+////  repeated double data = 1;
+//}
+//message ProductResponse {
+//  double sum = 1;
+//}
