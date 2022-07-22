@@ -94,14 +94,14 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_HEAP_OPTS: -Xmx1024M -Xms512M
+      KAFKA_HEAP_OPTS: -Xmx2048M -Xms1024M
     <<: [*default-svc, *log-driver]
     labels:
       org.label-schema.group: "monitoring"
     deploy:
       resources:
         limits:
-          memory: 2048M
+          memory: 4096M
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.2.0
