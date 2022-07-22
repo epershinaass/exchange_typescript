@@ -12,7 +12,13 @@ interface IRefillBalanceInfo {
   refillSum: number;
 }
 
+interface IError {
+  error: {
+    code: number;
+    message: string;
+  };
+}
+
 interface ICurrentBalance {
   total: number;
-  transactions: string[];
 }
