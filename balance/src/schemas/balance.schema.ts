@@ -8,8 +8,17 @@ export class Balance {
   @Prop()
   total: number;
 
-  @Prop([String])
-  transactions: string[];
+  @Prop({
+    type: [
+      {
+        transactionId: { type: String },
+        currentBalance: { type: Number },
+        refillSum: { type: Number },
+        transactionTime: { type: Date },
+      },
+    ],
+  })
+  transactions: ITransaction[];
 }
 
 /* Сейчас сущности в бд хранятся примерно в таком виде:

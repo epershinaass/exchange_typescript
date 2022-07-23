@@ -27,10 +27,15 @@ export class BalanceService {
       return err;
     }
 
-    if (balance.transactions.find((t) => t === transactionId)) {
+    if (balance.transactions.find((t) => t.transactionId === transactionId)) {
       return { total: balance.total };
     }
-    balance.transactions.push(String(transactionId));
+    balance.transactions.push({
+      transactionId: transactionId,
+      currentBalance: balance.total,
+      refillSum: refillSum,
+      transactionTime: new Date(),
+    });
     balance.total = Number(balance.total) + Number(refillSum);
 
     // TODO красиво избавиться от дублирования поиска транзакции
