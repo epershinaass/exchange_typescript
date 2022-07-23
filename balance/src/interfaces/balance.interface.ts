@@ -4,6 +4,10 @@ interface IRefillBalanceInfo {
   refillSum: number;
 }
 
+interface IBalanceId {
+  balanceId: string;
+}
+
 interface IError {
   error: {
     code: number;

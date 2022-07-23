@@ -49,15 +49,15 @@ export class BalanceService {
 
   // TODO вынести проверку id в отдельный метод
   // TODO вынести отдельно exception
-  public async getBalance({ balanceId }): Promise<ICurrentBalance> {
-    const exception = new RpcException({
-      message: 'Balance not found',
-      code: status.NOT_FOUND,
-    });
-    if (balanceId.length !== 24) throw exception;
+  public async getBalance({ balanceId }): Promise<ICurrentBalance | IError> {
+    const err = getStatusGrpcError(statusGrpc.NOT_FOUND);
+
+    if (balanceId.length !== 24) {
+      return err;
+    }
     const balance = await this.balanceModel.findById(balanceId);
     if (!balance) {
-      throw exception;
+      return err;
     }
     return { total: balance.total };
   }
