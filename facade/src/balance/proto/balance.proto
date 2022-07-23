@@ -3,40 +3,26 @@ syntax = "proto3";
 package balance;
 
 service BalanceController {
-  rpc Accumulate (NumberArray) returns (SumOfNumberArray);
-  rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalance);
-  rpc GetBalance (BalanceId) returns (CurrentBalance);
-}
-
-message NumberArray {
-  repeated double data = 1;
-}
-
-message SumOfNumberArray {
-  double sum = 1;
+  rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalanceResponse);
+  rpc GetBalance (BalanceId) returns (CurrentBalanceResponse);
 }
 
 message RefillBalanceInfo {
-  string balance_id = 1;
-  string transaction_id = 2;
-  uint64 refill_sum = 3;
-}
-
-message Error {
-  string message = 1;
-  int32 code = 2;
+  string balanceId = 1;
+  string transactionId = 2;
+  uint64 refillSum = 3;
 }
 
 message CurrentBalanceResponse {
-  oneof res {
-    CurrentBalance balance = 1;
+  oneof response {
+    uint64 total = 1;
     Error error = 2;
   }
 }
 
-
-message CurrentBalance {
-  uint64 total = 1;
+message Error {
+  int32 code = 1;
+  string message = 2;
 }
 
 message BalanceId {

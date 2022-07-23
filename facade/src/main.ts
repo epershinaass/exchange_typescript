@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
-    url: 'localhost:3000',
+    url: '0.0.0.0:3000',
     package: 'balance',
     protoPath: join(__dirname, 'balance/proto/balance.proto'),
   },

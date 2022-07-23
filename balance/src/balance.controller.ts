@@ -6,11 +6,6 @@ import { GrpcMethod } from '@nestjs/microservices';
 export class BalanceController {
   constructor(private balanceService: BalanceService) { }
 
-  @GrpcMethod('BalanceController', 'Accumulate')
-  accumulate(numberArray: INumberArray, metadata: any): ISumOfNumberArray {
-    return { sum: this.balanceService.accumulate(numberArray.data) };
-  }
-
   /* запрос через grpc делаем такого вида
   http://localhost:5000/      RefillBalance
 
