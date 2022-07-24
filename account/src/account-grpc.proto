@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package app;
 
-service AppController {
+service AccountController {
   rpc SignIn (Credentials) returns (AuthToken);
 }
 

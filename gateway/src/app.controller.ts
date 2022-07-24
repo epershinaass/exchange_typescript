@@ -11,11 +11,16 @@ export class AppController implements OnModuleInit {
   private grpcService: IGrpcService;
 
   onModuleInit() {
-    this.grpcService = this.client.getService<IGrpcService>('AppController');
+    this.grpcService = this.client.getService<IGrpcService>('AccountController');
   }
 
   @Get('sign-in')
   async signIn(@Body('credentials') credentials: Credentials) {
     return this.grpcService.signIn(credentials);
   }
+
+  // @GrpcMethod('AccountController', 'signIn')
+  // async signIn(credentials: Credentials, metadata: any): Promise<AuthToken | string> {
+  //   return await this.accountService.signIn(credentials);
+  // }
 }
