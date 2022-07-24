@@ -18,9 +18,9 @@ export class AppController {
     }
 
     @GrpcMethod('ProductController', 'Accumulate')
-    accumulate(userId: number): any {
-        // return {sum: this.productsService.accumulate(userId)};
-        return {items:[{product_id: 1000, name: "HI15", quantity: 1}]}
+    accumulate(id: {id: number}): {items: ProductResponse[]} {
+        return {items: this.productsService.accumulate(id)};
+        // return {items:[{product_id: 1000, name: "HI15", quantity: 1}]}
     };
 
 }
