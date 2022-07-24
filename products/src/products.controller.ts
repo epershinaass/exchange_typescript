@@ -1,14 +1,15 @@
+import { Product } from './schemas/product.schema';
 import { Controller } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { GrpcMethod } from '@nestjs/microservices';
-import { IArrayOfObjects, IObject } from './interfaces/object.interface';
+import { IProductObject } from './interfaces/object.interface';
 
 @Controller()
 export class ProductsController {
   constructor(private productsService: ProductsService) { }
 
   @GrpcMethod('ProductsController', 'AllProducts')
-  allProducts(data: IObject): IArrayOfObjects {
-    return {total: this.productsService.allProducts(data)};
+  async allProducts(data: IProductObject, metadata: any): Promise<Product> {
+    return await this.productsService.allProducts(data);
   }
 }

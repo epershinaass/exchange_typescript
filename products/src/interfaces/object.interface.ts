@@ -1,7 +1,7 @@
-export interface IObject {
-    id: string;
-    name: string;
-    count: number;
+export interface IProductObject {
+  productId: string;
+  productName: string;
+  productCount: number;
 }
 
 export interface IArrayOfObjects {

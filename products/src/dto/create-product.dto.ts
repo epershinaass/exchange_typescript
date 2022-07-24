@@ -1,4 +1,5 @@
 export class CreateProductDTO {
-  readonly name: string;
-  readonly count: number;
+  readonly productId: string;
+  readonly productName: string;
+  readonly productCount: number;
 }

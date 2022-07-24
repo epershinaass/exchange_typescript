@@ -6,8 +6,14 @@ export type ProductDocument = Product & Document;
 @Schema()
 export class Product {
 
-@Prop(Object)
-  total: object[];
+@Prop()
+productId: string;
+
+@Prop()
+productName: string;
+
+@Prop()
+productCount: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
