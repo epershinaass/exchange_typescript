@@ -5,7 +5,6 @@ export interface IGrpcService {
 }
 
 interface IProductObject {
-  productId: string;
   productsName: string;
   productCount: number;
 }

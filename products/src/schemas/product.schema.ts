@@ -7,9 +7,6 @@ export type ProductDocument = Product & Document;
 export class Product {
 
 @Prop()
-productId: string;
-
-@Prop()
 productName: string;
 
 @Prop()

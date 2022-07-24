@@ -1,5 +1,4 @@
 export interface IProductObject {
-  productId: string;
   productName: string;
   productCount: number;
 }
