@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package balance;
+package facade;
 
 service BalanceController {
   rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalanceResponse);

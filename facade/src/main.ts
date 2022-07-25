@@ -7,8 +7,8 @@ const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
     url: '0.0.0.0:3000',
-    package: 'balance',
-    protoPath: join(__dirname, '/proto/balance.proto'),
+    package: 'facade',
+    protoPath: join(__dirname, '/proto/facade.proto'),
   },
 };
 
