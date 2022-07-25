@@ -3,12 +3,16 @@ syntax = "proto3";
 package products;
 
 service ProductsController {
-  rpc AddProduct (AddProductRequest) returns (Product);
+  rpc AddProduct (AddProductRequest) returns (Response);
 }
 
 message Product {
   string productName = 1;
   uint64 productCount = 2;
+}
+
+message Response {
+  string response = 1;
 }
 
 message AddProductRequest {

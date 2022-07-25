@@ -8,7 +8,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) { }
 
   @GrpcMethod('ProductsController', 'AddProduct')
-  async addProduct(addProductRequest: IAddProductRequest) {
+  async addProduct(addProductRequest: IAddProductRequest): Promise<string> {
     return await this.productsService.addProduct(addProductRequest);
   }
 }
