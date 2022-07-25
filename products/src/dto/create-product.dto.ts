@@ -1,4 +1,3 @@
 export class CreateProductDTO {
-  readonly productName: string;
-  readonly productCount: number;
+  readonly products: object[];
 }

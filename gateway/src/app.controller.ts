@@ -4,6 +4,7 @@ import { IGrpcService } from './grpc.interface';
 import { microserviceOptions } from './grpc.options';
 
 class AddProductsDto {
+  // productId: string;
   productsName: string;
   productCount: number;
 }

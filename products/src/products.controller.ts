@@ -1,4 +1,3 @@
-import { Product } from './schemas/product.schema';
 import { Controller } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { GrpcMethod } from '@nestjs/microservices';
@@ -9,7 +8,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) { }
 
   @GrpcMethod('ProductsController', 'AllProducts')
-  async allProducts(data: IProductObject, metadata: any): Promise<Product> {
-    return await this.productsService.allProducts(data);
+  async allProducts(data: IProductObject, userId: any) {
+    return await this.productsService.allProducts(data, userId);
   }
 }

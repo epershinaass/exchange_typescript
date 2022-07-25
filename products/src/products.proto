@@ -7,8 +7,8 @@ service ProductsController {
 }
 
 message ProductObject {
-  string productName = 1;
-  uint64 productCount = 2;
+  string productName = 2;
+  uint64 productCount = 3;
 }
 message ArrayObjects {
  repeated ProductObject total = 1;
