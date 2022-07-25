@@ -1,8 +1,21 @@
-import mongoose from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-const AccountSchema = new mongoose.Schema({
-  login: String,
-  password: String,
-});
+export type AccountDocument = Account & Document;
 
-export default mongoose.model('Account', AccountSchema);
+@Schema()
+export class Account {
+  @Prop()
+  login: String;
+  @Prop()
+  password: String;
+}
+
+export const AccountModel = SchemaFactory.createForClass(Account);
+
+// const AccountSchema = new mongoose.Schema({
+//   login: String,
+//   password: String,
+// });
+
+//export default mongoose.model('Account', AccountSchema);

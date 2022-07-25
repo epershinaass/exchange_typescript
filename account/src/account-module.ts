@@ -1,10 +1,29 @@
 import { Module } from '@nestjs/common';
 import { AccountController } from './account-controller';
 import { AccountService } from './account-service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+import { AccountModel, Account } from './account-model';
+
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.config.env',
+    }),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.DB_URL??'localhost'}:${process.env.DB_PORT??'27017'}/${process.env.DB_NAME??'account'}`,
+    ),
+    MongooseModule.forFeature([
+      {
+        name: Account.name,
+        schema: AccountModel,
+      },
+    ]),
+  ],
   controllers: [AccountController],
   providers: [AccountService],
 })
-export class AppModule { }
+export class AccountModule { }
+
+//  await mongoose.connect('mongodb://localhost:27017/account');
