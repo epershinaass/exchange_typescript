@@ -24,8 +24,10 @@ services:
       SERVICE_DB: balance
 
     volumes:
-      - ./infra/mongodb/:/docker-entrypoint-initdb.d/
       - db-data:/data/db
+    configs:
+      - source: mongo_config
+        target: /docker-entrypoint-initdb.d/mongo-init.sh
 
     profiles:
       - mongo
@@ -390,7 +392,7 @@ configs:
   prometheus-alerts:
     file: ./infra/alert.rules
   mongo_config:
-    file: infra/mongodb/mongo-init.sh
+    file: ./infra/mongodb/mongo-init.sh
 
 volumes:
   grafana:
