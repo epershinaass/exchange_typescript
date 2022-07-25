@@ -2,7 +2,6 @@ set -e
 
 mongo_Balance () {
   mongo <<EOF
-  db = db.getSiblingDB($SERVICE_DB)
   use $SERVICE_DB;
   db.createUser({
     user: '$SERVICE_USER',
@@ -15,7 +14,6 @@ EOF
 
 mongo_Auth () {
   mongo <<EOF
-  db = db.getSiblingDB($SERVICE_DB)
   use $SERVICE_DB;
   db.createUser({
     user: '$SERVICE_USER',
