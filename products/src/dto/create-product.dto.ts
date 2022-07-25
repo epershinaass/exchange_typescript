@@ -1,3 +1,3 @@
-export class CreateProductDTO {
-  readonly products: object[];
-}
+// export class CreateProductDTO {
+//   readonly products: object[];
+// }

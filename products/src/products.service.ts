@@ -1,10 +1,9 @@
-import { CreateProductDTO } from './dto/create-product.dto';
 import { Product } from './schemas/product.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProductDocument } from './schemas/product.schema';
-import { IProductObject } from './interfaces/object.interface';
+import { IAddProductRequest } from './interfaces/object.interface';
 
 @Injectable()
 export class ProductsService {
@@ -13,9 +12,9 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
   ) {}
 
-  public async allProducts(data, userId): Promise<object> {
-    const product = await this.productModel.findById(userId);
-    product.products.push(data);
+  public async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
+    const product = await this.productModel.findById(addProductRequest.userProductsId);
+    product.products.push(addProductRequest.product);
     return product.save();
   }
 }

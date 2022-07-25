@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
-import { IProductObject } from 'src/interfaces/object.interface';
+import { Document } from 'mongoose';
+import { IProduct } from 'src/interfaces/object.interface';
 
 export type ProductDocument = Product & Document;
 
@@ -15,7 +15,7 @@ export class Product {
     },
   ],
 })
-products: IProductObject[];
+products: IProduct[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

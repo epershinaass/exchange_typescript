@@ -1,9 +1,9 @@
-export interface IProductObject {
-  // productId?: string;
+export interface IProduct {
   productName: string;
   productCount: number;
 }
 
-export interface IArrayOfObjects {
-  product: object[];
+export interface IAddProductRequest {
+  userProductsId: string;
+  product: IProduct;
 }
