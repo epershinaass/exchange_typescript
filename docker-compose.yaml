@@ -41,6 +41,8 @@ services:
       interval: 10s
       timeout: 2s
       retries: 10
+    labels:
+      org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
   zoo1:
