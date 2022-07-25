@@ -17,7 +17,5 @@ export class ProductsService {
     product.products.push(addProductRequest.product);
     await product.save();
     return 'Success';
-
-  
   }
 }

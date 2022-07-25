@@ -1,4 +1,6 @@
+import { IProduct } from "src/grpc.interface";
+
 export class AddProductsDto {
-  productsName: string;
-  productCount: number;
+  userProductsId: string;
+  product: IProduct
 }

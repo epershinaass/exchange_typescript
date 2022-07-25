@@ -3,13 +3,19 @@ syntax = "proto3";
 package products;
 
 service ProductsController {
-  rpc AllProducts (ProductObject) returns (ProductObject);
+  rpc AddProduct (AddProductRequest) returns (Response);
 }
 
-message ProductObject {
+message Product {
   string productName = 1;
   uint64 productCount = 2;
 }
-message ArrayObjects {
- repeated ProductObject total = 1;
+
+message Response {
+  string response = 1;
+}
+
+message AddProductRequest {
+  string userProductsId = 1;
+  Product product = 2;
 }
