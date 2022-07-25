@@ -15,6 +15,20 @@ services:
     image: mongo:latest
     hostname: mongo
     container_name: mongo
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      SERVICE_PASSWORD: balance
+      SERVICE_USER: balance
+      SERVICE_DB: balance
+
+    volumes:
+      - db-data:/data/db
+    configs:
+      - source: mongo_config
+        target: /docker-entrypoint-initdb.d/mongo-init.sh
+
     profiles:
       - mongo
       - kafkamng
@@ -27,11 +41,9 @@ services:
       interval: 10s
       timeout: 2s
       retries: 10
-    <<: [*default-svc, *log-driver]
     labels:
       org.label-schema.group: "monitoring"
-    volumes:
-      - db-data:/data/db
+    <<: [*default-svc, *log-driver]
 
   zoo1:
     image: confluentinc/cp-zookeeper:7.2.0
@@ -381,6 +393,8 @@ configs:
     file: ./infra/alertmanager-config.yml
   prometheus-alerts:
     file: ./infra/alert.rules
+  mongo_config:
+    file: ./infra/mongodb/mongo-init.sh
 
 volumes:
   grafana:
