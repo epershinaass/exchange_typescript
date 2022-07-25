@@ -1,11 +1,9 @@
-import { status } from '@grpc/grpc-js';
-import { Body, Controller, OnModuleInit, Post } from '@nestjs/common';
+import { Body, Controller, OnModuleInit } from '@nestjs/common';
 import {
   Client,
   ClientGrpc,
   ClientOptions,
   GrpcMethod,
-  RpcException,
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
@@ -28,7 +26,8 @@ export class BalanceController implements OnModuleInit {
   private grpcService: IGrpcService;
 
   onModuleInit() {
-    this.grpcService = this.client.getService<IGrpcService>('BalanceController');
+    this.grpcService =
+      this.client.getService<IGrpcService>('BalanceController');
   }
 
   /* запрос через grpc делаем такого вида
