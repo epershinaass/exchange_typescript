@@ -47,8 +47,6 @@ export class BalanceService {
     return { total: newBalance.total };
   }
 
-  // TODO вынести проверку id в отдельный метод
-  // TODO вынести отдельно exception
   public async getBalance({ balanceId }): Promise<ICurrentBalance | IError> {
     const err = getStatusGrpcError(statusGrpc.NOT_FOUND);
 
