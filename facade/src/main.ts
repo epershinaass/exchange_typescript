@@ -8,7 +8,7 @@ const microserviceOptions = {
   options: {
     url: '0.0.0.0:3000',
     package: 'balance',
-    protoPath: join(__dirname, 'balance/proto/balance.proto'),
+    protoPath: join(__dirname, '/proto/balance.proto'),
   },
 };
 

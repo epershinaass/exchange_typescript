@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package balance;
+
+service BalanceController {
+  rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalanceResponse);
+  rpc GetBalance (BalanceId) returns (CurrentBalanceResponse);
+}
+
+message RefillBalanceInfo {
+  string balanceId = 1;
+  string transactionId = 2;
+  uint64 refillSum = 3;
+}
+
+message CurrentBalanceResponse {
+  oneof response {
+    uint64 total = 1;
+    Error error = 2;
+  }
+}
+
+message Error {
+  int32 code = 1;
+  string message = 2;
+}
+
+message BalanceId {
+  string balanceId = 1;
+}
