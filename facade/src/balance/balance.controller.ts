@@ -4,7 +4,7 @@ import {
   ClientGrpc,
   ClientOptions,
   GrpcMethod,
-  Transport,
+  Transport
 } from '@nestjs/microservices';
 import { join } from 'path';
 import { GetBalanceDto } from './dto/get-balance.dto';
