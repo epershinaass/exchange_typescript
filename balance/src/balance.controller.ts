@@ -1,9 +1,10 @@
+import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
-import { getStatusGrpcError, statusGrpc } from './errors/balance.error';
+import { getGrpcError } from './errors/balance.error';
 
 const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 
@@ -23,13 +24,13 @@ export class BalanceController {
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceDto: RefillBalanceDto, metadata: any) {
     if (!checkForObjectId.test(refillBalanceDto.balanceId)) {
-      return getStatusGrpcError(statusGrpc.INVALID_ARGUMENT);
+      return getGrpcError(status.INVALID_ARGUMENT);
     }
     const balance = await this.balanceService.getBalance(
       refillBalanceDto.balanceId,
     );
     if (!balance) {
-      return getStatusGrpcError(statusGrpc.NOT_FOUND);
+      return getGrpcError(status.NOT_FOUND);
     }
 
     if (
@@ -37,34 +38,41 @@ export class BalanceController {
         (t) => t.transactionId === refillBalanceDto.transactionId,
       )
     ) {
-      return { total: balance.total };
+      return getGrpcError(status.OK);
     }
 
-    balance.transactions.push({
+    const totalBalance =
+      Number(balance.total) + Number(refillBalanceDto.refillSum);
+    const transactionInfo = {
       transactionId: refillBalanceDto.transactionId,
       currentBalance: balance.total,
       refillSum: refillBalanceDto.refillSum,
       transactionTime: new Date(),
-    });
-    balance.total = Number(balance.total) + Number(refillBalanceDto.refillSum);
+    };
 
-    const newBalance = await this.balanceService.refillBalance(
-      refillBalanceDto.balanceId,
-      balance,
-    );
-    return { total: newBalance.total };
+    if (
+      await this.balanceService.refillBalance(
+        refillBalanceDto.balanceId,
+        totalBalance,
+        transactionInfo,
+      )
+    ) {
+      return getGrpcError(status.OK);
+    } else {
+      return getGrpcError(status.INTERNAL);
+    }
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(getBalanceDto: GetBalanceDto, metadata: any) {
     if (!checkForObjectId.test(getBalanceDto.balanceId)) {
-      return getStatusGrpcError(statusGrpc.INVALID_ARGUMENT);
+      return getGrpcError(status.INVALID_ARGUMENT);
     }
     const currentBalance = await this.balanceService.getBalance(
       getBalanceDto.balanceId,
     );
     if (!currentBalance) {
-      return getStatusGrpcError(statusGrpc.NOT_FOUND);
+      return getGrpcError(status.NOT_FOUND);
     }
     return { total: currentBalance.total };
   }
