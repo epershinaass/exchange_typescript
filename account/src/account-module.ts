@@ -13,7 +13,7 @@ import { AccountModel, Account } from './account-model';
       envFilePath: '.config.env',
     }),
     MongooseModule.forRoot(
-      `mongodb://${process.env.DB_URL??'localhost'}:${process.env.DB_PORT??'27017'}/${process.env.DB_NAME??'account'}`,
+      `mongodb://${process.env.DB_URL ?? 'localhost'}:${process.env.DB_PORT ?? '27017'}/${process.env.DB_NAME ?? 'account'}`,
     ),
     MongooseModule.forFeature([
       {

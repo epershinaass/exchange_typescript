@@ -31,6 +31,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "grpc": "^1.24.11",
     "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.4.7",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"
