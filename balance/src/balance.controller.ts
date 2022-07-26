@@ -17,7 +17,7 @@ export class BalanceController {
   */
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceInfo: IRefillBalanceInfo, metadata: any) {
-    return await this.balanceService.refillBalance(refillBalanceInfo);
+    return this.balanceService.refillBalance(refillBalanceInfo);
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
