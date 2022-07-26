@@ -18,4 +18,9 @@ export class ProductsService {
     await product.save();
     return 'Success';
   }
+  public async getProduct(addProductRequest: IAddProductRequest): Promise<object> {
+    const product = await this.productModel.findById(addProductRequest.userProductsId);
+    return product;
+  }
+
 }

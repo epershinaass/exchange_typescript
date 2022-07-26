@@ -11,4 +11,8 @@ export class ProductsController {
   async addProduct(addProductRequest: IAddProductRequest): Promise<string> {
     return await this.productsService.addProduct(addProductRequest);
   }
+  @GrpcMethod('ProductsController', 'GetProduct')
+     async getProduct(addProductRequest: IAddProductRequest): Promise<object> {
+       return await this.productsService.getProduct(addProductRequest);
+     }
 }
