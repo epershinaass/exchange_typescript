@@ -9,13 +9,17 @@ export class BalanceService {
     @InjectModel(Balance.name) private balanceModel: Model<BalanceDocument>,
   ) { }
 
-  public async refillBalance(balanceId, newBalance): Promise<IBalance> {
-    return await this.balanceModel.findByIdAndUpdate(balanceId, newBalance, {
-      new: true,
-    });
+  public async refillBalance(balanceId, totalBalance, transactionInfo) {
+    return this.balanceModel.updateOne(
+      { _id: balanceId },
+      {
+        $set: { total: totalBalance },
+        $push: { transactions: transactionInfo },
+      },
+    );
   }
 
   public async getBalance(balanceId): Promise<IBalance> {
-    return await this.balanceModel.findById(balanceId);
+    return this.balanceModel.findById(balanceId);
   }
 }
