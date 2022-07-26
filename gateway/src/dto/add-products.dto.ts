@@ -4,3 +4,7 @@ export class AddProductsDto {
   userProductsId: string;
   product: IProduct
 }
+
+export class GetProductDto {
+  userProductsId: string;
+}

@@ -1,6 +1,6 @@
 import { Body, Controller, OnModuleInit } from '@nestjs/common';
 import { Client, ClientGrpc, GrpcMethod } from '@nestjs/microservices';
-import { AddProductsDto } from './dto/add-products.dto';
+import { AddProductsDto, GetProductDto } from './dto/add-products.dto';
 import { IGrpcService } from './grpc.interface';
 import { microserviceOptions } from './grpc.options';
 
@@ -17,5 +17,10 @@ export class AppController implements OnModuleInit {
   @GrpcMethod('ProductController', 'AddProducts')
   async addProducts(@Body() addProductsDto: AddProductsDto) {
     return this.grpcService.addProducts(addProductsDto);
+  }
+
+  @GrpcMethod('ProductController', 'GetProducts')
+  async getProducts(@Body() getProductDto: GetProductDto) {
+    return this.grpcService.getProducts(getProductDto);
   }
 }
