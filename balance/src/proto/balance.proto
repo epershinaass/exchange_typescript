@@ -6,8 +6,8 @@ package balance;
 // balanceId это guid
 
 service BalanceController {
-  rpc RefillBalance (RefillBalanceRequest) returns (CurrentBalanceResponse);
-  rpc GetBalance (GetBalanceRequest) returns (CurrentBalanceResponse);
+  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse);
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
 }
 
 message RefillBalanceRequest {
@@ -16,16 +16,23 @@ message RefillBalanceRequest {
   uint64 refillSum = 3;
 }
 
-message CurrentBalanceResponse {
+message RefillBalanceResponse {
   oneof response {
-    uint64 total = 1;
-    Error error = 2;
+    int32 status = 1;
+    RequsetResponse error = 2;
   }
 }
 
-message Error {
+message RequsetResponse {
   int32 code = 1;
   string message = 2;
+}
+
+message GetBalanceResponse {
+  oneof response {
+    uint64 total = 1;
+    RequsetResponse error = 2;
+  }
 }
 
 message GetBalanceRequest {
