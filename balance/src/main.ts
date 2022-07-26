@@ -6,7 +6,7 @@ import { BalanceModule } from './balance.module';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
-    url: `${process.env.SERVICE_URL}:5000`,
+    url: `${process.env.SERVICE_URL}:${process.env.SERVICE_PORT}`,
     package: 'balance',
     protoPath: join(__dirname, 'proto/balance.proto'),
   },
