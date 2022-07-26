@@ -41,11 +41,11 @@ export class BalanceController implements OnModuleInit {
   */
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
-    return this.grpcService.refillBalance(refillBalanceDto);
+    return await this.grpcService.refillBalance(refillBalanceDto);
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(@Body() getBalanceDto: GetBalanceDto) {
-    return this.grpcService.getBalance(getBalanceDto);
+    return await this.grpcService.getBalance(getBalanceDto);
   }
 }
