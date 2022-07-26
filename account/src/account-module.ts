@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AccountController } from './account-controller';
 import { AccountService } from './account-service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { AccountModel, Account } from './account-model';
 
@@ -20,6 +21,10 @@ import { AccountModel, Account } from './account-model';
         schema: AccountModel,
       },
     ]),
+    JwtModule.register({
+      secret: 'TheVerySecretKey',
+      signOptions: { expiresIn: '300s' },
+    }),
   ],
   controllers: [AccountController],
   providers: [AccountService],

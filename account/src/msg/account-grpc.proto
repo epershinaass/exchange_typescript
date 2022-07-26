@@ -11,7 +11,6 @@ service AccountController {
 message Credentials {
   string login = 1;
   string password = 2;
-  Error error = 3;
 }
 
 message AuthMessage {

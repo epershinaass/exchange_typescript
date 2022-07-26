@@ -1,5 +1,10 @@
 
 export interface IAccountService {
+  signIn(ICredentials): Promise<string | number>;
+  signUp(ICredentials): Promise<string | number>;
+  isAuth(IAuthMessage): Promise<object | number>;
+}
+export interface IAccountController {
   signIn(ICredentials): Promise<IAuthMessageOrErr>;
   signUp(ICredentials): Promise<IMessageOrErr>;
   isAuth(IAuthMessage): Promise<IMessageOrErr>;

@@ -7,8 +7,9 @@ import { AccountModule } from './account-module';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
+    url: '0.0.0.0:5000',
     package: 'app',
-    protoPath: join(__dirname, './msg/account-grpc.proto'),
+    protoPath: join(__dirname, 'msg/account-grpc.proto'),
   },
 };
 

@@ -1,53 +1,45 @@
 import { Injectable } from '@nestjs/common';
 import { Account, AccountDocument } from './account-model'
 import { ICredentials, IAuthMessageOrErr, IMessageOrErr, IAuthMessage, IAccountService } from './msg/account-grpc-interface'
-import { getGrpcError, codes } from './msg/account-err';
-import jwt from 'jsonwebtoken';
+import { codes } from './msg/account-err';
+import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-const tokenKey = '1a2b-3c4d-5e6f-7g8h'
 
 @Injectable()
-export class AccountService implements IAccountService {
+export class AccountService {
   constructor(
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
+    private jwtService: JwtService,
   ) { }
 
-  public async signIn(creds: ICredentials): Promise<IAuthMessageOrErr> {
-    if (creds && (creds.login && creds.password)) {
-      const account = await this.accountModel.findOne({ login: creds.login });
-
-      if (!account)
-        return getGrpcError(codes.NOT_FOUND);
-      if (account?.password != creds.password)
-        return getGrpcError(codes.UNAUTHENTICATED);
-
-      return {
-        login: creds.login,
-        token: jwt.sign({ id: creds.login }, tokenKey)
-      };
-    }
-    return getGrpcError(codes.INVALID_ARGUMENT);
-
+  public async signIn(creds: ICredentials): Promise<string | codes> {
+    const account = await this.accountModel.findOne({ login: creds.login });
+    if (!account)
+      return codes.NOT_FOUND;
+    if (account?.password !== creds.password)
+      return codes.UNAUTHENTICATED;
+      const payload = { username: account.login, sub: account._id}
+    return this.jwtService.sign(payload);
   }
 
-
-  public async signUp(creds: ICredentials): Promise<IMessageOrErr> {
-    if(await this.accountModel.findOne({ login: creds.login }))
-      return getGrpcError(codes.ALREADY_EXISTS);
-    if(await this.accountModel.create(creds))
-      return {message:`user ${creds.login} maked`};
+  public async signUp(creds: ICredentials): Promise<string | codes> {
+    console.log(creds)
+    if (await this.accountModel.findOne({ login: creds.login }))
+      return codes.ALREADY_EXISTS;
+    if (await this.accountModel.create(creds))
+      return 'user created';
     else
-      return getGrpcError(codes.ABORTED);
+      return codes.ABORTED;
   }
 
 
-  public async isAuth(auth: IAuthMessage): Promise<IMessageOrErr> {
+  public async isAuth(auth: IAuthMessage): Promise<string | codes> {
     try {
-      return {message: jwt.verify(auth.login, tokenKey)};
+      return JSON.stringify(this.jwtService.verify(auth.token, {secret: 'TheVerySecretKey'}));
     } catch (err) {
-      return getGrpcError(codes.UNAUTHENTICATED);
+      return codes.UNAUTHENTICATED;
     }
   }
 }
