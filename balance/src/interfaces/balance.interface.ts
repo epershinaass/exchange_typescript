@@ -1,10 +1,10 @@
-interface IRefillBalanceInfo {
+interface IRefillBalanceRequest {
   balanceId: string;
   transactionId: string;
   refillSum: number;
 }
 
-interface IBalanceId {
+interface IGetBalance {
   balanceId: string;
 }
 
@@ -13,6 +13,11 @@ interface IError {
     code: number;
     message: string;
   };
+}
+
+interface IBalance {
+  total: number;
+  transactions: ITransaction[];
 }
 
 interface ICurrentBalance {
