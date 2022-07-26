@@ -1,0 +1,19 @@
+name: remote deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      # need checkout before using docker-compose-remote-action
+      - uses: actions/checkout@v2
+      - uses: chaplyk/docker-compose-remote-action@v1.1
+        with:
+          ssh_host: 92.53.65.114
+          ssh_user: root
+          ssh_key: ${{ secrets.SSH_KEY }}
+          compose_file: docker-compose.yaml
+          pull: true
+          build: true
