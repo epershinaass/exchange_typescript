@@ -3,11 +3,11 @@ syntax = "proto3";
 package facade;
 
 service BalanceController {
-  rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalanceResponse);
-  rpc GetBalance (BalanceId) returns (CurrentBalanceResponse);
+  rpc RefillBalance (RefillBalanceRequest) returns (CurrentBalanceResponse);
+  rpc GetBalance (GetBalanceRequest) returns (CurrentBalanceResponse);
 }
 
-message RefillBalanceInfo {
+message RefillBalanceRequest {
   string balanceId = 1;
   string transactionId = 2;
   uint64 refillSum = 3;
@@ -25,6 +25,6 @@ message Error {
   string message = 2;
 }
 
-message BalanceId {
+message GetBalanceRequest {
   string balanceId = 1;
 }
