@@ -22,6 +22,6 @@ export class BalanceController {
 
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(balanceId: IBalanceId, metadata: any) {
-    return await this.balanceService.getBalance(balanceId);
+    return this.balanceService.getBalance(balanceId);
   }
 }
