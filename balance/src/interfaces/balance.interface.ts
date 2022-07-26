@@ -1,11 +1,11 @@
 interface IRefillBalanceRequest {
-  balanceId: string;
+  userId: string;
   transactionId: string;
   refillSum: number;
 }
 
 interface IGetBalance {
-  balanceId: string;
+  userId: string;
 }
 
 interface IBalance {

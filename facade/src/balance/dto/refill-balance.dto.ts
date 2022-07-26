@@ -1,5 +1,5 @@
 export class RefillBalanceDto {
-  balanceId: string;
+  userId: string;
   transactionId: string;
   refillSum: number;
 }

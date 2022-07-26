@@ -3,7 +3,8 @@ syntax = "proto3";
 package balance;
 
 // баланс хранится в центах
-// balanceId это guid
+// userId это guid
+// получаем баланс по id пользователя
 
 service BalanceController {
   rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse);
@@ -11,7 +12,7 @@ service BalanceController {
 }
 
 message RefillBalanceRequest {
-  string balanceId = 1;
+  string userId = 1;
   string transactionId = 2;
   uint64 refillSum = 3;
 }
@@ -36,5 +37,5 @@ message GetBalanceResponse {
 }
 
 message GetBalanceRequest {
-  string balanceId = 1;
+  string userId = 1;
 }

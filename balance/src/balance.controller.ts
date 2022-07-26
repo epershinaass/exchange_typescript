@@ -16,18 +16,18 @@ export class BalanceController {
   http://localhost:5000/      RefillBalance
 
   {
-    "balanceId": "62d9abf5c79d1502fdf98d97",
+    "userId": "62d9abf5c79d1502fdf98d97",
     "transactionId": "1233213",
     "refillSum": 100
   }
   */
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceDto: RefillBalanceDto, metadata: any) {
-    if (!checkForObjectId.test(refillBalanceDto.balanceId)) {
+    if (!checkForObjectId.test(refillBalanceDto.userId)) {
       return getGrpcError(status.INVALID_ARGUMENT);
     }
     const balance = await this.balanceService.getBalance(
-      refillBalanceDto.balanceId,
+      refillBalanceDto.userId,
     );
     if (!balance) {
       return getGrpcError(status.NOT_FOUND);
@@ -52,7 +52,7 @@ export class BalanceController {
 
     if (
       this.balanceService.refillBalance(
-        refillBalanceDto.balanceId,
+        refillBalanceDto.userId,
         totalBalance,
         transactionInfo,
       )
@@ -65,11 +65,11 @@ export class BalanceController {
 
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(getBalanceDto: GetBalanceDto, metadata: any) {
-    if (!checkForObjectId.test(getBalanceDto.balanceId)) {
+    if (!checkForObjectId.test(getBalanceDto.userId)) {
       return getGrpcError(status.INVALID_ARGUMENT);
     }
     const currentBalance = await this.balanceService.getBalance(
-      getBalanceDto.balanceId,
+      getBalanceDto.userId,
     );
     if (!currentBalance) {
       return getGrpcError(status.NOT_FOUND);

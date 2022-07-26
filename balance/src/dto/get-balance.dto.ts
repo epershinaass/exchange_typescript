@@ -1,3 +1,3 @@
 export class GetBalanceDto {
-  balanceId: string;
+  userId: string;
 }

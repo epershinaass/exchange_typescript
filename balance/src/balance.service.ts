@@ -10,12 +10,12 @@ export class BalanceService {
   ) { }
 
   public async refillBalance(
-    balanceId,
+    userId,
     totalBalance,
     transactionInfo,
   ): Promise<any> {
     return this.balanceModel.updateOne(
-      { _id: balanceId },
+      { userId: userId },
       {
         $set: { total: totalBalance },
         $push: { transactions: transactionInfo },
@@ -23,7 +23,7 @@ export class BalanceService {
     );
   }
 
-  public async getBalance(balanceId): Promise<IBalance> {
-    return this.balanceModel.findById(balanceId).exec();
+  public async getBalance(userId): Promise<IBalance> {
+    return this.balanceModel.findOne({ userId: userId }).exec();
   }
 }
