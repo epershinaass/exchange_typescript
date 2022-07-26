@@ -11,6 +11,18 @@ x-log: &log-driver
         tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  account:
+    image: ourrepo/account:${FACADE_VERSION:-0.1.0}
+    hostname: account
+    container_name: account
+    build:
+      context: account
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_URL=mongo
+    ports:
+      - 5000:5000
+    <<: [*default-svc, *log-driver]
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
     hostname: facade
