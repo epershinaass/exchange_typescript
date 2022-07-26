@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { GrpcMethod } from '@nestjs/microservices';
-import { IAddProductRequest } from './interfaces/object.interface';
+import { IAddProductRequest, IResponseProductList, IUserProductsId } from './interfaces/object.interface';
 
 @Controller()
 export class ProductsController {
@@ -12,7 +12,7 @@ export class ProductsController {
     return await this.productsService.addProduct(addProductRequest);
   }
   @GrpcMethod('ProductsController', 'GetProduct')
-     async getProduct(addProductRequest: IAddProductRequest): Promise<object> {
-       return await this.productsService.getProduct(addProductRequest);
+     async getProduct(userProductId: IUserProductsId): Promise<IResponseProductList> {
+      return {products: await this.productsService.getProduct(userProductId)};
      }
 }

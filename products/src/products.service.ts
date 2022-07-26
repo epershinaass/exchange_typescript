@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProductDocument } from './schemas/product.schema';
-import { IAddProductRequest, IProduct } from './interfaces/object.interface';
+import { IAddProductRequest, IUserProductsId } from './interfaces/object.interface';
 
 @Injectable()
 export class ProductsService {
@@ -18,9 +18,9 @@ export class ProductsService {
     await product.save();
     return 'Success';
   }
-  public async getProduct(addProductRequest: IAddProductRequest): Promise<object> {
-    const product = await this.productModel.findById(addProductRequest.userProductsId);
-    return product;
+  public async getProduct(userProductId: IUserProductsId): Promise<object> {
+    const product = await this.productModel.findById(userProductId.userProductsId);
+    return product.products;
   }
 
 }
