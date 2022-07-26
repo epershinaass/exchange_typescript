@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package facade;
 
+// баланс хранится в центах
+// balanceId это guid
+
 service BalanceController {
   rpc RefillBalance (RefillBalanceRequest) returns (CurrentBalanceResponse);
   rpc GetBalance (GetBalanceRequest) returns (CurrentBalanceResponse);
