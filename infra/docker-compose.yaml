@@ -8,6 +8,9 @@ x-log: &log-driver
   logging:
     options:
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+x-labels: &default-lables
+  labels:
+    org.label-schema.group: "monitoring"
 
 services:
   mongo:
@@ -17,8 +20,8 @@ services:
 
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
-      SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
       SERVICE_USER: balance
       SERVICE_DB: balance
 
@@ -36,9 +39,7 @@ services:
       interval: 10s
       timeout: 2s
       retries: 10
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   zoo1:
     image: confluentinc/cp-zookeeper:7.2.1
@@ -57,11 +58,9 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
-    labels:
-      org.label-schema.group: "monitoring"
     volumes:
       - zoo1-data:/var/lib/zookeeper/data
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -96,11 +95,9 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
     volumes:
       - kafka1-data:/var/lib/kafka/data
-    labels:
-      org.label-schema.group: "monitoring"
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -127,9 +124,7 @@ services:
         condition: service_healthy
       kafka1:
         condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   loki:
     image: grafana/loki:2.6.1
@@ -153,9 +148,7 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   promtail:
     image: grafana/promtail:2.6.1
@@ -181,9 +174,7 @@ services:
     configs:
       - source: promtail_config
         target: /etc/promtail/promtail_config.yaml
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   grafana:
     image: grafana/grafana:9.0.4
@@ -198,6 +189,10 @@ services:
       GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-127.0.0.1}
       GF_SERVER_ROOT_URL: "/grafana"
       GF_SERVER_SERVE_FROM_SUB_PATH: true
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_DEFAULT_ADMIN:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_DEFAULT_ADMIN_PASSWORD:-admin}
+      GRAFANA_DATASOURCE_USER: ${GRAFANA_DATASOURCE_USER:-grafana}
+      GRAFANA_DATASOURCE_PASSWORD: ${GRAFANA_DATASOURCE_PASSWORD}
     volumes:
       - grafana:/var/lib/grafana
       - ./dashboards:/etc/grafana/provisioning/dashboards:ro
@@ -210,16 +205,19 @@ services:
     #       memory: 30M
     #       cpus: '0.25'
     configs:
-      - source: datasource
+      - source: datasource-auth
         target: /etc/grafana/provisioning/datasources/monitoring.yaml
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   prometheus:
-    image: prom/prometheus:v2.9.2
+    image: prom/prometheus:v2.37.0
     hostname: prometheus
     container_name: prometheus
+    command:
+    - '--web.external-url=https://${PROMETHEUS_DOMAIN:-127.0.0.1}/prometheus/'
+    - '--web.route-prefix=/'
+    - '--web.config.file=/etc/prometheus/web.yml'
+    - '--config.file=/etc/prometheus/prometheus.yml'
     profiles:
       - monitoring
       - full
@@ -231,9 +229,9 @@ services:
         target: /etc/prometheus/prometheus.yml
       - source: prometheus-alerts
         target: /etc/prometheus/alert.rules
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+      - source: prometheus-auth
+        target: /etc/prometheus/web.yml
+    <<: [*default-svc, *log-driver, *default-lables]
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.44.0
@@ -247,9 +245,7 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   node-exporter:
     image: prom/node-exporter:v1.3.1
@@ -260,14 +256,15 @@ services:
       - full
     command:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   alertmanager:
     image: prom/alertmanager:v0.24.0
     hostname: alertmanager
     container_name: alertmanager
+    environment:
+      TELEGRAM_BOT_TOKEN: ${ALERTMANAGER_TELEGRAM_BOT_TOKEN:-none}
+      TELEGRAM_CHAT_ID: ${ALERTMANAGER_TELEGRAM_CHAT_ID:-123}
     profiles:
       - monitoring
       - full
@@ -276,9 +273,7 @@ services:
     configs:
       - source: alertmanager
         target: /etc/alertmanager/config.yml
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   zookeeper-exporter:
     image: dabealu/zookeeper-exporter:v0.1.12
@@ -291,9 +286,7 @@ services:
     depends_on:
       zoo1:
         condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.4.2
@@ -306,9 +299,7 @@ services:
     depends_on:
       kafka1:
         condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   haproxy-exporter:
     image: prom/haproxy-exporter:v0.13.0
@@ -321,9 +312,7 @@ services:
       - full
     depends_on:
       - haproxy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
   haproxy:
     image: haproxy:2.6.2-alpine
@@ -337,7 +326,7 @@ services:
     configs:
       - source: haproxy
         target: /usr/local/etc/haproxy/haproxy.cfg
-    <<: [*default-svc, *log-driver]
+    <<: [*default-svc, *log-driver, *default-lables]
 
 
 
@@ -348,6 +337,8 @@ configs:
     file: ./promtail-config.yaml
   datasource:
     file: ./datasource.yaml
+  datasource-auth:
+    file: ./datasource-auth.yaml
   prometheus:
     file: ./prometheus.yml
   alertmanager:
@@ -358,6 +349,8 @@ configs:
     file: ./mongodb/mongo-init.sh
   haproxy:
     file: ./haproxy.cfg
+  prometheus-auth:
+    file: ./web.yml
 
 volumes:
   grafana:
