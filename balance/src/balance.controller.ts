@@ -51,7 +51,7 @@ export class BalanceController {
     };
 
     if (
-      await this.balanceService.refillBalance(
+      this.balanceService.refillBalance(
         refillBalanceDto.balanceId,
         totalBalance,
         transactionInfo,

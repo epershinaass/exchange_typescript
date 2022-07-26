@@ -9,7 +9,11 @@ export class BalanceService {
     @InjectModel(Balance.name) private balanceModel: Model<BalanceDocument>,
   ) { }
 
-  public async refillBalance(balanceId, totalBalance, transactionInfo) {
+  public async refillBalance(
+    balanceId,
+    totalBalance,
+    transactionInfo,
+  ): Promise<any> {
     return this.balanceModel.updateOne(
       { _id: balanceId },
       {
@@ -20,6 +24,6 @@ export class BalanceService {
   }
 
   public async getBalance(balanceId): Promise<IBalance> {
-    return this.balanceModel.findById(balanceId);
+    return this.balanceModel.findById(balanceId).exec();
   }
 }

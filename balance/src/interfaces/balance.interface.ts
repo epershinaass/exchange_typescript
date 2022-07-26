@@ -8,13 +8,6 @@ interface IGetBalance {
   balanceId: string;
 }
 
-interface IError {
-  error: {
-    code: number;
-    message: string;
-  };
-}
-
 interface IBalance {
   total: number;
   transactions: ITransaction[];
