@@ -3,7 +3,3 @@ export class RefillBalanceDto {
   transactionId: string;
   refillSum: number;
 }
-
-export class BalanceIdDto {
-  balanceId: string;
-}

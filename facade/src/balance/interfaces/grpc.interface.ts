@@ -1,16 +1,16 @@
 import { Observable } from 'rxjs';
 
 export interface IGrpcService {
-  refillBalance(refillBalanceInfo: IRefillBalanceInfo): Observable<any>;
-  getBalance(balanceId: IBalanceId): Observable<any>;
+  refillBalance(refillBalanceInfo: IRefillBalanceRequest): Observable<any>;
+  getBalance(balanceId: IGetBalanceRequest): Observable<any>;
 }
 
-interface IRefillBalanceInfo {
+interface IRefillBalanceRequest {
   balanceId: string;
   transactionId: string;
   refillSum: number;
 }
 
-interface IBalanceId {
+interface IGetBalanceRequest {
   balanceId: string;
 }

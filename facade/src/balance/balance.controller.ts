@@ -7,7 +7,8 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
-import { BalanceIdDto, RefillBalanceDto } from './dto/refill-balance.dto';
+import { GetBalanceDto } from './dto/get-balance.dto';
+import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { IGrpcService } from './interfaces/grpc.interface';
 
 export const microserviceOptions: ClientOptions = {
@@ -44,7 +45,7 @@ export class BalanceController implements OnModuleInit {
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
-  async getBalance(@Body() balanceIdDto: BalanceIdDto) {
-    return this.grpcService.getBalance(balanceIdDto);
+  async getBalance(@Body() getBalanceDto: GetBalanceDto) {
+    return this.grpcService.getBalance(getBalanceDto);
   }
 }
