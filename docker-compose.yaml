@@ -11,6 +11,21 @@ x-log: &log-driver
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  balance:
+    image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
+    hostname: balance
+    container_name: balance
+    build:
+      context: balance
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    <<: [*default-svc, *log-driver]
+    environment:
+      - DB_PORT=27017
+      - DB_NAME=myapp
+      - DB_URL=mongo
+
   mongo:
     image: mongo:5.0.9
     hostname: mongo
