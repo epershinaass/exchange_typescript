@@ -27,9 +27,23 @@ services:
       - DB_URL=mongo
 
   mongo:
-    image: mongo:latest
+    image: mongo:5.0.9
     hostname: mongo
     container_name: mongo
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      SERVICE_PASSWORD: balance
+      SERVICE_USER: balance
+      SERVICE_DB: balance
+
+    volumes:
+      - db-data:/data/db
+    configs:
+      - source: mongo_config
+        target: /docker-entrypoint-initdb.d/mongo-init.sh
+
     profiles:
       - mongo
       - kafkamng
@@ -42,14 +56,12 @@ services:
       interval: 10s
       timeout: 2s
       retries: 10
-    <<: [*default-svc, *log-driver]
     labels:
       org.label-schema.group: "monitoring"
-    volumes:
-      - db-data:/data/db
+    <<: [*default-svc, *log-driver]
 
   zoo1:
-    image: confluentinc/cp-zookeeper:7.2.0
+    image: confluentinc/cp-zookeeper:7.2.1
     hostname: zoo1
     container_name: zoo1
     profiles:
@@ -79,7 +91,7 @@ services:
 
 
   kafka1:
-    image: confluentinc/cp-kafka:7.2.0
+    image: confluentinc/cp-kafka:7.2.1
     hostname: kafka1
     container_name: kafka1
     profiles:
@@ -109,17 +121,17 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_HEAP_OPTS: -Xmx1024M -Xms512M
+      KAFKA_HEAP_OPTS: -Xmx2048M -Xms1024M
     <<: [*default-svc, *log-driver]
     labels:
       org.label-schema.group: "monitoring"
     deploy:
       resources:
         limits:
-          memory: 2048M
+          memory: 4096M
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:7.2.0
+    image: confluentinc/cp-schema-registry:7.2.1
     hostname: schema-registry
     container_name: schema-registry
     profiles:
@@ -145,60 +157,8 @@ services:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
-  kafka-connect:
-    image: confluentinc/cp-kafka-connect:7.2.0
-    hostname: kafka-connect
-    container_name: kafka-connect
-    profiles:
-      - kafkamng
-      - kafkafull
-      - full
-    build:
-      context: infra
-      dockerfile: ./Dockerfile-MongoConnect
-    ports:
-      - 8083:8083
-    environment:
-      CONNECT_BOOTSTRAP_SERVERS: kafka1:9092
-      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
-      CONNECT_REST_PORT: 8083
-      CONNECT_GROUP_ID: compose-connect-group
-      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
-      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
-      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
-      CONNECT_KEY_CONVERTER: io.confluent.connect.protobuf.ProtobufConverter
-      CONNECT_VALUE_CONVERTER: io.confluent.connect.protobuf.ProtobufConverter
-      CONNECT_INTERNAL_KEY_CONVERTER: io.confluent.connect.protobuf.ProtobufConverter
-      CONNECT_INTERNAL_VALUE_CONVERTER: io.confluent.connect.protobuf.ProtobufConverter
-      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
-      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
-      CONNECT_CONFLUENT_TOPIC_REPLICATION_FACTOR: 1
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-      CONNECT_LOG4J_ROOT_LOGLEVEL: "INFO"
-      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR,com.mongodb.kafka=DEBUG"
-      CONNECT_ZOOKEEPER_CONNECT: 'zoo1:2181'
-      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.2.0.jar
-      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-    volumes:
-      - jars:/usr/share/confluent-hub-components
-    depends_on:
-      zoo1:
-        condition: service_healthy
-      kafka1:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
   loki:
-    image: grafana/loki:2.6.0
+    image: grafana/loki:2.6.1
     hostname: loki
     container_name: loki
     profiles:
@@ -222,10 +182,8 @@ services:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
-
-
   promtail:
-    image: grafana/promtail:2.6.0
+    image: grafana/promtail:2.6.1
     hostname: promtail
     container_name: promtail
     profiles:
@@ -250,7 +208,6 @@ services:
     labels:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
-
 
   grafana:
     image: grafana/grafana:9.0.4
@@ -396,11 +353,12 @@ configs:
     file: ./infra/alertmanager-config.yml
   prometheus-alerts:
     file: ./infra/alert.rules
+  mongo_config:
+    file: ./infra/mongodb/mongo-init.sh
 
 volumes:
   grafana:
   db-data:
-  jars:
   prometheus_data:
 
 networks:
