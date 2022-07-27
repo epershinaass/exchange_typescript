@@ -9,6 +9,17 @@ mongo_Balance () {
     roles: [{ role: 'readWrite', db: '$SERVICE_DB'}],
   });
   db.createCollection('balance')
+  use admin
+  db.createUser(
+    {
+      user: "mongodb_exporter",
+      pwd: "$SERVICE_PASSWORD",
+      roles: [
+          { role: "clusterMonitor", db: "admin" },
+          { role: "read", db: "local" }
+      ]
+    }
+  )
 EOF
 }
 

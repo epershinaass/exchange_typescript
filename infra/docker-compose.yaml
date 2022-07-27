@@ -35,6 +35,7 @@ services:
     profiles:
       - mongo
       - full
+      - haproxy
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -329,6 +330,18 @@ services:
         target: /usr/local/etc/haproxy/haproxy.cfg
     <<: [*default-svc, *log-driver, *default-lables]
 
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter
+    container_name: mongodb-exporter
+    command: --mongodb.uri=mongodb://mongo:27017
+    profiles:
+      - monitoring
+      - haproxy
+      - full
+    depends_on:
+      - mongo
+    <<: [*default-svc, *log-driver, *default-lables]
 
 
 configs:
