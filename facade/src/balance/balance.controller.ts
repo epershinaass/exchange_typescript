@@ -31,14 +31,6 @@ export class BalanceController implements OnModuleInit {
       this.client.getService<IGrpcService>('BalanceController');
   }
 
-  /* запрос через grpc делаем такого вида
-  http://localhost:3000/      RefillBalance
-  {
-    "balanceId": "62d9abf5c79d1502fdf98d97",
-    "transactionId": "1233213",
-    "refillSum": 100
-  }
-  */
   @GrpcMethod('BalanceController', 'RefillBalance')
   refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
     return this.grpcService.refillBalance(refillBalanceDto);

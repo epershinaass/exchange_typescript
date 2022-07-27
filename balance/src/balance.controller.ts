@@ -12,15 +12,6 @@ const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 export class BalanceController {
   constructor(private balanceService: BalanceService) { }
 
-  /* запрос через grpc делаем такого вида
-  http://localhost:5000/      RefillBalance
-
-  {
-    "userId": "62d9abf5c79d1502fdf98d97",
-    "transactionId": "1233213",
-    "refillSum": 100
-  }
-  */
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceDto: RefillBalanceDto, metadata: any) {
     if (!checkForObjectId.test(refillBalanceDto.userId)) {

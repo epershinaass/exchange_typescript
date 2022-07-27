@@ -13,6 +13,7 @@ export class BalanceService {
   public async refillBalance(
     refillBalanceDto: RefillBalanceDto,
   ): Promise<IBalance> {
+    // операция атомарна, перезаписи доумента не будет
     return this.balanceModel
       .findOneAndUpdate(
         { userId: refillBalanceDto.userId },

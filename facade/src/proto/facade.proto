@@ -13,6 +13,8 @@ service BalanceController {
 
 message RefillBalanceRequest {
   string userId = 1;
+  // idempotency field
+  // Пока вводит пользователь, будет генерироваться
   string transactionId = 2;
   uint64 refillSum = 3;
 }
