@@ -1,19 +1,39 @@
-name: remote deploy
+name: remote deploy to Server 1
 
 on:
   workflow_dispatch:
 
+
 jobs:
-  docker:
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
-      # need checkout before using docker-compose-remote-action
-      - uses: actions/checkout@v2
-      - uses: chaplyk/docker-compose-remote-action@v1.1
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        env:
+          SERVICE_PASSWORD: balance
+          SERVICE_USER: balance
+          SERVICE_DB: balance
+          PROJECT_DIR: exchange_typescript
+          GIT_URL: https://github.com/epershinaass/exchange_typescript.git
         with:
-          ssh_host: ${{ secrets.IP_ADDRESS }}
-          ssh_user: ${{ secrets.SSH_USER }}
-          ssh_key: ${{ secrets.SSH_KEY }}
-          compose_file: docker-compose.yaml
-          pull: true
-          build: true
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          envs: SERVICE_PASSWORD,SERVICE_USER,SERVICE_DB,PROJECT_DIR
+          script: |
+            export SERVICE_PASSWORD=$SERVICE_PASSWORD
+            export SERVICE_USER=$SERVICE_USER
+            export SERVICE_DB=$SERVICE_DB
+            export PROJECT_DIR=$PROJECT_DIR
+            echo "SERVICE_PASSWORD: $SERVICE_PASSWORD"
+            echo "SERVICE_USER: $SERVICE_USER"
+            echo "SERVICE_DB: $SERVICE_DB"
+            if [ -d $PROJECT_DIR ]; then 
+            rm -rf $PROJECT_DIR
+            fi
+            docker kill $(docker ps -q)
+            docker rm -vf $(docker ps -a -q)
+            git clone $GIT_URL && cd $PROJECT_DIR && docker-compose up --profile full -d --build
