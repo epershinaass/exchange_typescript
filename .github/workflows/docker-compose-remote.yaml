@@ -45,4 +45,4 @@ jobs:
             else
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
-            docker-compose -f ./infra/docker-compose.yaml up -d
+            docker-compose --profile full -f ./infra/docker-compose.yaml up -d
