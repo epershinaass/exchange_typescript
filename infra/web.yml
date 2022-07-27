@@ -1,0 +1,4 @@
+basic_auth_users:
+  jo-user: $2b$12$Vl/J08t324QB3CTqvqbdMudkYnK/CW06sCCi3z2uohL1QxYlrnf3S
+  # grafana: $2b$12$EyrS2VSFeF5g7xlq4ehLeO/vQ8c/HA/Slz7vwPulP0KwrdJgcw.46 # supersecret
+  grafana: $2b$12$Mj/CuwleIndf6.ChH3Ha9.tbhWLMWNcPsPWJE1lxlKFtVL81zRrLK

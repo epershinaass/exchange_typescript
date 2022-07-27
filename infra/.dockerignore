@@ -5,3 +5,7 @@
 *.rules
 *.json
 dashboards/
+*.conf
+ansible/
+mongodb/
+*.cfg
