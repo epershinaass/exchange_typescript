@@ -1,6 +1,6 @@
 export interface IGrpcService {
   refillBalance(refillBalanceInfo: IRefillBalanceRequest): Promise<any>;
-  getBalance(userId: IGetBalanceRequest): Promise<IBalance>;
+  getBalance(userId: IGetBalanceRequest): Promise<IGetBalanceResponse>;
 }
 
 interface IRefillBalanceRequest {
@@ -13,6 +13,6 @@ interface IGetBalanceRequest {
   userId: string;
 }
 
-export interface IBalance {
+export interface IGetBalanceResponse {
   total: number;
 }

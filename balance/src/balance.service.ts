@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { Balance, BalanceDocument } from './schemas/balance.schema';
 
 @Injectable()
@@ -10,17 +11,23 @@ export class BalanceService {
   ) { }
 
   public async refillBalance(
-    userId,
-    totalBalance,
-    transactionInfo,
-  ): Promise<any> {
-    return this.balanceModel.updateOne(
-      { userId: userId },
-      {
-        $set: { total: totalBalance },
-        $push: { transactions: transactionInfo },
-      },
-    );
+    refillBalanceDto: RefillBalanceDto,
+  ): Promise<IBalance> {
+    return this.balanceModel
+      .findOneAndUpdate(
+        { userId: refillBalanceDto.userId },
+        {
+          $inc: { total: refillBalanceDto.refillSum },
+          $push: {
+            transactions: {
+              transactionId: refillBalanceDto.transactionId,
+              refillSum: refillBalanceDto.refillSum,
+              transactionTime: new Date(),
+            },
+          },
+        },
+      )
+      .exec();
   }
 
   public async getBalance(userId): Promise<IBalance> {

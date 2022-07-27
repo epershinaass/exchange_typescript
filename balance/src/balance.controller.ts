@@ -41,22 +41,7 @@ export class BalanceController {
       return getGrpcError(status.OK);
     }
 
-    const totalBalance =
-      Number(balance.total) + Number(refillBalanceDto.refillSum);
-    const transactionInfo = {
-      transactionId: refillBalanceDto.transactionId,
-      currentBalance: balance.total,
-      refillSum: refillBalanceDto.refillSum,
-      transactionTime: new Date(),
-    };
-
-    if (
-      this.balanceService.refillBalance(
-        refillBalanceDto.userId,
-        totalBalance,
-        transactionInfo,
-      )
-    ) {
+    if (await this.balanceService.refillBalance(refillBalanceDto)) {
       return getGrpcError(status.OK);
     } else {
       return getGrpcError(status.INTERNAL);
