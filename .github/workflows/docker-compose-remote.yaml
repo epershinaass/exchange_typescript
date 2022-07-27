@@ -42,7 +42,7 @@ jobs:
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
             echo "PROJECT_DIR=$PROJECT_DIR"
             echo "GIT_URL=$GIT_URL"
-            
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
             else
