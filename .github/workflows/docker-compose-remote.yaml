@@ -60,5 +60,5 @@ jobs:
             else
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
-            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d
-            rm .env
+            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file ../.env up -d
+            rm ../.env
