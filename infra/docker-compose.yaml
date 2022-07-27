@@ -215,6 +215,8 @@ services:
     image: prom/prometheus:v2.37.0
     hostname: prometheus
     container_name: prometheus
+    environment:
+      - PROMETHEUS_DATASOURCE_PASSWORD=${GRAFANA_DATASOURCE_PASSWORD}
     command:
     - '--web.external-url=https://${PROMETHEUS_DOMAIN:-127.0.0.1}/prometheus/'
     - '--web.route-prefix=/'
@@ -226,6 +228,8 @@ services:
       - haproxy
     volumes:
       - prometheus_data:/prometheus
+    ports:
+      - 9090:9090
     configs:
       - source: prometheus
         target: /etc/prometheus/prometheus.yml
