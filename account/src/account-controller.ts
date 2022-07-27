@@ -3,7 +3,7 @@ import { AccountService } from './account-service';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ICredentialsRequest, IAuthMessage, IResponse } from './msg/account-grpc-interface'
 import { getGrpcErr, codes } from './msg/account-err';
-import { AuthMessage, Message } from './msg/account-dto';
+import { AuthMessageDto, MessageDto } from './msg/account-dto';
 
 
 @Controller()
@@ -17,7 +17,7 @@ export class AccountController {
       return codes.UNKNOWN;
     })
     .then(res => {
-     if (typeof res === 'string') return new AuthMessage(res);
+     if (typeof res === 'string') return new AuthMessageDto(res);
      if (typeof res === 'number') throw getGrpcErr(res);
     });
   }
@@ -29,7 +29,7 @@ export class AccountController {
       return codes.UNKNOWN;
     })
     .then(res => {
-    if (typeof res === 'string') return new Message(res);
+    if (typeof res === 'string') return new MessageDto(res);
     if (typeof res === 'number') return getGrpcErr(res);
     });
 
@@ -41,7 +41,7 @@ export class AccountController {
       return codes.UNKNOWN;
     })
     .then(res => {
-    if (typeof res === 'string') return new Message(res);
+    if (typeof res === 'string') return new MessageDto(res);
     if (typeof res === 'number') return getGrpcErr(res);
     });
   }

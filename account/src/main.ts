@@ -8,7 +8,7 @@ const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
     url: `${process.env.SERVICE_URL??'0.0.0.0'}:${process.env.SERVICE_PORT??'5000'}`,
-    package: 'app',
+    package: 'account',
     protoPath: join(__dirname, 'msg/account-grpc.proto'),
   },
 };
