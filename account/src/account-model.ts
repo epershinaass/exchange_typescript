@@ -12,10 +12,3 @@ export class Account {
 }
 
 export const AccountModel = SchemaFactory.createForClass(Account);
-
-// const AccountSchema = new mongoose.Schema({
-//   login: String,
-//   password: String,
-// });
-
-//export default mongoose.model('Account', AccountSchema);

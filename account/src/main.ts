@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
-import { join } from 'path'; // <-- Add this
+import { join } from 'path';
 import { AccountModule } from './account-module';
 
 
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
-    url: '0.0.0.0:5000',
+    url: `${process.env.SERVICE_URL??'0.0.0.0'}:${process.env.SERVICE_PORT??'5000'}`,
     package: 'app',
     protoPath: join(__dirname, 'msg/account-grpc.proto'),
   },

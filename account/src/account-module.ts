@@ -10,10 +10,13 @@ import { AccountModel, Account } from './account-model';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.config.env',
+      envFilePath: '.env',
     }),
     MongooseModule.forRoot(
-      `mongodb://${process.env.DB_URL ?? 'localhost'}:${process.env.DB_PORT ?? '27017'}/${process.env.DB_NAME ?? 'account'}`,
+      `mongodb://
+${process.env.DB_URL ?? 'localhost'}:
+${process.env.DB_PORT ?? '27017'}/
+${process.env.DB_NAME ?? 'account'}`,
     ),
     MongooseModule.forFeature([
       {
@@ -30,5 +33,3 @@ import { AccountModel, Account } from './account-model';
   providers: [AccountService],
 })
 export class AccountModule { }
-
-//  await mongoose.connect('mongodb://localhost:27017/account');

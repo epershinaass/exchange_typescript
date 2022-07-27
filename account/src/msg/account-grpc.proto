@@ -3,27 +3,19 @@ syntax = "proto3";
 package app;
 
 service AccountController {
-  rpc SignIn (Credentials) returns (AuthMessage);
-  rpc SignUp (Credentials) returns (Message);
-  rpc IsAuth (AuthMessage) returns (Message);
+  rpc SignIn (CredentialsRequest) returns (AuthMessage);
+  rpc SignUp (CredentialsRequest) returns (Response);
+  rpc IsAuth (AuthMessage) returns (Response);
 }
 
-message Credentials {
+message CredentialsRequest {
   string login = 1;
   string password = 2;
 }
 
 message AuthMessage {
-  string login = 1;
-  string token = 2;
-  Error error = 3;
+  string token = 1;
 }
-message Message {
+message Response {
   string message = 1;
-  Error error = 2;
-}
-
-message Error {
-  int32 code = 1;
-  string message = 2;
 }

@@ -1,35 +1,29 @@
 
-export interface IAccountService {
-  signIn(ICredentials): Promise<string | number>;
-  signUp(ICredentials): Promise<string | number>;
-  isAuth(IAuthMessage): Promise<object | number>;
-}
-export interface IAccountController {
-  signIn(ICredentials): Promise<IAuthMessageOrErr>;
-  signUp(ICredentials): Promise<IMessageOrErr>;
-  isAuth(IAuthMessage): Promise<IMessageOrErr>;
-}
+// export interface IAccountService {
+//   signIn(ICredentials): Promise<string | number>;
+//   signUp(ICredentials): Promise<string | number>;
+//   isAuth(IAuthMessage): Promise<object | number>;
+// }
+// export interface IAccountController {
+//   signIn(ICredentials): Promise<IAuthMessage>;
+//   signUp(ICredentials): Promise<IMessage>;
+//   isAuth(IAuthMessage): Promise<IMessage>;
+// }
 
-export interface ICredentials {
+export interface ICredentialsRequest {
   login: string;
   password: string;
 }
 
 export interface IAuthMessage {
-  login: string;
   token: string;
 }
 
-export interface IMessage {
+export interface IResponse {
   message: string;
 }
 
-export interface IGrpcErr {
-  error: {
-  code: number;
-  message: string;
-  };
-}
-
-export type IAuthMessageOrErr = IAuthMessage | IGrpcErr;
-export type IMessageOrErr = IMessage | IGrpcErr;
+// export interface IGrpcErr {
+//   code: number;
+//   message: string;
+// }
