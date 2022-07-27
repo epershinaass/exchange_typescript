@@ -36,15 +36,19 @@ jobs:
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
 
-            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD">.env
-            echo "MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD">>.env
-            echo "MONGO_SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD">>.env
-            echo "GRAFANA_DOMAIN=$GRAFANA_DOMAIN">>.env
-            echo "GRAFANA_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD">>.env
-            echo "GRAFANA_DEFAULT_ADMIN_PASSWORD=$GRAFANA_DEFAULT_ADMIN_PASSWORD">>.env
-            echo "PROMETHEUS_DOMAIN=$PROMETHEUS_DOMAIN">>.env
-            echo "ALERTMANAGER_TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN">>.env
-            echo "ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" >> .env
+            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
+            MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
+            MONGO_SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
+            GRAFANA_DOMAIN=$GRAFANA_DOMAIN
+            GRAFANA_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            PROMETHEUS_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            GRAFANA_DEFAULT_ADMIN_PASSWORD=$GRAFANA_DEFAULT_ADMIN_PASSWORD
+            PROMETHEUS_DOMAIN=$PROMETHEUS_DOMAIN
+            ALERTMANAGER_TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
+            TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
+            TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
+            ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
+
 
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
@@ -52,3 +56,5 @@ jobs:
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
 
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            git restore .
+            git clean -dxf
