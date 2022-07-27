@@ -26,6 +26,9 @@ scrape_configs:
 
     static_configs:
       - targets: ['prometheus:9090']
+        basic_auth:
+          username: prometheus
+          password: ${GRAFANA_DATASOURCE_PASSWORD}
 
   - job_name: cadvisor
     static_configs:
