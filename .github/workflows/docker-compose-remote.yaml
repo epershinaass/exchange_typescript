@@ -30,6 +30,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL
           script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
 
             echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
             MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
@@ -40,12 +45,11 @@ jobs:
             PROMETHEUS_DOMAIN=$PROMETHEUS_DOMAIN
             ALERTMANAGER_TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
-            echo "PROJECT_DIR=$PROJECT_DIR"
-            echo "GIT_URL=$GIT_URL"
-            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
-            if [ -d $PROJECT_DIR ]; then
-              cd $PROJECT_DIR && git pull
-            else
-              git clone $GIT_URL && cd $PROJECT_DIR
-            fi
-            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file ../.env up -d --force-recreate
+
+            envsubst<infra/alertmanager-config.yml>infra/alertmanager-config.yml && \
+            envsubst<infra/datasource-auth.yml>infra/datasource-auth.yml && \
+            envsubst<infra/prometheus.yml>infra/prometheus.yml && \
+            envsubst<infra/dashboards/datasource-auth.yml>infra/dashboards/datasource-auth.yml
+
+            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            rm .env
