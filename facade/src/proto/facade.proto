@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package facade;
+
+// баланс хранится в центах
+// userId это guid
+// получаем баланс по id пользователя
+
+service BalanceController {
+  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse);
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
+}
+
+message RefillBalanceRequest {
+  string userId = 1;
+  string transactionId = 2;
+  uint64 refillSum = 3;
+}
+
+message RefillBalanceResponse {
+  oneof response {
+    int32 status = 1;
+    RequsetResponse error = 2;
+  }
+}
+
+message RequsetResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetBalanceResponse {
+  oneof response {
+    uint64 total = 1;
+    RequsetResponse error = 2;
+  }
+}
+
+message GetBalanceRequest {
+  string userId = 1;
+}
