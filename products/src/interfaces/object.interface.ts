@@ -5,12 +5,12 @@ export interface IProduct {
 }
 
 export interface IAddProductRequest {
-  userProductsId: string;
+  userId: string;
   product: IProduct;
 }
 
-export interface IUserProductsId {
-  userProductsId: string;
+export interface IUserId {
+  userId: string;
 }
 
 export interface IResponseProductList {
