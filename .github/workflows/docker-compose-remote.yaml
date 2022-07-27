@@ -39,7 +39,7 @@ jobs:
             export ALERTMANAGER_TELEGRAM_BOT_TOKEN=${{ secrets.ALERTMANAGER_TELEGRAM_BOT_TOKEN }}
             export ALERTMANAGER_TELEGRAM_CHAT_ID=${{ secrets.ALERTMANAGER_TELEGRAM_CHAT_ID }}
             export PROJECT_DIR="exchange_typescript"
-            export GIT_URL=${GIT_URL}
+            export GIT_URL=$GIT_URL
             
             echo "PROJECT_DIR=$PROJECT_DIR"
             echo "GIT_URL=$GIT_URL"
