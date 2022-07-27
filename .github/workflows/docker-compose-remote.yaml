@@ -49,6 +49,7 @@ jobs:
             TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
+
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
             envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
