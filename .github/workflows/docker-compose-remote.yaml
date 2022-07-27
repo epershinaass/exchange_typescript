@@ -46,10 +46,10 @@ jobs:
             ALERTMANAGER_TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/alertmanager-config.yml>infra/alertmanager-config.yml && \
-            envsubst<infra/datasource-auth.yml>infra/datasource-auth.yml && \
-            envsubst<infra/prometheus.yml>infra/prometheus.yml && \
-            envsubst<infra/dashboards/datasource-auth.yml>infra/dashboards/datasource-auth.yml
+            envsubst<infra/datasource-auth.yaml>infra/datasource-auth.yaml && \
+            envsubst<infra/prometheus.yml>infra/prometheus.yml
 
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             rm .env
