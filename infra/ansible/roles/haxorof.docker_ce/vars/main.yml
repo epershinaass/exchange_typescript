@@ -1,0 +1,109 @@
+---
+# vars file for ansible-role-docker-ce
+docker_repository_related_packages:
+  RedHat:
+    - yum-utils
+  Debian:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg2
+    - software-properties-common
+
+docker_repository_url:
+  RedHat: https://download.docker.com/linux/centos/docker-ce.repo
+  Fedora: https://download.docker.com/linux/fedora/docker-ce.repo
+
+docker_channels:
+  - stable
+  - nightly
+  - test
+
+docker_cmd_enable_disable_repo:
+  RedHat: >
+    type dnf && dnf config-manager --set-{{ (_item_enabled == true) | ternary('enabled','disabled') }} docker-ce-{{ item }}
+    || yum-config-manager --{{ (_item_enabled == true) | ternary('enable','disable') }} docker-ce-{{ item }}
+
+docker_cmd_update_repo_cache:
+  RedHat: type dnf && dnf makecache || yum makecache
+  Debian: apt-get update
+
+docker_envs_dir:
+  RedHat: /etc/sysconfig
+  Debian: /etc/default
+
+docker_packages:
+  - docker-ce-cli
+  - docker-ce
+  - containerd.io
+
+docker_os_pkg_version_separator:
+  RedHat: "-"
+  Debian: "="
+
+docker_old_packages:
+  RedHat:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-selinux
+    - docker-engine-selinux
+    - docker-engine
+    - docker-rhel-*-plugin
+  Debian:
+    - docker
+    - docker-engine
+    - docker.io
+    - containerd
+    - runc
+
+docker_python2_build_os_pkgs:
+  Debian:
+    - python-dev
+    - libffi-dev
+    - libssl-dev
+  Fedora:
+    - python-devel
+    - openssl-devel
+    - redhat-rpm-config
+    - libffi-devel
+  RedHat:
+    - python-devel
+    - openssl-devel
+
+docker_python3_build_os_pkgs:
+  Debian:
+    - libffi-dev
+    - libssl-dev
+  Fedora:
+    - python3-devel
+    - openssl-devel
+    - redhat-rpm-config
+    - libffi-devel
+  RedHat:
+    - python3-devel
+    - openssl-devel
+
+docker_predefined_packages_os: []
+
+docker_predefined_packages_pip:
+  RedHat:
+    sdk:
+      - docker{{'<5' if ansible_python_version is version('3', '<') }}
+    compose:
+      - docker-compose{{'<1.29' if ansible_python_version is version('3', '<') }}
+    stack:
+      - jsondiff
+      - pyyaml
+  Debian:
+    sdk:
+      - docker{{'<5' if ansible_python_version is version('3', '<') }}
+    compose:
+      - docker-compose{{'<1.29' if ansible_python_version is version('3', '<') }}
+    stack:
+      - jsondiff
+      - pyyaml

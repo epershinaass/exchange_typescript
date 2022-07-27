@@ -1,0 +1,26 @@
+---
+- name: Manage users
+  hosts: servers
+  tags: users
+  become: true
+  roles:
+    - role: ansible-role-users
+
+- name: install docker ce
+  hosts: servers
+  tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
+  vars:
+    docker_compose_no_pip: true
+    docker_enable_audit: true
+    docker_users:
+    - deploy
+    docker_daemon_config:
+      icc: false
+      userns-remap: default
+      no-new-privileges: true
+      live-restore: true
+      userland-proxy: false
+      log-driver: json-file
+
+  roles:
+    - role: haxorof.docker_ce
