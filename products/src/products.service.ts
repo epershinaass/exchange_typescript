@@ -18,7 +18,7 @@ export class ProductsService {
     await product.save();
     return 'Success';
   }
-  public async getProduct(userId: IUserId): Promise<any> {
+  public async getProducts(userId: IUserId): Promise<any> {
     return this.productModel.findOne({ userId: userId.userId }).exec();
   }
 

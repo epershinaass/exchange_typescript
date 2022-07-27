@@ -1,4 +1,4 @@
-import { IProduct } from "src/grpc.interface";
+import { IProduct } from "../interfaces/grpc.interface";
 
 export class AddProductsDto {
   userId: string;

@@ -6,6 +6,7 @@ import { ProductsModule } from './products.module';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
+    url: '0.0.0.0:5001',
     package: 'products',
     protoPath: join(__dirname, '../src/products.proto'),
   },

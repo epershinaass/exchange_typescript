@@ -1,9 +1,9 @@
 import { Observable } from 'rxjs';
-import { GetProductDto } from './dto/add-products.dto';
+import { GetProductDto } from '../dto/add-products.dto';
 
 export interface IGrpcService {
   getProducts(getProductDto: GetProductDto): Observable<any>;
-  addProducts(addProductRequest: IAddProductRequest): Observable<any>;
+  addProduct(addProductRequest: IAddProductRequest): Observable<any>;
 }
 
 export interface IProduct {
