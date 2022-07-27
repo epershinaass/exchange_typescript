@@ -20,11 +20,11 @@ message RefillBalanceRequest {
 message RefillBalanceResponse {
   oneof response {
     int32 status = 1;
-    RequsetResponse error = 2;
+    Error error = 2;
   }
 }
 
-message RequsetResponse {
+message Error {
   int32 code = 1;
   string message = 2;
 }
@@ -32,7 +32,7 @@ message RequsetResponse {
 message GetBalanceResponse {
   oneof response {
     uint64 total = 1;
-    RequsetResponse error = 2;
+    Error error = 2;
   }
 }
 
