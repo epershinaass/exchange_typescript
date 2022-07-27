@@ -1,4 +1,4 @@
-name: remote deploy to Server 1
+name: Deploy to server1
 
 on:
   workflow_dispatch:
@@ -47,9 +47,9 @@ jobs:
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
-            envsubst<infra/alertmanager-config.yml>infra/alertmanager-config.yml && \
-            envsubst<infra/datasource-auth.yaml>infra/datasource-auth.yaml && \
-            envsubst<infra/prometheus.yml>infra/prometheus.yml
+            export $(grep "^[^#]" .env | xargs) && cat infra/alertmanager-config.yml | envsubst
+            export $(grep "^[^#]" .env | xargs) && cat infra/datasource-auth.yaml | envsubst
+            export $(grep "^[^#]" .env | xargs) && cat infra/prometheus.yml | envsubst
 
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             rm .env
