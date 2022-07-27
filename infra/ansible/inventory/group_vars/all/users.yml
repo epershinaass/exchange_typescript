@@ -6,5 +6,5 @@ users_users:
     name: "devops"
     key: jo.pub
   - user: nikita
-      name: "devops"
-      key: nikita.pub
+    name: "devops"
+    key: nikita.pub
