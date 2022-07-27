@@ -1,4 +1,4 @@
-import { Body, Controller, OnModuleInit, Post } from '@nestjs/common';
+import { Body, Controller, OnModuleInit } from '@nestjs/common';
 import {
   Client,
   ClientGrpc,
@@ -7,6 +7,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
+import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { IGrpcService } from './interfaces/grpc.interface';
 
@@ -26,7 +27,8 @@ export class BalanceController implements OnModuleInit {
   private grpcService: IGrpcService;
 
   onModuleInit() {
-    this.grpcService = this.client.getService<IGrpcService>('BalanceController');
+    this.grpcService =
+      this.client.getService<IGrpcService>('BalanceController');
   }
 
   /* запрос через grpc делаем такого вида
@@ -38,7 +40,12 @@ export class BalanceController implements OnModuleInit {
   }
   */
   @GrpcMethod('BalanceController', 'RefillBalance')
-  async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
+  refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
     return this.grpcService.refillBalance(refillBalanceDto);
+  }
+
+  @GrpcMethod('BalanceController', 'GetBalance')
+  getBalance(@Body() getBalanceDto: GetBalanceDto) {
+    return this.grpcService.getBalance(getBalanceDto);
   }
 }

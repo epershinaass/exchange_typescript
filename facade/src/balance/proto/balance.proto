@@ -2,28 +2,40 @@ syntax = "proto3";
 
 package balance;
 
+// баланс хранится в центах
+// userId это guid
+// получаем баланс по id пользователя
+
 service BalanceController {
-  rpc RefillBalance (RefillBalanceInfo) returns (CurrentBalanceResponse);
+  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse);
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
 }
 
-message RefillBalanceInfo {
-  string balanceId = 1;
+message RefillBalanceRequest {
+  string userId = 1;
   string transactionId = 2;
   uint64 refillSum = 3;
 }
 
-message CurrentBalanceResponse {
+message RefillBalanceResponse {
   oneof response {
-    uint64 total = 1;
-    Error error = 2;
+    int32 status = 1;
+    RequsetResponse error = 2;
   }
 }
 
-message Error {
+message RequsetResponse {
   int32 code = 1;
   string message = 2;
 }
 
-message BalanceId {
-  string balanceId = 1;
+message GetBalanceResponse {
+  oneof response {
+    uint64 total = 1;
+    RequsetResponse error = 2;
+  }
+}
+
+message GetBalanceRequest {
+  string userId = 1;
 }

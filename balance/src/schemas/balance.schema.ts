@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 export type BalanceDocument = Balance & Document;
 
@@ -7,6 +7,9 @@ export type BalanceDocument = Balance & Document;
 export class Balance {
   @Prop()
   total: number;
+
+  @Prop({ type: mongoose.Types.ObjectId })
+  userId: string;
 
   @Prop({
     type: [
