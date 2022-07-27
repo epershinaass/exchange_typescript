@@ -22,7 +22,7 @@ jobs:
           ALERTMANAGER_TELEGRAM_BOT_TOKEN: ${{ secrets.ALERTMANAGER_TELEGRAM_BOT_TOKEN }}
           ALERTMANAGER_TELEGRAM_CHAT_ID: ${{ secrets.ALERTMANAGER_TELEGRAM_CHAT_ID }}
           PROJECT_DIR: "exchange_typescript"
-          GIT_URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+          GIT_URL: "https://github.com/epershinaass/exchange_typescript"
         with:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -30,7 +30,7 @@ jobs:
           envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
-              cd $PROJECT_DIR
+              cd $PROJECT_DIR && git pull
             else
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
