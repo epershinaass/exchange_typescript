@@ -12,29 +12,26 @@ jobs:
       - name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         env:
-          SERVICE_PASSWORD: balance
-          SERVICE_USER: balance
-          SERVICE_DB: balance
-          PROJECT_DIR: exchange_typescript
-          GIT_URL: https://github.com/epershinaass/exchange_typescript.git
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+          MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
+          MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
+          GRAFANA_DOMAIN: ${{ secrets.SERVER1 }}
+          GRAFANA_DEFAULT_ADMIN_PASSWORD: ${{ secrets.GRAFANA_DEFAULT_ADMIN_PASSWORD }}
+          GRAFANA_DATASOURCE_PASSWORD: ${{ secrets.GRAFANA_DATASOURCE_PASSWORD }}
+          PROMETHEUS_DOMAIN: ${{ secrets.SERVER1 }}
+          ALERTMANAGER_TELEGRAM_BOT_TOKEN: ${{ secrets.ALERTMANAGER_TELEGRAM_BOT_TOKEN }}
+          ALERTMANAGER_TELEGRAM_CHAT_ID: ${{ secrets.ALERTMANAGER_TELEGRAM_CHAT_ID }}
+          PROJECT_DIR: "exchange_typescript"
+          GIT_URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
         with:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          envs: SERVICE_PASSWORD,SERVICE_USER,SERVICE_DB,PROJECT_DIR,GIT_URL
+          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL
           script: |
-            export SERVICE_PASSWORD=$SERVICE_PASSWORD
-            export SERVICE_USER=$SERVICE_USER
-            export SERVICE_DB=$SERVICE_DB
-            export PROJECT_DIR=$PROJECT_DIR
-            export GIT_URL=$GIT_URL
-            echo "SERVICE_PASSWORD: $SERVICE_PASSWORD"
-            echo "SERVICE_USER: $SERVICE_USER"
-            echo "SERVICE_DB: $SERVICE_DB"
-            if [ -d $PROJECT_DIR ]; then 
-            rm -rf $PROJECT_DIR
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
             fi
-            docker kill $(docker ps -q)
-            docker rm -vf $(docker ps -a -q)
-            git clone $GIT_URL && cd $PROJECT_DIR && docker-compose up --profile full -d --build
+            docker-compose -f ./infra/docker-compose.yaml up -d
