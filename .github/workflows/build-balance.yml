@@ -1,9 +1,9 @@
 name: build balance microservice
 on:
-  # pull_request:
-  #   types: [opened, reopened]
-  #   paths:
-  #   - 'balance/**'
+  pull_request:
+    types: [opened, reopened]
+    paths:
+    - 'balance/**'
   workflow_dispatch:
 
 env:
@@ -47,4 +47,4 @@ jobs:
         push: true
         cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
         cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
-        tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:latest,${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tags }},${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:${{ github.run_id }}
+        tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:latest,${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:${{ github.run_id }}
