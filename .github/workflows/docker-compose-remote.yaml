@@ -42,6 +42,7 @@ jobs:
             # export PROJECT_DIR="exchange_typescript"
             # export GIT_URL=$GIT_URL
             
+            touch .env
             echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
             MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
             MONGO_SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
