@@ -47,8 +47,8 @@ jobs:
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
-            cat infra/alertmanager-config.yml | envsubst
-            cat infra/datasource-auth.yaml | envsubst
-            cat infra/prometheus.yml | envsubst
+            envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
+            envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
+            envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
 
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
