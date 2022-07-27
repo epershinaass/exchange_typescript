@@ -17,14 +17,24 @@ services:
     container_name: balance
     build:
       context: balance
+      dockerfile: ../Dockerfile
+    ports:
+      - 5000:5000
+    <<: [*default-svc, *log-driver]
+    environment:
+      DB_PORT: 27017
+      DB_URL: mongo
+
+  facade:
+    image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
+    hostname: facade
+    container_name: facade
+    build:
+      context: facade
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
     <<: [*default-svc, *log-driver]
-    environment:
-      - DB_PORT=27017
-      - DB_NAME=myapp
-      - DB_URL=mongo
 
   mongo:
     image: mongo:5.0.9

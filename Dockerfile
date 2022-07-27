@@ -1,6 +1,6 @@
 FROM node:16-alpine as builder
 WORKDIR /app
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock nest-cli.json ./
 RUN yarn install --production=true --frozen-lockfile && \
     yarn cache clean && \
     yarn global add @nestjs/cli
@@ -12,7 +12,7 @@ LABEL buildDate=${buildDate}
 
 FROM node:16-alpine
 WORKDIR /app
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock nest-cli.json ./
 RUN yarn install --production=true --frozen-lockfile && \
     yarn cache clean && \
     yarn global add @nestjs/cli
