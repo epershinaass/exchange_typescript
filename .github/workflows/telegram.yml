@@ -2,8 +2,8 @@ name: telegram message
 on: [push]
 jobs:
 
-  build:
-    name: Build
+  message:
+    name: message
     runs-on: ubuntu-latest
     steps:
       - name: send telegram message on push
