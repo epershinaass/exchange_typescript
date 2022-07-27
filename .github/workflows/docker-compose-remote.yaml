@@ -48,4 +48,4 @@ jobs:
             else
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
-            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file ../.env up -d
+            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file ../.env up -d --force-recreate
