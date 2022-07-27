@@ -22,12 +22,13 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
-          envs: SERVICE_PASSWORD,SERVICE_USER,SERVICE_DB,PROJECT_DIR
+          envs: SERVICE_PASSWORD,SERVICE_USER,SERVICE_DB,PROJECT_DIR,GIT_URL
           script: |
             export SERVICE_PASSWORD=$SERVICE_PASSWORD
             export SERVICE_USER=$SERVICE_USER
             export SERVICE_DB=$SERVICE_DB
             export PROJECT_DIR=$PROJECT_DIR
+            export GIT_URL=$GIT_URL
             echo "SERVICE_PASSWORD: $SERVICE_PASSWORD"
             echo "SERVICE_USER: $SERVICE_USER"
             echo "SERVICE_DB: $SERVICE_DB"
