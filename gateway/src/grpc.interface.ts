@@ -13,10 +13,10 @@ export interface IProduct {
 }
 
 export interface IAddProductRequest {
-  userProductsId: string;
+  userId: string;
   product: IProduct;
 }
 
 export interface IUserId {
-  userProductsId: string;
+  userId: string;
 }

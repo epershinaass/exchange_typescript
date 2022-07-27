@@ -4,7 +4,7 @@ package products;
 
 service ProductsController {
   rpc AddProduct (AddProductRequest) returns (Response);
-  rpc GetProduct (UserProductsId) returns (ProductResponse);
+  rpc GetProduct (UserId) returns (ProductResponse);
 }
 
 message Product {
@@ -13,7 +13,7 @@ message Product {
 }
 
 message AddProductRequest {
-  string userProductsId = 1;
+  string userId = 1;
   Product product = 2;
 }
 
@@ -31,6 +31,6 @@ message Response {
   string response = 1;
 }
 
-message UserProductsId {
-  string userProductsId = 1;
+message UserId {
+  string userId = 1;
 }

@@ -1,10 +1,10 @@
 import { IProduct } from "src/grpc.interface";
 
 export class AddProductsDto {
-  userProductsId: string;
+  userId: string;
   product: IProduct
 }
 
 export class GetProductDto {
-  userProductsId: string;
+  userId: string;
 }
