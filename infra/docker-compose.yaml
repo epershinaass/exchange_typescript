@@ -15,7 +15,7 @@ x-labels: &default-lables
 services:
 
   balance:
-    image: exchangetypescript.jfrog.io/balance-docker/balance:latest
+    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
     hostname: balance
     container_name: balance
     profiles:
@@ -30,7 +30,7 @@ services:
       DB_URL: mongo
 
   facade:
-    image: exchangetypescript.jfrog.io/facade-docker/facade:latest
+    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
     hostname: facade
     container_name: facade
     profiles:
