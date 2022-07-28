@@ -1,6 +1,6 @@
 basic_auth_users:
   jo-user: $2b$12$Vl/J08t324QB3CTqvqbdMudkYnK/CW06sCCi3z2uohL1QxYlrnf3S
-  nikita-user: $2b$12$jX4AFZExEktEhzTq4gOROOlN6msxS.rDAawG.mQfNx2ZQRZc2b/mu
+  nikita: $2b$12$K08FZFZ.3tn5n2R2Hm/GUe/MAPL4v8YvXebTMQgARRQcIKOqnnmMW
   # grafana: $2b$12$EyrS2VSFeF5g7xlq4ehLeO/vQ8c/HA/Slz7vwPulP0KwrdJgcw.46 # supersecret
   grafana: $2b$12$Mj/CuwleIndf6.ChH3Ha9.tbhWLMWNcPsPWJE1lxlKFtVL81zRrLK
   prometheus: $2b$12$Mj/CuwleIndf6.ChH3Ha9.tbhWLMWNcPsPWJE1lxlKFtVL81zRrLK
