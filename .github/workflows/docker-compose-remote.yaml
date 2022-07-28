@@ -21,6 +21,7 @@ env:
   ALERTMANAGER_TELEGRAM_CHAT_ID: ${{ secrets.ALERTMANAGER_TELEGRAM_CHAT_ID }}
   JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
   JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
+  JFROG_URL: exchangetypescript.jfrog.io
 
   PROJECT_DIR: "exchange_typescript"
   GIT_URL: "https://github.com/epershinaass/exchange_typescript"
@@ -62,6 +63,7 @@ jobs:
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
             JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
             JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
+            JFROG_URL=$JFROG_URL
             COMPOSE_HTTP_TIMEOUT=200
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
@@ -70,7 +72,7 @@ jobs:
             envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
             envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
-            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p JFROG_USERNAME_DEPLOY_ACCESS_TOKEN exchangetypescript.jfrog.io
+            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             git restore .
             git clean -dxf
