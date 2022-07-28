@@ -1,6 +1,6 @@
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
@@ -15,38 +15,39 @@ export class BalanceController {
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceDto: RefillBalanceDto, metadata: any) {
     if (!checkForObjectId.test(refillBalanceDto.userId)) {
-      return getGrpcError(status.INVALID_ARGUMENT);
+      throw new RpcException(getGrpcError(status.INVALID_ARGUMENT));
     }
-    const balance = await this.balanceService.getBalance(
-      refillBalanceDto.userId,
-    );
-    if (!balance) {
-      return getGrpcError(status.NOT_FOUND);
-    }
-
-    if (
-      balance.transactions.find(
-        (t) => t.transactionId === refillBalanceDto.transactionId,
-      )
-    ) {
-      return getGrpcError(status.OK);
+    try {
+      const balance = await this.balanceService.getBalance(
+        refillBalanceDto.userId,
+      );
+      if (
+        balance.transactions.find(
+          (t) => t.transactionId === refillBalanceDto.transactionId,
+        )
+      ) {
+        return { status: status.OK };
+      }
+    } catch (e) {
+      throw new RpcException(getGrpcError(e));
     }
 
     this.balanceService.refillBalance(refillBalanceDto);
-    return getGrpcError(status.OK);
+    return { status: status.OK };
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(getBalanceDto: GetBalanceDto, metadata: any) {
     if (!checkForObjectId.test(getBalanceDto.userId)) {
-      return getGrpcError(status.INVALID_ARGUMENT);
+      throw new RpcException(getGrpcError(status.INVALID_ARGUMENT));
     }
-    const currentBalance = await this.balanceService.getBalance(
-      getBalanceDto.userId,
-    );
-    if (!currentBalance) {
-      return getGrpcError(status.NOT_FOUND);
+    try {
+      const currentBalance = await this.balanceService.getBalance(
+        getBalanceDto.userId,
+      );
+      return { total: currentBalance.total };
+    } catch (e) {
+      throw new RpcException(getGrpcError(e));
     }
-    return { total: currentBalance.total };
   }
 }

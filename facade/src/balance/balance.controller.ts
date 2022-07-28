@@ -4,6 +4,7 @@ import {
   ClientGrpc,
   ClientOptions,
   GrpcMethod,
+  RpcException,
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
@@ -32,12 +33,20 @@ export class BalanceController implements OnModuleInit {
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')
-  refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
-    return this.grpcService.refillBalance(refillBalanceDto);
+  async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
+    try {
+      return await this.grpcService.refillBalance(refillBalanceDto).toPromise();
+    } catch (e) {
+      throw new RpcException(e);
+    }
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
-  getBalance(@Body() getBalanceDto: GetBalanceDto) {
-    return this.grpcService.getBalance(getBalanceDto);
+  async getBalance(@Body() getBalanceDto: GetBalanceDto) {
+    try {
+      return await this.grpcService.getBalance(getBalanceDto).toPromise();
+    } catch (e) {
+      throw new RpcException(e);
+    }
   }
 }
