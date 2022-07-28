@@ -35,7 +35,7 @@ services:
     profiles:
       - mongo
       - full
-      - haproxy
+      # - haproxy
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -243,8 +243,10 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.44.0
     hostname: cadvisor
     container_name: cadvisor
+    userns_mode: "host"
     profiles:
       - monitoring
+      - haproxy
       - full
     volumes:
       - /:/rootfs:ro
@@ -259,6 +261,7 @@ services:
     container_name: node-exporter
     profiles:
       - monitoring
+      - haproxy
       - full
     command:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
