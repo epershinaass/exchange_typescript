@@ -253,6 +253,7 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/kmsg:/dev/kmsg:ro
     <<: [*default-svc, *log-driver, *default-lables]
 
   node-exporter:
