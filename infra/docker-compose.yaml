@@ -15,12 +15,9 @@ x-labels: &default-lables
 services:
 
   balance:
-    image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
+    image: exchangetypescript.jfrog.io/balance-docker/balance:latest
     hostname: balance
     container_name: balance
-    build:
-      context: ../balance
-      dockerfile: ../Dockerfile
     profiles:
       - mongo
       - balance
@@ -33,12 +30,9 @@ services:
       DB_URL: mongo
 
   facade:
-    image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
+    image: exchangetypescript.jfrog.io/facade-docker/facade:latest
     hostname: facade
     container_name: facade
-    build:
-      context: ../facade
-      dockerfile: ./Dockerfile
     profiles:
       - mongo
       - facade
