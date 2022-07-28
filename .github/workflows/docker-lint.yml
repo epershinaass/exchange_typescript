@@ -10,6 +10,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: dorny/paths-filter@v2
         id: changes
