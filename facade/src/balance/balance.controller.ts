@@ -8,6 +8,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
+import { lastValueFrom } from 'rxjs';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { IGrpcService } from './interfaces/grpc.interface';
@@ -35,7 +36,9 @@ export class BalanceController implements OnModuleInit {
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
     try {
-      return await this.grpcService.refillBalance(refillBalanceDto).toPromise();
+      const refillStatusObservable =
+        this.grpcService.refillBalance(refillBalanceDto);
+      return await lastValueFrom(refillStatusObservable);
     } catch (e) {
       throw new RpcException(e);
     }
@@ -44,7 +47,9 @@ export class BalanceController implements OnModuleInit {
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(@Body() getBalanceDto: GetBalanceDto) {
     try {
-      return await this.grpcService.getBalance(getBalanceDto).toPromise();
+      const balanceObservable = this.grpcService.getBalance(getBalanceDto);
+      const balance = await lastValueFrom(balanceObservable);
+      return { total: balance.total };
     } catch (e) {
       throw new RpcException(e);
     }
