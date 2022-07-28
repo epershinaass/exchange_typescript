@@ -1,8 +1,9 @@
+import { Observable} from "rxjs";
 
 export interface IGrpcService {
-  signIn(credentials: ICredentialsRequest): Promise<IAuthMessage>;
-  signUp(credentials: ICredentialsRequest): Promise<IResponse>;
-  isAuth(authMessage: IAuthMessage): Promise<IResponse>;
+  signIn(credentials: ICredentialsRequest): Observable<IAuthMessage>;
+  signUp(credentials: ICredentialsRequest): Observable<IResponse>;
+  isAuth(authMessage: IAuthMessage): Observable<IResponse>;
 }
 
 export interface ICredentialsRequest {

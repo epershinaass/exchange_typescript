@@ -30,7 +30,7 @@ export class AccountController {
     })
     .then(res => {
     if (typeof res === 'string') return new MessageDto(res);
-    if (typeof res === 'number') return getGrpcErr(res);
+    if (typeof res === 'number') throw getGrpcErr(res);
     });
 
   }
@@ -42,7 +42,7 @@ export class AccountController {
     })
     .then(res => {
     if (typeof res === 'string') return new MessageDto(res);
-    if (typeof res === 'number') return getGrpcErr(res);
+    if (typeof res === 'number') throw getGrpcErr(res);
     });
   }
 }

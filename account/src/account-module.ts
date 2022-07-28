@@ -25,7 +25,7 @@ ${process.env.DB_NAME ?? 'account'}`,
       },
     ]),
     JwtModule.register({
-      secret: 'TheVerySecretKey',
+      secret: process.env.AUTH_SECRET_KEY??'TheVerySecretKey',
       signOptions: { expiresIn: '300s' },
     }),
   ],

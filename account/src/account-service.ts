@@ -14,6 +14,9 @@ export class AccountService {
     private jwtService: JwtService,
   ) { }
 
+  private secret: string = process.env.AUTH_SECRET_KEY??'TheVerySecretKey';
+
+
   public async signIn(creds: ICredentialsRequest): Promise<string | codes> {
     const account = await this.accountModel.findOne({ login: creds.login });
 
@@ -38,7 +41,7 @@ export class AccountService {
 
   public async isAuth(auth: IAuthMessage): Promise<string | codes> {
     try {
-      return JSON.stringify(this.jwtService.verify(auth.token, {secret: 'TheVerySecretKey'}));
+      return JSON.stringify(this.jwtService.verify(auth.token, {secret: this.secret}));
     } catch (err) {
       return codes.UNAUTHENTICATED;
     }
