@@ -89,6 +89,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS: '-Dzookeeper.4lw.commands.whitelist=mntr'
     volumes:
       - zoo1-data:/var/lib/zookeeper/data
       - zoo1-logs:/var/lib/zookeeper/logs
@@ -187,6 +188,7 @@ services:
     image: grafana/promtail:2.6.1
     hostname: promtail
     container_name: promtail
+    userns_mode: "host"
     profiles:
       - logs
       - haproxy
