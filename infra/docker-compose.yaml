@@ -228,8 +228,6 @@ services:
       - haproxy
     volumes:
       - prometheus_data:/prometheus
-    ports:
-      - 9090:9090
     configs:
       - source: prometheus
         target: /etc/prometheus/prometheus.yml
