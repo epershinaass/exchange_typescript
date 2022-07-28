@@ -9,6 +9,17 @@ mongo_Balance () {
     roles: [{ role: 'readWrite', db: '$SERVICE_DB'}],
   });
   db.createCollection('balance')
+  use admin;
+  db.createUser(
+    {
+      user: 'mongodb_exporter',
+      pwd: '$MONGODB_EXPORTER_PASSWORD',
+      roles: [
+          { role: 'clusterMonitor', db: 'admin' },
+          { role: 'read', db: 'local' }
+      ]
+    }
+  )
 EOF
 }
 
@@ -21,6 +32,17 @@ mongo_Auth () {
     roles: [{ role: 'readWrite', db: '$SERVICE_DB'}],
   });
   db.createCollection('users')
+  use admin;
+    db.createUser(
+      {
+        user: 'mongodb_exporter',
+        pwd: '$MONGODB_EXPORTER_PASSWORD',
+        roles: [
+            { role: 'clusterMonitor', db: 'admin' },
+            { role: 'read', db: 'local' }
+        ]
+      }
+    )
 EOF
 }
 
