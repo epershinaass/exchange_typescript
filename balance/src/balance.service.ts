@@ -13,7 +13,9 @@ export class BalanceService {
   public async refillBalance(
     refillBalanceDto: RefillBalanceDto,
   ): Promise<IBalance> {
-    // операция атомарна, перезаписи доумента не будет
+    // операция атомарна, перезаписи документа не будет
+    // Надо ли добавлять автоинкрементирующийся счетчик для проверки выполнения
+    // если операция точно выполнится и докумнет ничто не перезапишет?
     return this.balanceModel
       .findOneAndUpdate(
         { userId: refillBalanceDto.userId },

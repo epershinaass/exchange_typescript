@@ -32,11 +32,8 @@ export class BalanceController {
       return getGrpcError(status.OK);
     }
 
-    if (await this.balanceService.refillBalance(refillBalanceDto)) {
-      return getGrpcError(status.OK);
-    } else {
-      return getGrpcError(status.INTERNAL);
-    }
+    this.balanceService.refillBalance(refillBalanceDto);
+    return getGrpcError(status.OK);
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
