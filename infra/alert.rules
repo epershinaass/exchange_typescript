@@ -384,15 +384,6 @@ groups:
       summary: Prometheus all targets missing (instance {{ $labels.instance }})
       description: "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-  - alert: PrometheusAllTargetsMissing
-    expr: sum by (job) (up) == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Prometheus all targets missing (instance {{ $labels.instance }})
-      description: "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
   - alert: PrometheusConfigurationReloadFailure
     expr: prometheus_config_last_reload_successful != 1
     for: 0m
