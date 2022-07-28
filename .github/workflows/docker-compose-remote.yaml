@@ -70,7 +70,8 @@ jobs:
             envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
             envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
-
+            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p JFROG_USERNAME_DEPLOY_ACCESS_TOKEN exchangetypescript.jfrog.io
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             git restore .
             git clean -dxf
+            docker logout
