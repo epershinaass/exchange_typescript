@@ -44,6 +44,7 @@ jobs:
         file: ../Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         build-args: buildDate=$(date +'%Y-%m-%d')
+        labels: buildDate=$(date +'%Y-%m-%d')
         push: true
         cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
         cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
