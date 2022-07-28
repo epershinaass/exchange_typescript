@@ -158,6 +158,7 @@ services:
     image: grafana/promtail:2.6.1
     hostname: promtail
     container_name: promtail
+    userns_mode: "host"
     profiles:
       - logs
       - haproxy
