@@ -60,8 +60,9 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
-    # volumes:
-    #   - zoo1-data:/var/lib/zookeeper/data
+    volumes:
+      - zoo1-data:/var/lib/zookeeper/data
+      - zoo1-logs:/var/lib/zookeeper/logs
     <<: [*default-svc, *log-driver, *default-lables]
     # deploy: # Change after testing
     #   resources:
@@ -98,8 +99,9 @@ services:
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
     <<: [*default-svc, *log-driver, *default-lables]
-    # volumes: # bug
-    #   - kafka1-data:/var/lib/kafka/data
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
+      - kafka1-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -380,7 +382,9 @@ volumes:
   prometheus_data:
   loki-data:
   kafka1-data:
+  kafka1-logs:
   zoo1-data:
+  zoo1-logs:
 
 networks:
   stage-net:
