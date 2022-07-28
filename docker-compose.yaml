@@ -18,6 +18,10 @@ services:
     build:
       context: balance
       dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - balance
+      - full
     ports:
       - 5000:5000
     <<: [*default-svc, *log-driver]
@@ -32,6 +36,10 @@ services:
     build:
       context: facade
       dockerfile: ./Dockerfile
+    profiles:
+      - mongo
+      - facade
+      - full
     ports:
       - 3000:3000
     <<: [*default-svc, *log-driver]
