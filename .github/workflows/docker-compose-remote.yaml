@@ -27,6 +27,7 @@ jobs:
   deploy:
     name: Deploy
     if: github.event.pull_request.merged == true
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: executing remote ssh commands using ssh key
