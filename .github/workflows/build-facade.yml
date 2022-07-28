@@ -1,4 +1,4 @@
-name: build facade microservice
+name: Build facade image
 on:
   pull_request:
     types: [opened, reopened]
@@ -13,7 +13,7 @@ env:
 
 
 jobs:
-  docker:
+  build-images:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
