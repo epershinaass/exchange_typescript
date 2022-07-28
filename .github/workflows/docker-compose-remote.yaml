@@ -1,0 +1,68 @@
+name: Deploy to server1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [closed]
+    paths:
+    - 'infra/**'
+
+
+env:
+  MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+  MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
+  MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
+  GRAFANA_DOMAIN: ${{ secrets.SERVER1 }}
+  GRAFANA_DEFAULT_ADMIN_PASSWORD: ${{ secrets.GRAFANA_DEFAULT_ADMIN_PASSWORD }}
+  GRAFANA_DATASOURCE_USER: grafana
+  GRAFANA_DATASOURCE_PASSWORD: ${{ secrets.GRAFANA_DATASOURCE_PASSWORD }}
+  PROMETHEUS_DOMAIN: ${{ secrets.SERVER1 }}
+  ALERTMANAGER_TELEGRAM_BOT_TOKEN: ${{ secrets.ALERTMANAGER_TELEGRAM_BOT_TOKEN }}
+  ALERTMANAGER_TELEGRAM_CHAT_ID: ${{ secrets.ALERTMANAGER_TELEGRAM_CHAT_ID }}
+  PROJECT_DIR: "exchange_typescript"
+  GIT_URL: "https://github.com/epershinaass/exchange_typescript"
+
+
+jobs:
+  deploy:
+    name: Deploy
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_USER,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
+            MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
+            MONGO_SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
+            GRAFANA_DOMAIN=$GRAFANA_DOMAIN
+            GRAFANA_DATASOURCE_USER=$GRAFANA_DATASOURCE_USER
+            GRAFANA_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            PROMETHEUS_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            GRAFANA_DEFAULT_ADMIN_PASSWORD=$GRAFANA_DEFAULT_ADMIN_PASSWORD
+            PROMETHEUS_DOMAIN=$PROMETHEUS_DOMAIN
+            ALERTMANAGER_TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
+            TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
+            TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
+            ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
+
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
+            envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
+            envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
+
+            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            git restore .
+            git clean -dxf
