@@ -62,6 +62,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
       - zoo1-data:/var/lib/zookeeper/data
+      - zoo1-logs:/var/lib/zookeeper/logs
     <<: [*default-svc, *log-driver, *default-lables]
     # deploy: # Change after testing
     #   resources:
@@ -100,6 +101,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
     volumes:
       - kafka1-data:/var/lib/kafka/data
+      - kafka1-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -380,7 +382,9 @@ volumes:
   prometheus_data:
   loki-data:
   kafka1-data:
+  kafka1-logs:
   zoo1-data:
+  zoo1-logs:
 
 networks:
   stage-net:
