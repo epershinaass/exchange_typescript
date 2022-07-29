@@ -370,7 +370,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-exporter:
-    image: percona/mongodb_exporter:0.33
+    image: percona/mongodb_exporter:0.20
     hostname: mongodb-exporter
     container_name: mongodb-exporter
     command:
