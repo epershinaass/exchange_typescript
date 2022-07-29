@@ -78,36 +78,6 @@ services:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
-  zoo1:
-    image: confluentinc/cp-zookeeper:7.2.1
-    hostname: zoo1
-    container_name: zoo1
-    profiles:
-      - kafka
-      - kafkamng
-      - kafkafull
-      - full
-      - monitoring
-    healthcheck:
-      test: echo srvr | nc zoo1 2181 || exit 1
-      retries: 20
-      interval: 10s
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_HEAP_OPTS: -Xmx512M -Xms256M
-    labels:
-      org.label-schema.group: "monitoring"
-    ports:
-      - 2181:2181
-    <<: [*default-svc, *log-driver]
-    deploy:
-      resources:
-        limits:
-          memory: 1024M
-
-
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka1
@@ -118,9 +88,6 @@ services:
       - kafkafull
       - full
       - monitoring
-    depends_on:
-      zoo1:
-        condition: service_healthy
     ports:
       - 29092:29092
     healthcheck:
@@ -129,20 +96,38 @@ services:
       timeout: 10s
       retries: 3
     environment:
-      # KAFKA_BROKER_ID: 1
+      KAFKA_BROKER_ID: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
-      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093'
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093,CONNECTIONS_FROM_HOST://0.0.0.0:29092
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
       KAFKA_HEAP_OPTS: -Xmx2048M -Xms1024M
     <<: [*default-svc, *log-driver]
     labels:
       org.label-schema.group: "monitoring"
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
+      - kafka1-logs:/var/lib/kafka/logs
+    configs:
+      - source: kafka_run
+        target: /tmp/update_run.sh
+        uid: "1000"
+        gid: "1000"
+        mode: 0777
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     deploy:
       resources:
         limits:
@@ -154,6 +139,7 @@ services:
     container_name: schema-registry
     profiles:
       - kafkafull
+      - kafka
       - full
     ports:
       - 8081:8081
@@ -167,12 +153,28 @@ services:
       timeout: 10s
       retries: 3
     depends_on:
-      zoo1:
-        condition: service_healthy
       kafka1:
         condition: service_healthy
     labels:
       org.label-schema.group: "monitoring"
+    <<: [*default-svc, *log-driver]
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    hostname: kafdrop
+    container_name: kafdrop
+    profiles:
+      - kafka
+      - full
+    ports:
+      - 9000:9000
+    environment:
+      KAFKA_BROKERCONNECT: kafka1:9092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    depends_on:
+      kafka1:
+        condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   loki:
@@ -323,23 +325,6 @@ services:
       org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
-  zookeeper-exporter:
-    image: dabealu/zookeeper-exporter:v0.1.12
-    hostname: zookeeper-exporter
-    container_name: zookeeper-exporter
-    profiles:
-      - monitoring
-      - full
-    # ports: # No need to publish
-    #   - 9141:9141
-    command: --zk-hosts="zoo1:2181" --timeout=5
-    depends_on:
-      zoo1:
-        condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.4.2
     hostname: kafka-exporter
@@ -347,6 +332,7 @@ services:
     command: --kafka.server=kafka1:9092
     profiles:
       - monitoring
+      - kafka
       - full
     # ports: # No need to publish
     #   - 9308:9308
@@ -373,11 +359,15 @@ configs:
     file: ./infra/alert.rules
   mongo_config:
     file: ./infra/mongodb/mongo-init.sh
+  kafka_run:
+    file: ./infra/update_run.sh
 
 volumes:
   grafana:
   db-data:
   prometheus_data:
+  kafka1-data:
+  kafka1-logs:
 
 networks:
   dev-net:
