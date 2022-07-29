@@ -9,3 +9,6 @@ dashboards/
 ansible/
 mongodb/
 *.cfg
+*.py
+*.sh
+installation-scripts/

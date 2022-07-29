@@ -64,7 +64,7 @@ jobs:
             JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
             JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
             JFROG_URL=$JFROG_URL
-            COMPOSE_HTTP_TIMEOUT=200
+            COMPOSE_HTTP_TIMEOUT=500
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
 
@@ -73,6 +73,7 @@ jobs:
             envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
+            wget -P ./infra https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             git restore .
             git clean -dxf
