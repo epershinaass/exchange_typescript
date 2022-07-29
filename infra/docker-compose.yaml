@@ -375,6 +375,7 @@ services:
     container_name: mongodb-exporter
     command:
     - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo:27017'
+    - '--compatible-mode'
     profiles:
       - monitoring
       - haproxy
