@@ -7,9 +7,11 @@ package facade;
 // получаем баланс по id пользователя
 
 service BalanceController {
-  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse);
-  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {
+  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse) {
     option idempotency_level = IDEMPOTENT;
+  }
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
 
