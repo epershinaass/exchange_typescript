@@ -13,6 +13,6 @@ export interface IUserId {
   userId: string;
 }
 
-export interface IResponseProductList {
-  products: object;
+export interface IGetProductResponse {
+  products: IProduct[];
 }

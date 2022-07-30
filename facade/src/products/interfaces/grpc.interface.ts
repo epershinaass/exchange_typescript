@@ -2,7 +2,7 @@ import { GetProductDto } from '../dto/add-products.dto';
 
 export interface IProductsService {
   getProducts(getProductDto: GetProductDto): Promise<IProduct[]>;
-  addProduct(addProductRequest: IAddProductRequest): Promise<string>;
+  addProduct(addProductRequest: IAddProductRequest): Promise<object>;
 }
 
 export interface IProduct {
