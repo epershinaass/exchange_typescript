@@ -3,11 +3,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { Product, ProductSchema } from './schemas/product.schema';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-  MongooseModule.forRoot('mongodb://localhost:27017/user-products'),
-  MongooseModule.forFeature([{name: Product.name, schema: ProductSchema}])],
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    ),
+    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+  ],
   controllers: [ProductsController],
   providers: [ProductsService],
 })
