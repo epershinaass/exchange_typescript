@@ -3,8 +3,8 @@ syntax = "proto3";
 package products;
 
 service ProductsController {
-  rpc AddProduct (AddProductRequest) returns (Response);
-  rpc GetProducts (UserId) returns (ProductResponse);
+  rpc AddProduct (AddProductRequest) returns (AddProductResponse);
+  rpc GetProducts (GetProductRequest) returns (GetProductResponse);
 }
 
 message Product {
@@ -17,20 +17,20 @@ message AddProductRequest {
   Product product = 2;
 }
 
-message ProductResponse {
-  repeated GetProducts products = 1;
+message GetProductResponse {
+  repeated Products products = 1;
 }
 
-message GetProducts {
+message Products {
   string product_id = 1;
   string product_name = 2;
   uint64 product_count = 3;
 }
 
-message Response {
+message AddProductResponse {
   string response = 1;
 }
 
-message UserId {
+message GetProductRequest {
   string user_id = 1;
 }

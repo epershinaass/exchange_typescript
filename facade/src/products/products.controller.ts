@@ -8,7 +8,7 @@ import {
 } from '@nestjs/microservices';
 import { join } from 'path';
 import { AddProductsDto, GetProductDto } from './dto/add-products.dto';
-import { IGrpcService } from './interfaces/grpc.interface';
+import { IProductsService } from './interfaces/grpc.interface';
 
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
@@ -23,11 +23,11 @@ export const microserviceOptions: ClientOptions = {
 export class ProductsController implements OnModuleInit {
   @Client(microserviceOptions)
   private client: ClientGrpc;
-  private grpcService: IGrpcService;
+  private grpcService: IProductsService;
 
   onModuleInit() {
     this.grpcService =
-      this.client.getService<IGrpcService>('ProductsController');
+      this.client.getService<IProductsService>('ProductsController');
   }
 
   @GrpcMethod('ProductsController', 'AddProduct')
