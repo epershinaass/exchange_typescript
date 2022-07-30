@@ -10,7 +10,7 @@ import {
 import { join } from 'path';
 import { firstValueFrom, lastValueFrom, withLatestFrom } from 'rxjs';
 import { CredentialsDto, AuthMessageDto, MessageDto } from './dto/account-dto';
-import { IGrpcService } from './interface/account-grpc-interface';
+import { IAccountGrpcService } from './interface/account-grpc-interface';
 
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
@@ -26,28 +26,37 @@ export class AccountController implements OnModuleInit {
   @Client(microserviceOptions)
   private client: ClientGrpc;
 
-  private grpcService: IGrpcService;
+  private grpcService: IAccountGrpcService;
 
   onModuleInit() {
     this.grpcService =
-      this.client.getService<IGrpcService>('AccountController');
+      this.client.getService<IAccountGrpcService>('AccountController');
   }
 
   @GrpcMethod('AccountController', 'SignIn')
   async signIn(@Body() creds: CredentialsDto): Promise<AuthMessageDto> {
+    try {
       return await firstValueFrom(this.grpcService.signIn(creds))
-      .catch( e => {throw new RpcException(e)});
+    } catch (err) {
+      throw new RpcException(err);
+    }
   }
 
   @GrpcMethod('AccountController', 'SignUp')
   async signUp(@Body() creds: CredentialsDto): Promise<MessageDto> {
-    return await lastValueFrom(this.grpcService.signUp(creds))
-    .catch( e => {throw new RpcException(e)});
+    try {
+      return await firstValueFrom(this.grpcService.signUp(creds))
+    } catch (err) {
+      throw new RpcException(err);
+    }
   }
 
   @GrpcMethod('AccountController', 'IsAuth')
   async isAuth(@Body() auth: AuthMessageDto): Promise<MessageDto> {
-    return await lastValueFrom(this.grpcService.isAuth(auth))
-    .catch( e => {throw new RpcException(e)});
+    try {
+      return await firstValueFrom(this.grpcService.isAuth(auth))
+    } catch (err) {
+      throw new RpcException(err);
+    }
   }
 }

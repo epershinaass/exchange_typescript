@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { Account, AccountDocument } from './account-model'
 import { ICredentialsRequest, IAuthMessage } from './msg/account-grpc-interface'
-import { codes } from './msg/account-err';
+import { codes, messages } from './msg/account-err';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 
 
 @Injectable()
 export class AccountService {
   constructor(
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
+    private configService: ConfigService,
     private jwtService: JwtService,
   ) { }
 
-  private secret: string = process.env.AUTH_SECRET_KEY??'TheVerySecretKey';
+  private secret: string = this.configService.get('ACC_SECRET_KEY');
+  private salt: string = this.configService.get('ACC_PASSW_SALT');
 
 
   public async signIn(creds: ICredentialsRequest): Promise<string | codes> {
@@ -34,7 +37,7 @@ export class AccountService {
       return codes.ALREADY_EXISTS;
 
     if (await this.accountModel.create(creds))
-      return 'user created';
+      return messages.USER_MD;
 
     return codes.ABORTED;
   }

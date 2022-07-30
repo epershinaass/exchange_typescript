@@ -7,7 +7,7 @@ import { AccountModule } from './account-module';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
-    url: `${process.env.SERVICE_URL??'0.0.0.0'}:${process.env.SERVICE_PORT??'5002'}`,
+    url: `${process.env.ACC_URL}:${process.env.ACC_PORT}`,
     package: 'account',
     protoPath: join(__dirname, 'msg/account-grpc.proto'),
   },

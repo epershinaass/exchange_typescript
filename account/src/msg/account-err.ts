@@ -14,6 +14,10 @@ export enum codes {
   UNAUTHENTICATED = status.UNAUTHENTICATED,
 }
 
+export enum messages {
+  USER_MD = 'user created',
+}
+
 export function getGrpcErr(code: codes): RpcException {
 
   switch (code.valueOf()) {

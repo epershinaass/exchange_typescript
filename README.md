@@ -1,6 +1,5 @@
 # exchange_typescript
 
-
 ### Usage docker compose
 
 - В файле docker-compose.yaml описаны сервисы для локальной разработки.

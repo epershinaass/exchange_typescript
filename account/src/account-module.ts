@@ -12,12 +12,7 @@ import { AccountModel, Account } from './account-model';
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot(
-      `mongodb://
-${process.env.DB_URL ?? 'localhost'}:
-${process.env.DB_PORT ?? '27017'}/
-${process.env.DB_NAME ?? 'account'}`,
-    ),
+    MongooseModule.forRoot(`mongodb://${process.env.ACC_DB_URL}:${process.env.ACC_DB_PORT}/${process.env.ACC_DB_NAME}`),
     MongooseModule.forFeature([
       {
         name: Account.name,
@@ -25,7 +20,7 @@ ${process.env.DB_NAME ?? 'account'}`,
       },
     ]),
     JwtModule.register({
-      secret: process.env.AUTH_SECRET_KEY??'TheVerySecretKey',
+      secret: process.env.ACC_SECRET_KEY,
       signOptions: { expiresIn: '300s' },
     }),
   ],
