@@ -11,7 +11,7 @@ import { join } from 'path';
 import { lastValueFrom } from 'rxjs';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
-import { IGrpcService } from './interfaces/grpc.interface';
+import { IBalanceService } from './interfaces/grpc.interface';
 
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
@@ -26,18 +26,18 @@ export class BalanceController implements OnModuleInit {
   @Client(microserviceOptions)
   private client: ClientGrpc;
 
-  private grpcService: IGrpcService;
+  private balanceService: IBalanceService;
 
   onModuleInit() {
-    this.grpcService =
-      this.client.getService<IGrpcService>('BalanceController');
+    this.balanceService =
+      this.client.getService<IBalanceService>('BalanceController');
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
     try {
       const refillStatusObservable =
-        this.grpcService.refillBalance(refillBalanceDto);
+        this.balanceService.refillBalance(refillBalanceDto);
       return await lastValueFrom(refillStatusObservable);
     } catch (e) {
       throw new RpcException(e);
@@ -47,7 +47,7 @@ export class BalanceController implements OnModuleInit {
   @GrpcMethod('BalanceController', 'GetBalance')
   async getBalance(@Body() getBalanceDto: GetBalanceDto) {
     try {
-      const balanceObservable = this.grpcService.getBalance(getBalanceDto);
+      const balanceObservable = this.balanceService.getBalance(getBalanceDto);
       const balance = await lastValueFrom(balanceObservable);
       return { total: balance.total };
     } catch (e) {
