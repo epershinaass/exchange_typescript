@@ -13,6 +13,35 @@ x-labels: &default-lables
     org.label-schema.group: "monitoring"
 
 services:
+
+  balance:
+    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
+    hostname: balance
+    container_name: balance
+    profiles:
+      - mongo
+      - balance
+      - full
+    ports:
+      - 5000:5000
+    <<: [ *default-svc, *log-driver ]
+    environment:
+      DB_PORT: 27017
+      DB_URL: mongo
+
+  facade:
+    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
+    hostname: facade
+    container_name: facade
+    profiles:
+      - mongo
+      - facade
+      - full
+    ports:
+      - 3000:3000
+    <<: [ *default-svc, *log-driver ]
+
+
   mongo:
     image: mongo:5.0.9
     hostname: mongo
@@ -35,7 +64,7 @@ services:
     profiles:
       - mongo
       - full
-      - haproxy
+      # - haproxy
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -60,8 +89,10 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS: '-Dzookeeper.4lw.commands.whitelist=*'
     volumes:
       - zoo1-data:/var/lib/zookeeper/data
+      - zoo1-logs:/var/lib/zookeeper/logs
     <<: [*default-svc, *log-driver, *default-lables]
     # deploy: # Change after testing
     #   resources:
@@ -100,6 +131,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
     volumes:
       - kafka1-data:/var/lib/kafka/data
+      - kafka1-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -156,6 +188,7 @@ services:
     image: grafana/promtail:2.6.1
     hostname: promtail
     container_name: promtail
+    userns_mode: "host"
     profiles:
       - logs
       - haproxy
@@ -228,8 +261,6 @@ services:
       - haproxy
     volumes:
       - prometheus_data:/prometheus
-    ports:
-      - 9090:9090
     configs:
       - source: prometheus
         target: /etc/prometheus/prometheus.yml
@@ -243,14 +274,17 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.44.0
     hostname: cadvisor
     container_name: cadvisor
+    userns_mode: "host"
     profiles:
       - monitoring
+      - haproxy
       - full
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/kmsg:/dev/kmsg:ro
     <<: [*default-svc, *log-driver, *default-lables]
 
   node-exporter:
@@ -259,6 +293,7 @@ services:
     container_name: node-exporter
     profiles:
       - monitoring
+      - haproxy
       - full
     command:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
@@ -335,11 +370,12 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-exporter:
-    image: percona/mongodb_exporter:0.30
+    image: percona/mongodb_exporter:0.33
     hostname: mongodb-exporter
     container_name: mongodb-exporter
     command:
     - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo:27017'
+    - '--compatible-mode'
     profiles:
       - monitoring
       - haproxy
@@ -377,7 +413,9 @@ volumes:
   prometheus_data:
   loki-data:
   kafka1-data:
+  kafka1-logs:
   zoo1-data:
+  zoo1-logs:
 
 networks:
   stage-net:

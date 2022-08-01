@@ -17,7 +17,6 @@
     docker_daemon_config:
       icc: false
       userns-remap: default
-      no-new-privileges: true
       live-restore: true
       userland-proxy: false
       log-driver: json-file

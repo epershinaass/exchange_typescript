@@ -1,15 +1,15 @@
-name: Build facade image
+name: Build balance image
 on:
   pull_request:
     types: [opened, reopened]
     paths:
-    - 'facade/**'
+    - 'balance/**'
   workflow_dispatch:
 
 env:
   IMAGE_REGISTRY: exchangetypescript.jfrog.io
-  IMAGE_REPOSITORY: facade-docker
-  DOCKER_IMAGE: facade
+  IMAGE_REPOSITORY: balance-docker
+  DOCKER_IMAGE: balance
 
 
 jobs:
@@ -37,14 +37,27 @@ jobs:
         images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Upload Dockerfile as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: Dockerfile
+
+    - name: Download artifact from previous workflow
+      uses: actions/download-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: /tmp
+
     - name: Build and push
       uses: docker/build-push-action@v3
       id: buildx
       with:
-        context: ./facade
-        file: ./Dockerfile
+        context: ./balance
+        file: /tmp/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         build-args: buildDate=$(date +'%Y-%m-%d')
+        labels: buildDate=$(date +'%Y-%m-%d')
         push: true
         cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
         cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
