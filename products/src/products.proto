@@ -8,8 +8,8 @@ service ProductsController {
 }
 
 message Product {
-  string name = 1;
-  uint64 quantity = 2;
+  string product_name = 1;
+  uint64 product_count = 2;
 }
 
 message AddProductRequest {
@@ -22,9 +22,9 @@ message GetProductResponse {
 }
 
 message Products {
-  string id = 1;
-  string name = 2;
-  uint64 quantity = 3;
+  string product_id = 1;
+  string product_name = 2;
+  uint64 product_count = 3;
 }
 
 message AddProductResponse {
