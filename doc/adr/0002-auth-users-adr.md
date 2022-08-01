@@ -43,16 +43,20 @@ Date: 2022-08-01: ACCEPTED
 - Мы могли бы попробовать хешировать на фронте, или же на самом сервисе Account. Но чем меньше дыр, где можно перехватить пароль - тем лучше.
 
 ```js
-export interface ICredentialsRequest {
+interface ICredentialsRequest {
   login: string;
   password: string;
 }
 
-export interface IAuthMessage {
+interface IAuthMessage {
   token: string;
 }
 
-export interface IResponse {
+interface IUserIdRequest {
+  userId: string;
+}
+
+interface IResponse {
   message: string;
 }
 
