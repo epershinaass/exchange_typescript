@@ -1,21 +1,13 @@
-import { GetProductDto } from '../dto/add-products.dto';
+import { AddProductsDto, GetProductDto } from '../dto/add-products.dto';
 
 export interface IProductsService {
   getProducts(getProductDto: GetProductDto): Promise<IProduct[]>;
-  addProduct(addProductRequest: IAddProductRequest): Promise<object>;
+  addProduct(addProductDto: AddProductsDto): Promise<IProduct>;
 }
 
 export interface IProduct {
-  productName: string;
-  productCount: number;
-  productId?: string;
+  name: string;
+  count: number;
+  id?: string;
 }
 
-export interface IAddProductRequest {
-  userId: string;
-  product: IProduct;
-}
-
-export interface IUserId {
-  userId: string;
-}

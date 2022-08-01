@@ -23,20 +23,20 @@ export const microserviceOptions: ClientOptions = {
 export class ProductsController implements OnModuleInit {
   @Client(microserviceOptions)
   private client: ClientGrpc;
-  private grpcService: IProductsService;
+  private productService: IProductsService;
 
   onModuleInit() {
-    this.grpcService =
+    this.productService =
       this.client.getService<IProductsService>('ProductsController');
   }
 
   @GrpcMethod('ProductsController', 'AddProduct')
   addProduct(@Body() addProductsDto: AddProductsDto) {
-    return this.grpcService.addProduct(addProductsDto);
+    return this.productService.addProduct(addProductsDto);
   }
 
   @GrpcMethod('ProductsController', 'GetProducts')
   getProducts(@Body() getProductDto: GetProductDto) {
-    return this.grpcService.getProducts(getProductDto);
+    return this.productService.getProducts(getProductDto);
   }
 }
