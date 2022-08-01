@@ -12,6 +12,7 @@ Date: 2022-08-01: ACCEPTED
 - Написать метод создания пользователя, и вызова методов других сервисов для создания соответствующих сущностей.
 - Написать метод для проверки токена
 
+[Ссылка на документ > 2.1](https://docs.google.com/document/d/1HwW4-Q8kIadQPA3vRosXDwSpWbfjIRJMwdgL5OhvnXY/edit#bookmark=id.y34kbxm8enrl)
 
 ## Decision
 
