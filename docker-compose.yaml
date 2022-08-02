@@ -17,17 +17,19 @@ services:
     container_name: balance
     build:
       context: balance
-      dockerfile: ../Dockerfile
+      dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
     profiles:
       - mongo
+      - dev
       - balance
+      - facade
       - full
     ports:
       - 5000:5000
     <<: [*default-svc, *log-driver]
-    environment:
-      DB_PORT: 27017
-      DB_URL: mongo
+
+    volumes:
+      - ./balance:/app/
 
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
@@ -35,12 +37,15 @@ services:
     container_name: facade
     build:
       context: facade
-      dockerfile: ./Dockerfile
+      dockerfile: ./${DOCKER_FILENAME:-Dockerfile-dev}
     profiles:
       - facade
+      - dev
       - full
+    volumes:
+      - ./balance:/app/
     ports:
-      - 3000:3000
+      - 3000:3001
     <<: [*default-svc, *log-driver]
 
   mongo:
@@ -49,8 +54,6 @@ services:
     container_name: mongo
 
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
       SERVICE_PASSWORD: balance
       SERVICE_USER: balance
       SERVICE_DB: balance
@@ -59,10 +62,11 @@ services:
       - db-data:/data/db
     configs:
       - source: mongo_config
-        target: /docker-entrypoint-initdb.d/mongo-init.sh
+        target: /docker-entrypoint-initdb.d/mongo-init.js
 
     profiles:
       - mongo
+      - dev
       - balance
       - full
     ports:
@@ -164,6 +168,7 @@ services:
       KAFKA_BROKERCONNECT: kafka1:9092
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
+    command: -schemaregistry.connect=http://localhost:8081
     depends_on:
       kafka1:
         condition: service_healthy
@@ -175,6 +180,7 @@ services:
     container_name: loki
     profiles:
       - logs
+      - dev
       - full
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
@@ -196,6 +202,7 @@ services:
     container_name: promtail
     profiles:
       - logs
+      - dev
       - full
     volumes:
       - /var/log:/var/log:ro
@@ -221,6 +228,7 @@ services:
     container_name: grafana
     profiles:
       - logs
+      - dev
       - full
     ports: ["3001:3000"]
     volumes:
@@ -248,7 +256,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.sh
+    file: ./infra/mongodb/mongo-init.js
   kafka_run:
     file: ./infra/update_run.sh
 

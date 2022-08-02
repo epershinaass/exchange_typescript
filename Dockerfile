@@ -18,3 +18,4 @@ RUN yarn install --production=true --frozen-lockfile && \
 COPY --from=builder /app/dist /app/dist
 
 CMD [ "yarn", "start:prod" ]
+
