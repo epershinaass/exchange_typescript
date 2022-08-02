@@ -68,7 +68,7 @@ jobs:
             JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
             JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
             JFROG_URL=$JFROG_URL
-            COMPOSE_HTTP_TIMEOUT=200
+            COMPOSE_HTTP_TIMEOUT=500
             LOKI_S3_USER=$LOKI_S3_USER
             LOKI_S3_PASSWORD=$LOKI_S3_PASSWORD
             MINIO_ROOT_USER=$MINIO_ROOT_USER
@@ -82,6 +82,7 @@ jobs:
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
             envsubst<infra/loki-config-scalable.yaml>temp && cat temp > infra/loki-config-scalable.yaml
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
+            wget -P ./infra https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
             openssl rand -base64 768 > ./infra/mongodb/mongo-replication.key
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             git restore .

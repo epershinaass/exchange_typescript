@@ -10,3 +10,4 @@ ansible/
 mongodb/
 *.cfg
 *.py
+*.sh
