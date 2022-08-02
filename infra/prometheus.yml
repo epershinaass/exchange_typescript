@@ -57,9 +57,9 @@ scrape_configs:
     static_configs:
     - targets: ['haproxy-exporter:9101']
 
-  - job_name: 'mongodb-exporter'
+  - job_name: 'mongodb-balance'
     static_configs:
-    - targets: ['mongodb-exporter:9216']
+    - targets: ['mongodb-balance-cluster:9216']
 
   - job_name: 'minio-s3'
     metrics_path: /minio/v2/metrics/cluster

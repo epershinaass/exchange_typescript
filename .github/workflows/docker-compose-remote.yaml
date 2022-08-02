@@ -82,6 +82,7 @@ jobs:
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
             envsubst<infra/loki-config-scalable.yaml>temp && cat temp > infra/loki-config-scalable.yaml
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
+            openssl rand -base64 768 > ./infra/mongodb/mongo-replication.key
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             git restore .
             git clean -dxf
