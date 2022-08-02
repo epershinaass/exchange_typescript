@@ -2,7 +2,8 @@ test/
 *.md
 .dockerignore
 .*
-.env
+!.env
+*.env
 **/dist
 **/node_modules
 .idea
