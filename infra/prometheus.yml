@@ -41,10 +41,6 @@ scrape_configs:
     static_configs:
     - targets: ['node-exporter:9100']
 
-  - job_name: 'zookeeper-exporter'
-    static_configs:
-    - targets: ['zookeeper-exporter:9141']
-
   - job_name: 'kafka-exporter'
     static_configs:
     - targets: ['kafka-exporter:9308']
@@ -57,9 +53,31 @@ scrape_configs:
     static_configs:
     - targets: ['haproxy-exporter:9101']
 
-  - job_name: 'mongodb-exporter'
+  - job_name: 'kafka1'
     static_configs:
-    - targets: ['mongodb-exporter:9216']
+    - targets: ['kafka1:9101']
+
+  - job_name: 'kafka2'
+    static_configs:
+    - targets: ['kafka2:9101']
+
+  - job_name: 'kafka3'
+    static_configs:
+    - targets: ['kafka3:9101']
+
+  - job_name: 'schema-registry'
+    static_configs:
+    - targets: ['schema-registry:9101']
+
+  - job_name: 'mongodb-balance'
+    static_configs:
+    - targets: ['mongodb-balance-cluster:9216']
+
+  - job_name: 'minio-s3'
+    metrics_path: /minio/v2/metrics/cluster
+    scheme: http
+    static_configs:
+      - targets: ['minio:9000']
 alerting:
   alertmanagers:
   - scheme: http
