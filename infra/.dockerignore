@@ -9,3 +9,4 @@ dashboards/
 ansible/
 mongodb/
 *.cfg
+*.py
