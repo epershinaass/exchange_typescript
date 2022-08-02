@@ -13,7 +13,7 @@ export class ProductsController {
 
   @GrpcMethod('ProductsController', 'AddProduct')
   async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
-    if (!checkForObjectId.test(addProductRequest.userId)) {
+    if (!checkForObjectId.test(String(addProductRequest.userId))) {
       throw new RpcException(getGrpcError(status.INVALID_ARGUMENT));
     }
     return await this.productsService.addProduct(addProductRequest);

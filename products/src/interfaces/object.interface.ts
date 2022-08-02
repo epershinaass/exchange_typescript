@@ -4,13 +4,13 @@ export interface IProduct {
   productId?: string;
 }
 
-export interface IAddProductRequest {
-  userId: string;
-  product: IProduct;
-}
-
 export interface IUserId {
   userId: string;
+}
+
+export interface IAddProductRequest {
+  userId: IUserId;
+  product: IProduct;
 }
 
 export interface IGetProductResponse {
