@@ -22,6 +22,10 @@ env:
   JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
   JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
   JFROG_URL: exchangetypescript.jfrog.io
+  LOKI_S3_USER: ${{ secrets.LOKI_S3_USER }}
+  LOKI_S3_PASSWORD: ${{ secrets.LOKI_S3_PASSWORD }}
+  MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
+  MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
 
   PROJECT_DIR: "exchange_typescript"
   GIT_URL: "https://github.com/epershinaass/exchange_typescript"
@@ -40,7 +44,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_USER,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,JFROG_URL
+          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_USER,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,JFROG_URL,LOKI_S3_USER,LOKI_S3_PASSWORD,MINIO_ROOT_USER,MINIO_ROOT_PASSWORD
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -65,6 +69,10 @@ jobs:
             JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
             JFROG_URL=$JFROG_URL
             COMPOSE_HTTP_TIMEOUT=500
+            LOKI_S3_USER=$LOKI_S3_USER
+            LOKI_S3_PASSWORD=$LOKI_S3_PASSWORD
+            MINIO_ROOT_USER=$MINIO_ROOT_USER
+            MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
 
 
@@ -72,6 +80,7 @@ jobs:
             envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
             envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
+            envsubst<infra/loki-config-scalable.yaml>temp && cat temp > infra/loki-config-scalable.yaml
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
             wget -P ./infra https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
             openssl rand -base64 768 > ./infra/mongodb/mongo-replication.key

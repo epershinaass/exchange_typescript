@@ -1,12 +1,18 @@
 apiVersion: 1
 
 datasources:
-  - name: Loki
-    type: loki
-    access: proxy
-    url: http://loki:3100
+  - access: proxy
+    basicAuth: false
     jsonData:
-      maxLines: 1000
+      httpHeaderName1: "X-Scope-OrgID"
+    secureJsonData:
+      httpHeaderValue1: "docker"
+    editable: true
+    name: loki
+    type: loki
+    uid: loki
+    url: http://haproxy:3100
+    version: 1
   - name: Prometheus
     type: prometheus
     access: proxy
