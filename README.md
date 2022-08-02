@@ -62,5 +62,6 @@ docker-compose build service_name
 - Kafdrop url: <http://localhost:9000>
 
 #### Работа в режиме dev:
+- Не забыть скопировать файл example.env для каждого микросервиса в папку с микросервисом под именем .env
 - Переходим в корень проекта и запускаем сервисы командой: docker-compose --profile profile_name up -d --build
-- Чтобы перейти в режим prod: DOCKER_FILENAME=Dockerfile docker-compose --profile profile_name up -d
+- Чтобы перейти в режим prod: DOCKER_FILENAME=Dockerfile docker-compose --profile profile_name up -d --build
