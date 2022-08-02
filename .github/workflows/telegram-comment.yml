@@ -1,0 +1,24 @@
+name: telegram message on PR
+on:
+  pull_request_review_comment:
+jobs:
+  message-review-comment:
+    name: message reviews comment
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request_review_comment' }}
+    timeout-minutes: 10
+    steps:
+      - name: send telegram message on pull request
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.event.pull_request_review_comment.comment.user.login }} ${{ github.event.pull_request_review_comment.action }} comment.
+            File: ${{ github.event.pull_request_review_comment.comment.path }}
+
+            Text: ${{ github.event.pull_request_review_comment.comment.body }}
+
+            See: ${{ github.event.pull_request_review_comment.comment.html_url }}
+            PR#${{ github.event.pull_request_review_comment.pull_request.number }}
+            Link: ${{ github.event.pull_request_review_comment.pull_request.html_url }}
