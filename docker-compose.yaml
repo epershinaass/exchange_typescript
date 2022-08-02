@@ -17,7 +17,7 @@ services:
     container_name: balance
     build:
       context: balance
-      dockerfile: ../Dockerfile
+      dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
     profiles:
       - mongo
       - balance
@@ -26,9 +26,9 @@ services:
     ports:
       - 5000:5000
     <<: [*default-svc, *log-driver]
-    environment:
-      DB_PORT: 27017
-      DB_URL: mongo
+
+    volumes:
+      - ./balance:/app/
 
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
@@ -41,7 +41,7 @@ services:
       - facade
       - full
     ports:
-      - 3000:3000
+      - 3000:3001
     <<: [*default-svc, *log-driver]
 
   mongo:
@@ -50,8 +50,6 @@ services:
     container_name: mongo
 
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
       SERVICE_PASSWORD: balance
       SERVICE_USER: balance
       SERVICE_DB: balance
@@ -60,7 +58,7 @@ services:
       - db-data:/data/db
     configs:
       - source: mongo_config
-        target: /docker-entrypoint-initdb.d/mongo-init.sh
+        target: /docker-entrypoint-initdb.d/mongo-init.js
 
     profiles:
       - mongo
@@ -250,7 +248,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.sh
+    file: ./infra/mongodb/mongo-init.js
   kafka_run:
     file: ./infra/update_run.sh
 
