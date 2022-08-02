@@ -1,11 +1,11 @@
-MONGODB1=mongo1
+MONGODB1=mongo-balance
 MONGODB2=mongo2
 MONGODB3=mongo3
 
 echo "**********************************************" ${MONGODB1}
 
 echo SETUP.sh time now: $(date +"%T")
-mongosh --host ${MONGODB1}:27017 -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD} <<EOF
+mongosh --host ${MONGODB1}:27017 <<EOF
 var cfg = {
     "_id": "rs1",
     "protocolVersion": 1,

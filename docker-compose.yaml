@@ -256,7 +256,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.js
+    file: infra/mongodb/local-mongo-init.js
   kafka_run:
     file: ./infra/update_run.sh
 

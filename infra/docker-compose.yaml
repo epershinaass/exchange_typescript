@@ -45,8 +45,6 @@ services:
     restart: no
     entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
       MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
       BALANCE_USER: balance
@@ -57,7 +55,7 @@ services:
       - haproxy
       - mongo-only
     depends_on:
-      - mongo1
+      - mongo-balance
       - mongo2
       - mongo3
     configs:
@@ -65,18 +63,18 @@ services:
         target: /docker-entrypoint-initdb.d/mongosetup.sh
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongo1:
+  mongo-balance:
     image: mongo:5.0.9
-    hostname: mongo1
-    container_name: mongo1
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    hostname: mongo-balance
+    container_name: mongo-balance
+
     volumes:
       - db-data1:/data/db
     configs:
       - source: keyfile
         target: /etc/mongo-replication.key
+      - source: mongo_balance_init
+        target: /docker-entrypoint-initdb.d/mongo-init.js
     command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
     profiles:
       - mongo
@@ -600,14 +598,14 @@ services:
     hostname: mongodb-exporter
     container_name: mongodb-exporter
     command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo1:27017'
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
     - '--compatible-mode'
     profiles:
       - monitoring
       - haproxy
       - full
     depends_on:
-      - mongo1
+      - mongo-balance
       - mongo2
       - mongo3
     <<: [*default-svc, *log-driver, *default-lables]
@@ -640,6 +638,8 @@ configs:
     file: ./jmx-sr-exporter-config.yml
   mongo_config_setup:
     file: ./mongodb/mongosetup.sh
+  mongo_balance_init:
+    file: ./mongodb/ci-mongo-init-balance.js
   keyfile:
     file: ./mongodb/mongo-replication.key
 
