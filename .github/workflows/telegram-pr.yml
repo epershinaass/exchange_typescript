@@ -20,7 +20,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.actor }} ${{ github.event.action }} PR #${{ github.event.number }}:
+            ${{ github.actor }} ${{ github.event.action }} PR ${{ github.event.number }}:
             From ${{ gihub.head_ref }} to ${{ github.base_ref }}
             Title: ${{ github.event.pull_request.title }}
             
