@@ -12,9 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: changes
         with:
+          list-files: 'none'
           filters: |
             root:
               - 'Dockerfile'
@@ -22,13 +24,11 @@ jobs:
               - 'facade/Dockerfile'
       - name: Validate root Dockerfile
         if: steps.changes.outputs.root == 'true'
-        uses: ghe-actions/dockerfile-validator@v1
+        uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: 'Dockerfile'
-          lint: 'hadolint'
       - name: Validate facade Dockerfile
         if: steps.changes.outputs.facade == 'true'
-        uses: ghe-actions/dockerfile-validator@v1
+        uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: 'facade/Dockerfile'
-          lint: 'hadolint'
