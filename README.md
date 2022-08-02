@@ -12,13 +12,13 @@
 ### Run
 
 ```bash
-docker-compose --profile full up -d --build
+docker-compose --profile dev up -d --build
 ```
 
 ### Stop
 
 ```bash
-docker-compose --profile full down
+docker-compose --profile dev down
 ```
 
 ### [Profiles](https://docs.docker.com/engine/reference/commandline/compose_up/)
@@ -32,7 +32,8 @@ docker-compose up -d
 Profiles avail:
 - balance: balance + mongo + kafka
 - mongo: mongo + balance
-- facade: facade + balance
+- facade: facade + balance + mongo
+- dev: facade + balance + mongo + loki + promtail + grafana
 - kafka: kafka + schema-registry + kafdrop
 - logs: loki + promtail + grafana
 - full: all services
