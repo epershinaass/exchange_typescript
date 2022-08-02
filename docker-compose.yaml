@@ -42,6 +42,8 @@ services:
       - facade
       - dev
       - full
+    volumes:
+      - ./balance:/app/
     ports:
       - 3000:3001
     <<: [*default-svc, *log-driver]
