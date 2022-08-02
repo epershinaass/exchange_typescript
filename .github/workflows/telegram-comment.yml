@@ -1,10 +1,11 @@
 name: Telegram message on PR comment
 on:
-  pull_request_review_comment:
-    types:
-      - "created"
-      - "edited"
-      - "deleted"
+  workflow_dispatch:
+  # pull_request_review_comment:
+  #   types:
+  #     - "created"
+  #     - "edited"
+  #     - "deleted"
 jobs:
   message-review-comment:
     name: message reviews comment

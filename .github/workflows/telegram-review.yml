@@ -1,10 +1,11 @@
 name: Telegram message on PR
 on:
-  pull_request_review:
-    types:
-      - "submitted"
-      - "edited"
-      - "dismissed"
+  workflow_dispatch:
+  # pull_request_review:
+  #   types:
+  #     - "submitted"
+  #     - "edited"
+  #     - "dismissed"
 jobs:
 
   message-review:
