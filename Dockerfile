@@ -20,6 +20,8 @@ COPY .env ./
 
 COPY .env ./
 
+COPY .env ./
+
 CMD [ "yarn", "start:prod" ]
 # ARG buildDate=today
 # LABEL buildDate=${buildDate}
