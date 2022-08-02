@@ -22,7 +22,7 @@ jobs:
           message: |
             ${{ github.actor }} ${{ github.event.action }} PR #${{ github.event.number }}:
             From ${{ gihub.head_ref }} to ${{ github.base_ref }}
-            Title: ${{ github.event.commits[0].message }}
+            Title: ${{ github.event.pull_request.title }}
             
             Repository: ${{ github.repository }}
             
