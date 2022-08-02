@@ -16,5 +16,7 @@ RUN yarn install --production=true --frozen-lockfile && \
     yarn global add @nestjs/cli
 
 COPY --from=builder /app/dist /app/dist
-
+COPY .env ./
 CMD [ "yarn", "start:prod" ]
+# ARG buildDate=today
+# LABEL buildDate=${buildDate}

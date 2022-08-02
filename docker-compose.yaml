@@ -40,7 +40,7 @@ services:
       - facade
       - full
     ports:
-      - 3000:3000
+      - 3001:3001
     <<: [*default-svc, *log-driver]
 
   mongo:
@@ -54,12 +54,13 @@ services:
       SERVICE_PASSWORD: balance
       SERVICE_USER: balance
       SERVICE_DB: balance
+      MONGODB_EXPORTER_PASSWORD: exporter
 
     volumes:
       - db-data:/data/db
     configs:
       - source: mongo_config
-        target: /docker-entrypoint-initdb.d/mongo-init.sh
+        target: /docker-entrypoint-initdb.d/
 
     profiles:
       - mongo
@@ -248,7 +249,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.sh
+    file: ./infra/mongodb/
   kafka_run:
     file: ./infra/update_run.sh
 
