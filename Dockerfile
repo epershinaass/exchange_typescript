@@ -16,9 +16,6 @@ RUN yarn install --production=true --frozen-lockfile && \
     yarn global add @nestjs/cli
 
 COPY --from=builder /app/dist /app/dist
-COPY .env ./
-
-COPY .env ./
 
 COPY .env ./
 
