@@ -17,5 +17,6 @@ jobs:
             Commit message: ${{ github.event.commits[0].message }}
             
             Repository: ${{ github.repository }}
+            Branch: ${{ github.ref.name }}
             
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
