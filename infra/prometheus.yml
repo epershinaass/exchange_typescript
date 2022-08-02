@@ -69,9 +69,9 @@ scrape_configs:
     static_configs:
     - targets: ['schema-registry:9101']
 
-  - job_name: 'mongodb-exporter'
+  - job_name: 'mongodb-balance'
     static_configs:
-    - targets: ['mongodb-exporter:9216']
+    - targets: ['mongodb-balance-cluster:9216']
 alerting:
   alertmanagers:
   - scheme: http

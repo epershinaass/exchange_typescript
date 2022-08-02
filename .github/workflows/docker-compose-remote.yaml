@@ -74,6 +74,7 @@ jobs:
             envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
             wget -P ./infra https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
+            openssl rand -base64 768 > ./infra/mongodb/mongo-replication.key
             docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             git restore .
             git clean -dxf

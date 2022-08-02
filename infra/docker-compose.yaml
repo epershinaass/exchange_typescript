@@ -40,30 +40,98 @@ services:
       - 3000:3000
     <<: [ *default-svc, *log-driver, *default-lables]
 
-
-  mongo:
+  mongo_setup:
     image: mongo:5.0.9
-    hostname: mongo
-    container_name: mongo
-
+    restart: no
+    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
       SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
-      SERVICE_USER: balance
-      SERVICE_DB: balance
-
-    volumes:
-      - db-data:/data/db
-    configs:
-      - source: mongo_config
-        target: /docker-entrypoint-initdb.d/mongo-init.sh
-
+      MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
+      BALANCE_USER: balance
+      BALANCE_DB: balance
     profiles:
       - mongo
       - full
-      # - haproxy
+      - haproxy
+      - mongo-only
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    configs:
+      - source: mongo_config_setup
+        target: /docker-entrypoint-initdb.d/mongosetup.sh
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo1:
+    image: mongo:5.0.9
+    hostname: mongo1
+    container_name: mongo1
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - db-data1:/data/db
+    configs:
+      - source: keyfile
+        target: /etc/mongo-replication.key
+    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
+    profiles:
+      - mongo
+      - full
+      - mongo-only
+      - haproxy
+    healthcheck:
+      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo2:
+    image: mongo:5.0.9
+    hostname: mongo2
+    container_name: mongo2
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - db-data2:/data/db
+    configs:
+      - source: keyfile
+        target: /etc/mongo-replication.key
+    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
+    profiles:
+      - mongo
+      - full
+      - mongo-only
+      - haproxy
+    healthcheck:
+      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    <<: [*default-svc, *log-driver, *default-lables]
+  mongo3:
+    image: mongo:5.0.9
+    hostname: mongo3
+    container_name: mongo3
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - db-data3:/data/db
+    configs:
+      - source: keyfile
+        target: /etc/mongo-replication.key
+    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
+    profiles:
+      - mongo
+      - full
+      - mongo-only
+      - haproxy
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -452,19 +520,21 @@ services:
         target: /usr/local/etc/haproxy/haproxy.cfg
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongodb-exporter:
+  mongodb-balance-cluster:
     image: percona/mongodb_exporter:0.33
     hostname: mongodb-exporter
     container_name: mongodb-exporter
     command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo:27017'
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo1:27017'
     - '--compatible-mode'
     profiles:
       - monitoring
       - haproxy
       - full
     depends_on:
-      - mongo
+      - mongo1
+      - mongo2
+      - mongo3
     <<: [*default-svc, *log-driver, *default-lables]
 
 
@@ -475,8 +545,6 @@ configs:
     file: ./promtail-config.yaml
   datasource-auth:
     file: ./datasource-auth.yaml
-  prometheus:
-    file: ./prometheus.yml
   alertmanager:
     file: ./alertmanager-config.yml
   prometheus-alerts:
@@ -495,9 +563,16 @@ configs:
     file: ./jmx-exporter-config.yml
   schema_registry_exporter_config:
     file: ./jmx-sr-exporter-config.yml
+  mongo_config_setup:
+    file: ./mongodb/mongosetup.sh
+  keyfile:
+    file: ./mongodb/mongo-replication.key
+
 volumes:
   grafana:
-  db-data:
+  db-data1:
+  db-data2:
+  db-data3:
   prometheus_data:
   loki-data:
   kafka1-data:
