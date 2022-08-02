@@ -49,8 +49,6 @@ services:
     container_name: mongo
 
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
       SERVICE_PASSWORD: balance
       SERVICE_USER: balance
       SERVICE_DB: balance
@@ -60,7 +58,7 @@ services:
       - db-data:/data/db
     configs:
       - source: mongo_config
-        target: /docker-entrypoint-initdb.d/
+        target: /docker-entrypoint-initdb.d/mongo-init.js
 
     profiles:
       - mongo
@@ -223,7 +221,8 @@ services:
     profiles:
       - logs
       - full
-    ports: ["3001:3000"]
+      - monitoring
+    ports: ["3002:3000"]
     volumes:
       - grafana:/var/lib/grafana
       - ./infra/dashboards:/etc/grafana/provisioning/dashboards:ro
@@ -249,7 +248,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/
+    file: ./infra/mongodb/mongo-init.js
   kafka_run:
     file: ./infra/update_run.sh
 
