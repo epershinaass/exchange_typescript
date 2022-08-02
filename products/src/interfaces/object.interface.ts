@@ -1,7 +1,7 @@
 export interface IProduct {
-  productName: string;
-  productCount: number;
-  productId?: string;
+  name: string;
+  count: number;
+  id?: string;
 }
 
 export interface IUserId {
