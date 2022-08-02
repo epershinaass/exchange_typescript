@@ -19,7 +19,6 @@ interface ICurrentBalance {
 
 interface ITransaction {
   transactionId: string;
-  currentBalance: number;
   refillSum: number;
   transactionTime: Date;
 }
