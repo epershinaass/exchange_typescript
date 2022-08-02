@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package account;
+
+service AccountController {
+  rpc SignIn (CredentialsRequest) returns (AuthMessage);
+  rpc SignUp (CredentialsRequest) returns (Response);
+  rpc IsAuth (AuthMessage) returns (Response);
+}
+
+message CredentialsRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message AuthMessage {
+  string token = 1;
+}
+message Response {
+  string message = 1;
+}
