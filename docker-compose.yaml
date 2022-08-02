@@ -29,7 +29,6 @@ services:
 
     volumes:
       - ./balance:/app/
-      - ./balance/.env:/app/.env
 
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
