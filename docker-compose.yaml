@@ -21,6 +21,7 @@ services:
     profiles:
       - mongo
       - balance
+      - facade
       - full
     ports:
       - 5000:5000
@@ -163,6 +164,7 @@ services:
       KAFKA_BROKERCONNECT: kafka1:9092
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
+    command: -schemaregistry.connect=http://localhost:8081
     depends_on:
       kafka1:
         condition: service_healthy
