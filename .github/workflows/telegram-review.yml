@@ -1,6 +1,10 @@
-name: telegram message on PR
+name: Telegram message on PR
 on:
   pull_request_review:
+    types:
+      - "submitted"
+      - "edited"
+      - "dismissed"
 jobs:
 
   message-review:
@@ -14,6 +18,8 @@ jobs:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: |
-            ${{ github.event.pull_request_review.review.user }} ${{ github.event.pull_request_review.action }} PR #${{ github.event.pull_request_review.pull_request.number }}
+            ${{ github.event.pull_request_review.review.user.login }} ${{ github.event.pull_request_review.action }}
+            PR #${{ github.event.pull_request_review.pull_request.number }}
+
             Pull request title: ${{ github.event.pull_request_review.pull_request.title }}
             See: ${{ github.event.pull_request_review.review.html_url }}

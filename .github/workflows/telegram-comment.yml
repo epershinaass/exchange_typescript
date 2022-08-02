@@ -1,11 +1,14 @@
-name: telegram message on PR
+name: Telegram message on PR comment
 on:
   pull_request_review_comment:
+    types:
+      - "created"
+      - "edited"
+      - "deleted"
 jobs:
   message-review-comment:
     name: message reviews comment
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request_review_comment' }}
     timeout-minutes: 10
     steps:
       - name: send telegram message on pull request

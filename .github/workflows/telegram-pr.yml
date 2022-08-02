@@ -1,4 +1,4 @@
-name: telegram message on PR
+name: Telegram message on PR
 on:
   pull_request:
     types:
@@ -24,7 +24,7 @@ jobs:
             From ${{ github.head_ref }} to ${{ github.base_ref }}
             Title: ${{ github.event.pull_request.title }}
             ${{ github.event.pull_request.body }}
-            Last head label: ${{ github.event.pull_request.head.label }}
+            Head branch: ${{ github.event.pull_request.head.ref }}
             Repository: ${{ github.repository }}
 
             See changes: https://github.com/${{ github.repository }}/pull/${{ github.event.number }}

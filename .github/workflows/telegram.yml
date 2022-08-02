@@ -1,4 +1,4 @@
-name: telegram message
+name: Telegram message
 on:
   push:
     branches:
