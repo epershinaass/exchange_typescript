@@ -20,6 +20,7 @@ services:
       dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
     profiles:
       - mongo
+      - dev
       - balance
       - facade
       - full
@@ -36,9 +37,10 @@ services:
     container_name: facade
     build:
       context: facade
-      dockerfile: ./Dockerfile
+      dockerfile: ./${DOCKER_FILENAME:-Dockerfile-dev}
     profiles:
       - facade
+      - dev
       - full
     ports:
       - 3000:3001
@@ -62,6 +64,7 @@ services:
 
     profiles:
       - mongo
+      - dev
       - balance
       - full
     ports:
@@ -175,6 +178,7 @@ services:
     container_name: loki
     profiles:
       - logs
+      - dev
       - full
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
@@ -196,6 +200,7 @@ services:
     container_name: promtail
     profiles:
       - logs
+      - dev
       - full
     volumes:
       - /var/log:/var/log:ro
@@ -221,6 +226,7 @@ services:
     container_name: grafana
     profiles:
       - logs
+      - dev
       - full
     ports: ["3001:3000"]
     volumes:
