@@ -17,7 +17,7 @@ services:
     container_name: balance
     build:
       context: balance
-      dockerfile: ../Dockerfile
+      dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
     profiles:
       - mongo
       - balance
@@ -25,9 +25,10 @@ services:
     ports:
       - 5000:5000
     <<: [*default-svc, *log-driver]
-    environment:
-      DB_PORT: 27017
-      DB_URL: mongo
+
+    volumes:
+      - ./balance:/app/
+      - ./balance/.env:/app/.env
 
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
@@ -40,7 +41,7 @@ services:
       - facade
       - full
     ports:
-      - 3001:3001
+      - 3000:3001
     <<: [*default-svc, *log-driver]
 
   mongo:
@@ -52,7 +53,6 @@ services:
       SERVICE_PASSWORD: balance
       SERVICE_USER: balance
       SERVICE_DB: balance
-      MONGODB_EXPORTER_PASSWORD: exporter
 
     volumes:
       - db-data:/data/db
@@ -221,8 +221,7 @@ services:
     profiles:
       - logs
       - full
-      - monitoring
-    ports: ["3002:3000"]
+    ports: ["3001:3000"]
     volumes:
       - grafana:/var/lib/grafana
       - ./infra/dashboards:/etc/grafana/provisioning/dashboards:ro

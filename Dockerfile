@@ -17,8 +17,5 @@ RUN yarn install --production=true --frozen-lockfile && \
 
 COPY --from=builder /app/dist /app/dist
 
-COPY .env ./
-
 CMD [ "yarn", "start:prod" ]
-# ARG buildDate=today
-# LABEL buildDate=${buildDate}
+

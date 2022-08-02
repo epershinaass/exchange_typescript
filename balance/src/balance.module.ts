@@ -11,7 +11,7 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
     }),
     MongooseModule.forRoot(
-      `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME_BALANCE}`,
+      `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
     ),
     MongooseModule.forFeature([
       {
