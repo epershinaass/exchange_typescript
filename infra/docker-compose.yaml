@@ -622,6 +622,8 @@ configs:
     file: ./datasource-auth.yaml
   alertmanager:
     file: ./alertmanager-config.yml
+  prometheus:
+    file: ./prometheus.yml
   prometheus-alerts:
     file: ./alert.rules
   mongo_config:
