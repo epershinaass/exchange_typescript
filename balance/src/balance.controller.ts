@@ -32,7 +32,7 @@ export class BalanceController {
       throw new RpcException(getGrpcError(e));
     }
 
-    this.balanceService.refillBalance(refillBalanceDto);
+    await this.balanceService.refillBalance(refillBalanceDto);
     return { status: status.OK };
   }
 
