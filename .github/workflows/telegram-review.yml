@@ -1,4 +1,4 @@
-name: Telegram message on PR
+name: Telegram message on PR review
 on:
   workflow_dispatch:
   # pull_request_review:
