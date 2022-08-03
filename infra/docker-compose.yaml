@@ -25,9 +25,9 @@ services:
     ports:
       - 5000:5000
     <<: [ *default-svc, *log-driver, *default-lables]
-    environment:
-      DB_PORT: ${BALANCE_DB_PORT:-27017}
-      DB_URL: ${BALANCE_DB_URL:-mongo}
+    configs:
+      - source: balance_env
+        target: /app/.env
 
   facade:
     image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
@@ -38,6 +38,9 @@ services:
       - full
     ports:
       - 3000:3000
+    configs:
+      - source: facade_env
+        target: /app/.env
     <<: [ *default-svc, *log-driver, *default-lables]
 
   mongo_setup:
@@ -642,6 +645,10 @@ configs:
     file: ./jmx-sr-exporter-config.yml
   mongo_config_setup:
     file: ./mongodb/mongosetup.sh
+  facade_env:
+    file: ../facade/.env
+  balance_env:
+    file: ../balance/.env
   keyfile:
     file: ./mongodb/mongo-replication.key
 
