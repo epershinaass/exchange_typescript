@@ -45,6 +45,8 @@ services:
     restart: no
     entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
     environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
       MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
       BALANCE_USER: balance
