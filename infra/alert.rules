@@ -384,15 +384,6 @@ groups:
       summary: Prometheus all targets missing (instance {{ $labels.instance }})
       description: "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-  - alert: PrometheusAllTargetsMissing
-    expr: sum by (job) (up) == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Prometheus all targets missing (instance {{ $labels.instance }})
-      description: "A Prometheus job does not have living target anymore.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
   - alert: PrometheusConfigurationReloadFailure
     expr: prometheus_config_last_reload_successful != 1
     for: 0m
@@ -720,45 +711,6 @@ groups:
       summary: Promtail request latency (instance {{ $labels.instance }})
       description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}s 99th percentile latency.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-
-# https://awesome-prometheus-alerts.grep.to/rules#zookeeper
-- name: Zookeeper
-  rules:
-  - alert: ZookeeperDown
-    expr: zk_up == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Zookeeper Down (instance {{ $labels.instance }})
-      description: "Zookeeper down on instance {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-  - alert: ZookeeperMissingLeader
-    expr: sum(zk_server_leader) == 0
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Zookeeper missing leader (instance {{ $labels.instance }})
-      description: "Zookeeper cluster has no node marked as leader\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-  - alert: ZookeeperTooManyLeaders
-    expr: sum(zk_server_leader) > 1
-    for: 0m
-    labels:
-      severity: critical
-    annotations:
-      summary: Zookeeper Too Many Leaders (instance {{ $labels.instance }})
-      description: "Zookeeper cluster has too many nodes marked as leader\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
-
-  - alert: ZookeeperNotOk
-    expr: zk_ruok == 0
-    for: 3m
-    labels:
-      severity: warning
-    annotations:
-      summary: Zookeeper Not Ok (instance {{ $labels.instance }})
-      description: "Zookeeper instance is not ok\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
 # https://awesome-prometheus-alerts.grep.to/rules#kafka-1
 - name: kafka

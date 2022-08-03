@@ -3,6 +3,7 @@ test/
 .dockerignore
 .*
 !.env
+*.env
 **/dist
 **/node_modules
 .idea
