@@ -8,7 +8,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
-import { firstValueFrom, lastValueFrom, withLatestFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { CredentialsDto, AuthMessageDto, MessageDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 

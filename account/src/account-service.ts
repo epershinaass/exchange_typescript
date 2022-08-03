@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Account, AccountDocument } from './account-model'
-import { ICredentialsRequest, IAuthMessage } from './msg/account-grpc-interface'
+import { ICredentials, IAuthMessage } from './msg/account-grpc-interface'
 import { codes, messages } from './msg/account-err';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -17,36 +17,37 @@ export class AccountService {
   ) { }
 
   private secret: string = this.configService.get('ACC_SECRET_KEY');
-  private salt: string = this.configService.get('ACC_PASSW_SALT');
 
-
-  public async signIn(creds: ICredentialsRequest): Promise<string | codes> {
+  public async signIn(creds: ICredentials): Promise<string> {
     const account = await this.accountModel.findOne({ login: creds.login });
 
     if (!account)
-      return codes.NOT_FOUND;
+      throw codes.NOT_FOUND;
     if (account?.password !== creds.password)
-      return codes.UNAUTHENTICATED;
+      throw codes.UNAUTHENTICATED;
 
-      const payload = { username: account.login, sub: account._id}
+    const payload = { username: account.login, sub: account._id }
     return this.jwtService.sign(payload);
   }
 
-  public async signUp(creds: ICredentialsRequest): Promise<string | codes> {
-    if (await this.accountModel.findOne({ login: creds.login }))
-      return codes.ALREADY_EXISTS;
+  public async signUp(creds: ICredentials): Promise<string> {
+    const account = await this.accountModel.findOne({ login: creds.login });
 
-    if (await this.accountModel.create(creds))
+    if (account)
+      throw codes.ALREADY_EXISTS;
+
+    const isAccountCreated = await this.accountModel.create(creds);
+    if (isAccountCreated)
       return messages.USER_MD;
 
-    return codes.ABORTED;
+    throw codes.ABORTED;
   }
 
-  public async isAuth(auth: IAuthMessage): Promise<string | codes> {
+  public async isAuth(auth: IAuthMessage): Promise<string> {
     try {
-      return JSON.stringify(this.jwtService.verify(auth.token, {secret: this.secret}));
+      return JSON.stringify(this.jwtService.verify(auth.token, { secret: this.secret }));
     } catch (err) {
-      return codes.UNAUTHENTICATED;
+      throw codes.UNAUTHENTICATED;
     }
   }
 }
