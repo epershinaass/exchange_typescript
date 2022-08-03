@@ -32,16 +32,15 @@ rs.initiate(cfg, { force: true });
 rs.secondaryOk();
 db.getMongo().setReadPref('primary');
 rs.reconfig(cfg);
-rs.status();
 
-db = db.getSiblingDB('$BALANCE_DB');
+db = db.getSiblingDB('${BALANCE_DB}');
 db.createUser({
-  user: '$BALANCE_USER',
-  pwd: '$SERVICE_PASSWORD',
+  user: 'balance',
+  pwd: 'v7tD3CiprwaWpDe7VoSk43Ea',
   roles: [
     {
       role: 'readWrite',
-      db: '$BALANCE_DB',
+      db: 'balance',
     },
   ],
 });
@@ -49,7 +48,7 @@ use admin;
 db.createUser(
   {
     user: 'mongodb_exporter',
-    pwd: '$MONGODB_EXPORTER_PASSWORD',
+    pwd: '4TWVDHzxuoEgvTr2dZzEcUdv',
     roles: [
         { role: 'clusterMonitor', db: 'admin' },
         { role: 'read', db: 'local' }

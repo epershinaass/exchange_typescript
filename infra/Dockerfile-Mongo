@@ -1,0 +1,5 @@
+FROM mongo:5.0.9
+COPY ./mongo-replication.key /etc/mongo-replication.key
+RUN chmod 400 /etc/mongo-replication.key && \
+    chmown 999 /etc/mongo-replication.key
+CMD ["mongod"]

@@ -66,7 +66,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongo1-balance:
-    image: mongo:5.0.9
+    image: mongo:cluster
     hostname: mongo1-balance
     container_name: mongo1-balance
     environment:
@@ -74,24 +74,21 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - db-data1:/data/db
-    configs:
-      - source: keyfile
-        target: /etc/mongo-replication.key
-    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
+    command: --replSet rs1 --bind_ip_all --keyfile /etc/mongo-replication.key
     profiles:
       - mongo
       - full
       - mongo-only
       - haproxy
     healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
+      test: echo 'db.runCommand("ping").ok' | mongo mongo1-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongo2-balance:
-    image: mongo:5.0.9
+    image: mongo:cluster
     hostname: mongo2-balance
     container_name: mongo2-balance
     environment:
@@ -99,23 +96,20 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - db-data2:/data/db
-    configs:
-      - source: keyfile
-        target: /etc/mongo-replication.key
-    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
+    command: --replSet rs1 --bind_ip_all --keyfile /etc/mongo-replication.key
     profiles:
       - mongo
       - full
       - mongo-only
       - haproxy
     healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
+      test: echo 'db.runCommand("ping").ok' | mongo mongo2-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
     <<: [*default-svc, *log-driver, *default-lables]
   mongo3-balance:
-    image: mongo:5.0.9
+    image: mongo:cluster
     hostname: mongo3-balance
     container_name: mongo3-balance
     environment:
@@ -123,20 +117,17 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - db-data3:/data/db
-    configs:
-      - source: keyfile
-        target: /etc/mongo-replication.key
-    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
+    command: --replSet rs1 --bind_ip_all --keyfile /etc/mongo-replication.key
     profiles:
       - mongo
       - full
       - mongo-only
       - haproxy
     healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
+      test: echo 'db.runCommand("ping").ok' | mongo mongo3-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
     <<: [*default-svc, *log-driver, *default-lables]
 
   kafka1:
@@ -642,8 +633,6 @@ configs:
     file: ./jmx-sr-exporter-config.yml
   mongo_config_setup:
     file: ./mongodb/mongosetup.sh
-  keyfile:
-    file: ./mongodb/mongo-replication.key
 
 volumes:
   grafana:
