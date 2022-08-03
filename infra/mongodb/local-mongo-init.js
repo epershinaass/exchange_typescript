@@ -139,7 +139,6 @@ db.balances.insertMany([
                     }
                 },
             }
-
         ]
     }
 ]);
