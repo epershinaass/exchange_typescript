@@ -69,11 +69,12 @@ services:
     image: mongo:5.0.9
     hostname: mongo
     container_name: mongo
-
-    # environment:
-    #   SERVICE_PASSWORD: balance
-    #   SERVICE_USER: balance
-    #   SERVICE_DB: balance
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin-password
+      SERVICE_PASSWORD: balance
+      SERVICE_USER: balance
+      SERVICE_DB: balance
 
     volumes:
       - db-data:/data/db
@@ -275,7 +276,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.js
+    file: infra/mongodb/local-mongo-init.js
   kafka_run:
     file: ./infra/update_run.sh
 
