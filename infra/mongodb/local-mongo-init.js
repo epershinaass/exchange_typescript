@@ -2,6 +2,16 @@
 /*****************************Init Database for balance****************************************************************/
 
 db = db.getSiblingDB('balance');
+db.createUser({
+    user: 'balance',
+    pwd: 'balance',
+    roles: [
+      {
+        role: 'readWrite',
+        db: 'balance',
+      },
+    ],
+  });
 db.createCollection('balances');
 
 db.balances.insertMany([
