@@ -39,3 +39,38 @@ message GetBalanceResponse {
 message GetBalanceRequest {
   string userId = 1;
 }
+
+
+service ProductsController {
+  rpc AddProduct (AddProductRequest) returns (AddProductResponse);
+  rpc GetProducts (GetProductRequest) returns (GetProductResponse);
+}
+
+message Product {
+  string name = 1;
+  uint64 quantity = 2;
+}
+
+message AddProductRequest {
+  string user_id = 1;
+  Product product = 2;
+}
+
+message GetProductResponse {
+  repeated Products product = 1;
+}
+
+message Products {
+  string id = 1;
+  string name = 2;
+  uint64 quantity = 3;
+}
+
+message AddProductResponse {
+  string response = 1;
+}
+
+message GetProductRequest {
+  string user_id = 1;
+}
+
