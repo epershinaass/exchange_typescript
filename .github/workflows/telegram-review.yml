@@ -1,0 +1,26 @@
+name: Telegram message on PR review
+on:
+  workflow_dispatch:
+  # pull_request_review:
+  #   types:
+  #     - "submitted"
+  #     - "edited"
+  #     - "dismissed"
+jobs:
+
+  message-review:
+    name: message reviews
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: send telegram message on pull request
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.event.pull_request_review.review.user.login }} ${{ github.event.pull_request_review.action }}
+            PR #${{ github.event.pull_request_review.pull_request.number }}
+
+            Pull request title: ${{ github.event.pull_request_review.pull_request.title }}
+            See: ${{ github.event.pull_request_review.review.html_url }}
