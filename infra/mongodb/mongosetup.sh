@@ -1,6 +1,6 @@
-MONGODB1=mongo1
-MONGODB2=mongo2
-MONGODB3=mongo3
+MONGODB1=mongo1-balance
+MONGODB2=mongo2-balance
+MONGODB3=mongo3-balance
 
 echo "**********************************************" ${MONGODB1}
 
