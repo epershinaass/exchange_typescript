@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
-    url: '${process.env.SERVICE_URL}:${process.env.SERVICE_PORT}',
+    url: `${process.env.SERVICE_URL}:${process.env.SERVICE_PORT}`,
     package: 'facade',
     protoPath: join(__dirname, '/proto/facade.proto'),
   },
