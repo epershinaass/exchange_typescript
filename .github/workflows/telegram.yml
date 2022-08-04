@@ -1,5 +1,9 @@
-name: telegram message
-on: [push]
+name: Telegram message
+on:
+  push:
+    branches:
+      - "main"
+
 jobs:
 
   message:
@@ -17,5 +21,6 @@ jobs:
             Commit message: ${{ github.event.commits[0].message }}
             
             Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
             
             See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
