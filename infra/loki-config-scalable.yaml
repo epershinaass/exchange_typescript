@@ -116,4 +116,4 @@ ruler:
       store: memberlist
   storage:
     s3:
-      bucket_name: loki-ruler
+      bucketnames: loki-ruler
