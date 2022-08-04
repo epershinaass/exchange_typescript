@@ -1,21 +1,21 @@
-name: Build facade image
+name: Build products image
 on:
   pull_request:
     types: [opened, reopened]
     paths:
-    - "facade/**"
+    - "products/**"
     branches: ["main"]
   push:
     paths:
-    - "facade/**"
+    - "products/**"
     branches:
     - "!main"
   workflow_dispatch:
 
 env:
   IMAGE_REGISTRY: exchangetypescript.jfrog.io
-  IMAGE_REPOSITORY: facade-docker
-  DOCKER_IMAGE: facade
+  IMAGE_REPOSITORY: products-docker
+  DOCKER_IMAGE: products
 
 
 jobs:
@@ -49,15 +49,27 @@ jobs:
           type=sha
           type=raw,value=latest,enable={{is_default_branch}}
 
+    - name: Upload Dockerfile as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: Dockerfile
+
+    - name: Download artifact from previous workflow
+      uses: actions/download-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: /tmp
+
     - name: Build and push
       uses: docker/build-push-action@v3
       id: buildx
       with:
-        context: ./facade
-        file: ./Dockerfile
+        context: ./products
+        file: /tmp/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
-        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache-facade
-        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache-facade,mode=max
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
