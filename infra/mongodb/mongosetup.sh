@@ -35,12 +35,12 @@ rs.reconfig(cfg);
 
 db = db.getSiblingDB('${BALANCE_DB}');
 db.createUser({
-  user: 'balance',
-  pwd: 'v7tD3CiprwaWpDe7VoSk43Ea',
+  user: '$BALANCE_USER',
+  pwd: '$SERVICE_PASSWORD',
   roles: [
     {
       role: 'readWrite',
-      db: 'balance',
+      db: '$BALANCE_DB',
     },
   ],
 });
@@ -48,7 +48,7 @@ use admin;
 db.createUser(
   {
     user: 'mongodb_exporter',
-    pwd: '4TWVDHzxuoEgvTr2dZzEcUdv',
+    pwd: '$MONGODB_EXPORTER_PASSWORD',
     roles: [
         { role: 'clusterMonitor', db: 'admin' },
         { role: 'read', db: 'local' }
