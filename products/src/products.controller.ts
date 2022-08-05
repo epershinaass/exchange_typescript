@@ -9,7 +9,7 @@ const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 
 @Controller()
 export class ProductsController {
-  constructor(private productsService: ProductsService) {}
+  constructor(private productsService: ProductsService) { }
 
   @GrpcMethod('ProductsController', 'AddProduct')
   async addProduct(addProductRequest: IAddProductRequest): Promise<object> {

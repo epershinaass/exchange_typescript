@@ -11,7 +11,7 @@ export class ProductsService {
 
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-  ) {}
+  ) { }
 
   public async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
     const product = await this.productModel.findOne({ userId: addProductRequest.userId });
