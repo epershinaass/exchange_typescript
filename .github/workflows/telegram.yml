@@ -5,6 +5,7 @@ jobs:
   message:
     name: message
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: send telegram message on push
         uses: appleboy/telegram-action@master
