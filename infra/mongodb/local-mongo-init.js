@@ -157,20 +157,20 @@ db.createUser({
 
 
 /*****************************Init Database for products****************************************************/
-db = db.getSiblingDB('products');
+db = db.getSiblingDB('product');
 
-/*db.products.insertMany([
+db.products.insertMany([
 
 
-]);*/
+]);
 
 db.createUser({
-    user: 'products',
-    pwd: 'products',
+    user: 'product',
+    pwd: 'product',
     roles: [
         {
             role: 'readWrite',
-            db: 'user-products',
+            db: 'product',
         },
     ],
 });
