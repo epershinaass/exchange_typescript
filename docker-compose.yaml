@@ -17,31 +17,70 @@ services:
     container_name: products
     build:
       context: products
-      dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
+      dockerfile: ../Dockerfile
     profiles:
       - mongo
-      - dev
+      - test
       - products
       - facade
       - full
     ports:
       - 5001:5000
     volumes:
+      - ./products/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+  products-dev:
+    image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
+    hostname: products-dev
+    container_name: products-dev
+    build:
+      context: products
+      dockerfile: ../Dockerfile-dev
+    profiles:
+      - products-dev
+      - facade-dev
+      - dev
+      - mongo-dev
+      - full-dev
+    ports:
+      - 5001:5000
+    volumes:
       - ./products:/app/
     <<: [*default-svc, *log-driver]
+
   balance:
     image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
     hostname: balance
     container_name: balance
     build:
       context: balance
-      dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
+      dockerfile: ../Dockerfile
     profiles:
       - mongo
-      - dev
+      - test
       - balance
       - facade
       - full
+    ports:
+      - 5000:5000
+    volumes:
+      - ./balance/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+  balance-dev:
+    image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
+    hostname: balance-dev
+    container_name: balance-dev
+    build:
+      context: balance
+      dockerfile: ../Dockerfile-dev
+    profiles:
+      - balance-dev
+      - facade-dev
+      - mongo-dev
+      - dev
+      - full-dev
     ports:
       - 5000:5000
     volumes:
@@ -54,15 +93,32 @@ services:
     container_name: facade
     build:
       context: facade
-      dockerfile: ./${DOCKER_FILENAME:-Dockerfile-dev}
+      dockerfile: ./Dockerfile
     profiles:
       - facade
-      - dev
+      - test
       - full
+    volumes:
+      - ./facade/.env:/app/.env
+    ports:
+      - 3000:3000
+    <<: [*default-svc, *log-driver]
+
+  facade-dev:
+    image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
+    hostname: facade-dev
+    container_name: facade-dev
+    build:
+      context: facade
+      dockerfile: ./Dockerfile-dev
+    profiles:
+      - facade-dev
+      - dev
+      - full-dev
     volumes:
       - ./facade:/app/
     ports:
-      - 3000:3001
+      - 3000:3000
     <<: [*default-svc, *log-driver]
 
   mongo:
@@ -84,10 +140,17 @@ services:
 
     profiles:
       - mongo
+      - mongo-dev
+      - facade
+      - facade-dev
       - dev
+      - test
+      - balance-dev
       - balance
       - products
+      - products-dev
       - full
+      - full-dev
     ports:
       - 27017:27017
     healthcheck:
@@ -103,9 +166,8 @@ services:
     container_name: kafka1
     profiles:
       - kafka
-      - balance
-      - products
       - full
+      - full-dev
     ports:
       - 29092:29092
     healthcheck:
@@ -159,6 +221,7 @@ services:
     profiles:
       - kafka
       - full
+      - full-dev
     ports:
       - 8081:8081
     environment:
@@ -182,6 +245,7 @@ services:
     profiles:
       - kafka
       - full
+      - full-dev
     ports:
       - 9000:9000
     environment:
@@ -200,8 +264,10 @@ services:
     container_name: loki
     profiles:
       - logs
+      - test
       - dev
       - full
+      - full-dev
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
       resources:
@@ -222,8 +288,10 @@ services:
     container_name: promtail
     profiles:
       - logs
+      - test
       - dev
       - full
+      - full-dev
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -248,8 +316,10 @@ services:
     container_name: grafana
     profiles:
       - logs
+      - test
       - dev
       - full
+      - full-dev
     ports: ["3001:3000"]
     volumes:
       - grafana:/var/lib/grafana
