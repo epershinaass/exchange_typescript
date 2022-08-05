@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "@types/node": "^18.6.4"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.6.8",
+    "@nestjs/common": "^9.0.8",
+    "@nestjs/config": "^2.2.0",
+    "@nestjs/core": "^9.0.8",
+    "@nestjs/microservices": "^9.0.8",
+    "@nestjs/mongoose": "^9.2.0",
+    "mongoose": "^6.5.1"
+  }
+}

@@ -128,10 +128,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin-password
-      SERVICE_PASSWORD: balance
-      SERVICE_USER: balance
-      SERVICE_DB: balance
-
     volumes:
       - db-data:/data/db
     configs:

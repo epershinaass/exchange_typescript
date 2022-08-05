@@ -6,7 +6,7 @@ db = db.getSiblingDB('balance');
 db.balances.insertMany([
     {
         total: 2150,
-        userId: "62e370f465eec4910c2ba2e1",
+        userId: ObjectId("62e370f465eec4910c2ba2e1"),
         transactions: [
             {
                 transactionId: "ipsum in do",
@@ -160,8 +160,13 @@ db.createUser({
 db = db.getSiblingDB('product');
 
 db.products.insertMany([
-
-
+    {
+        product: {
+            name: "enim",
+            quantity: "41277"
+        },
+        userId: ObjectId("62e370f465eec4910c2ba2e1")
+    }
 ]);
 
 db.createUser({
