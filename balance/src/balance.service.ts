@@ -15,8 +15,7 @@ export class BalanceService {
     refillBalanceDto: RefillBalanceDto,
   ): Promise<IBalance> {
     // операция атомарна, перезаписи документа не будет
-    // Надо ли добавлять автоинкрементирующийся счетчик для проверки выполнения
-    // если операция точно выполнится и докумнет ничто не перезапишет?
+    // transaction_id генерируется на фасаде и проверяется в контроллере
     return this.balanceModel
       .findOneAndUpdate(
         { userId: refillBalanceDto.userId },
