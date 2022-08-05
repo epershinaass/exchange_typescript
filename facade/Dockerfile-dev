@@ -7,6 +7,7 @@ RUN yarn install --production=true --frozen-lockfile && \
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 ADD https://raw.githubusercontent.com/epershinaass/exchange_typescript/main/balance/src/proto/balance.proto ./src/balance/proto/balance.proto
+ADD https://raw.githubusercontent.com/epershinaass/exchange_typescript/main/products/src/products.proto ./src/products/proto/products.proto
 RUN yarn build
 
 CMD [ "yarn", "start:dev" ]

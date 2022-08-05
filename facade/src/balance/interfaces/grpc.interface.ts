@@ -1,6 +1,10 @@
-export interface IGrpcService {
-  refillBalance(refillBalanceInfo: IRefillBalanceRequest): Promise<any>;
-  getBalance(userId: IGetBalanceRequest): Promise<IBalance>;
+import { Observable } from 'rxjs';
+
+export interface IBalanceService {
+  refillBalance(
+    refillBalanceInfo: IRefillBalanceRequest,
+  ): Observable<IRefillBalanceResponse>;
+  getBalance(userId: IGetBalanceRequest): Observable<IGetBalanceResponse>;
 }
 
 interface IRefillBalanceRequest {
@@ -9,10 +13,14 @@ interface IRefillBalanceRequest {
   refillSum: number;
 }
 
+export interface IRefillBalanceResponse {
+  status: number;
+}
+
 interface IGetBalanceRequest {
   userId: string;
 }
 
-export interface IBalance {
+export interface IGetBalanceResponse {
   total: number;
 }

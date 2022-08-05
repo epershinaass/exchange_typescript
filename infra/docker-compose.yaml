@@ -25,9 +25,9 @@ services:
     ports:
       - 5000:5000
     <<: [ *default-svc, *log-driver, *default-lables]
-    environment:
-      DB_PORT: ${BALANCE_DB_PORT:-27017}
-      DB_URL: ${BALANCE_DB_URL:-mongo}
+    configs:
+      - source: balance_env
+        target: /app/.env
 
   facade:
     image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
@@ -38,6 +38,9 @@ services:
       - full
     ports:
       - 3000:3000
+    configs:
+      - source: facade_env
+        target: /app/.env
     <<: [ *default-svc, *log-driver, *default-lables]
 
   mongo_setup:
@@ -57,18 +60,18 @@ services:
       - haproxy
       - mongo-only
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongo1-balance
+      - mongo2-balance
+      - mongo3-balance
     configs:
       - source: mongo_config_setup
         target: /docker-entrypoint-initdb.d/mongosetup.sh
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongo1:
+  mongo1-balance:
     image: mongo:5.0.9
-    hostname: mongo1
-    container_name: mongo1
+    hostname: mongo1-balance
+    container_name: mongo1-balance
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -90,10 +93,10 @@ services:
       retries: 10
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongo2:
+  mongo2-balance:
     image: mongo:5.0.9
-    hostname: mongo2
-    container_name: mongo2
+    hostname: mongo2-balance
+    container_name: mongo2-balance
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -114,10 +117,10 @@ services:
       timeout: 2s
       retries: 10
     <<: [*default-svc, *log-driver, *default-lables]
-  mongo3:
+  mongo3-balance:
     image: mongo:5.0.9
-    hostname: mongo3
-    container_name: mongo3
+    hostname: mongo3-balance
+    container_name: mongo3-balance
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -340,6 +343,8 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-read:
@@ -358,6 +363,8 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-write:
@@ -384,6 +391,8 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
     <<: [*default-svc, *log-driver, *default-lables]
 
   minio:
@@ -600,16 +609,16 @@ services:
     hostname: mongodb-exporter
     container_name: mongodb-exporter
     command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo1:27017'
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo1-balance:27017'
     - '--compatible-mode'
     profiles:
       - monitoring
       - haproxy
       - full
     depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
+      - mongo1-balance
+      - mongo2-balance
+      - mongo3-balance
     <<: [*default-svc, *log-driver, *default-lables]
 
 
@@ -642,6 +651,12 @@ configs:
     file: ./jmx-sr-exporter-config.yml
   mongo_config_setup:
     file: ./mongodb/mongosetup.sh
+  facade_env:
+    file: ../facade/.env
+  balance_env:
+    file: ../balance/.env
+  loki_alert:
+    file: ./loki-rules.yml
   keyfile:
     file: ./mongodb/mongo-replication.key
 
