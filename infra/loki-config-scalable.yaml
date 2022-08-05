@@ -104,3 +104,16 @@ querier:
 compactor:
   working_directory: /tmp/compactor
   shared_store: s3
+
+ruler:
+  alertmanager_url: http://alertmanager:9093
+  enable_alertmanager_v2: true
+  enable_api: true
+  enable_sharding: true
+  rule_path: /tmp/rules
+  ring:
+    kvstore:
+      store: memberlist
+  storage:
+    s3:
+      bucketnames: loki-ruler

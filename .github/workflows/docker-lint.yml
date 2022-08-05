@@ -5,6 +5,7 @@ on:
     paths:
     - 'Dockerfile'
     - 'facade/Dockerfile'
+    - 'infra/Dockerfile-Mongo'
   workflow_dispatch:
 
 jobs:
@@ -22,6 +23,8 @@ jobs:
               - 'Dockerfile'
             facade:
               - 'facade/Dockerfile'
+            infra:
+              - 'infra/Dockerfile-Mongo'
       - name: Validate root Dockerfile
         if: steps.changes.outputs.root == 'true'
         uses: hadolint/hadolint-action@v2.0.0
@@ -32,3 +35,8 @@ jobs:
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: 'facade/Dockerfile'
+      - name: Validate infra Dockerfiles
+        if: steps.changes.outputs.infra == 'true'
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: 'infra/Dockerfile-Mongo'

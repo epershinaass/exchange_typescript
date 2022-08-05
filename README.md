@@ -31,9 +31,10 @@ docker-compose up -d
 
 Profiles avail:
 - balance: balance + mongo + kafka
-- mongo: mongo + balance
-- facade: facade + balance + mongo
-- dev: facade + balance + mongo + loki + promtail + grafana
+- products: products + mongo + kafka
+- mongo: mongo + balance + products
+- facade: facade + balance + mongo + products
+- dev: facade + balance + mongo + loki + promtail + grafana + products
 - kafka: kafka + schema-registry + kafdrop
 - logs: loki + promtail + grafana
 - full: all services
@@ -49,6 +50,7 @@ docker-compose build service_name
 
 ```md
 - Balance: 5000
+- Products: 5001
 - Facade: 3000
 - Kafka: 29092
 - Schema registry (kafka): 8081
@@ -62,7 +64,8 @@ docker-compose build service_name
 - Grafana + loki url: <http://localhost:3001>
 - Kafdrop url: <http://localhost:9000>
 
-#### Работа в режиме dev:
+#### Работа в режиме dev
+
 - Не забыть скопировать файл example.env для каждого микросервиса в папку с микросервисом под именем .env
 - Переходим в корень проекта и запускаем сервисы командой: docker-compose --profile profile_name up -d --build
 - Чтобы перейти в режим prod: DOCKER_FILENAME=Dockerfile docker-compose --profile profile_name up -d --build

@@ -11,6 +11,24 @@ x-log: &log-driver
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  products:
+    image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
+    hostname: products
+    container_name: products
+    build:
+      context: products
+      dockerfile: ../${DOCKER_FILENAME:-Dockerfile-dev}
+    profiles:
+      - mongo
+      - dev
+      - products
+      - facade
+      - full
+    ports:
+      - 5001:5000
+    volumes:
+      - ./products:/app/
+    <<: [*default-svc, *log-driver]
   balance:
     image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
     hostname: balance
@@ -26,10 +44,9 @@ services:
       - full
     ports:
       - 5000:5000
-    <<: [*default-svc, *log-driver]
-
     volumes:
       - ./balance:/app/
+    <<: [*default-svc, *log-driver]
 
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
@@ -43,7 +60,7 @@ services:
       - dev
       - full
     volumes:
-      - ./balance:/app/
+      - ./facade:/app/
     ports:
       - 3000:3001
     <<: [*default-svc, *log-driver]
@@ -52,8 +69,9 @@ services:
     image: mongo:5.0.9
     hostname: mongo
     container_name: mongo
-
     environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin-password
       SERVICE_PASSWORD: balance
       SERVICE_USER: balance
       SERVICE_DB: balance
@@ -68,6 +86,7 @@ services:
       - mongo
       - dev
       - balance
+      - products
       - full
     ports:
       - 27017:27017
@@ -85,6 +104,7 @@ services:
     profiles:
       - kafka
       - balance
+      - products
       - full
     ports:
       - 29092:29092
@@ -256,7 +276,7 @@ configs:
   datasource:
     file: ./infra/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.js
+    file: infra/mongodb/local-mongo-init.js
   kafka_run:
     file: ./infra/update_run.sh
 
