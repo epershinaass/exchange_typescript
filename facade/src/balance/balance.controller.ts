@@ -14,6 +14,7 @@ import { IGrpcService } from './interfaces/grpc.interface';
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
   options: {
+    url: '0.0.0.0:5000',
     package: 'balance',
     protoPath: join(__dirname, './proto/balance.proto'),
   },
