@@ -16,7 +16,7 @@ import { IBalanceService } from './interfaces/grpc.interface';
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
   options: {
-    url: `${process.env.BALANCE_URL}:${process.env.BALANCE_PORT}`,
+    url: 'balance:5000',
     package: 'balance',
     protoPath: join(__dirname, './proto/balance.proto'),
   },
