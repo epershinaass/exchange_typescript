@@ -46,21 +46,21 @@ service ProductsController {
   rpc GetProducts (GetProductRequest) returns (GetProductResponse);
 }
 
-message Product {
+message Products {
   string name = 1;
   uint64 quantity = 2;
 }
 
 message AddProductRequest {
   string user_id = 1;
-  Product product = 2;
+  Products product = 2;
 }
 
 message GetProductResponse {
-  repeated Products product = 1;
+  repeated Product products_list = 1;
 }
 
-message Products {
+message Product {
   string id = 1;
   string name = 2;
   uint64 quantity = 3;
@@ -73,4 +73,3 @@ message AddProductResponse {
 message GetProductRequest {
   string user_id = 1;
 }
-
