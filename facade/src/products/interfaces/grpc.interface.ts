@@ -7,7 +7,7 @@ export interface IProductsService {
 
 export interface IProduct {
   name: string;
-  count: number;
+  quantity: number;
   id?: string;
 }
 
