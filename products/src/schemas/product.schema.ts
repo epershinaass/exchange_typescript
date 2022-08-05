@@ -7,18 +7,18 @@ export type ProductDocument = Product & Document;
 @Schema()
 export class Product {
 
-@Prop({type: mongoose.Types.ObjectId})
-userId: string
+  @Prop({ type: mongoose.Types.ObjectId })
+  userId: string
 
-@Prop({
-  type: [
-    {
-      name: { type: String },
-      quantity: { type: Number },
-    },
-  ],
-})
-products_list: IProduct[];
+  @Prop({
+    type: [
+      {
+        name: { type: String },
+        quantity: { type: Number },
+      },
+    ],
+  })
+  products: IProduct[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

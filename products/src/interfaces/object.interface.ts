@@ -13,6 +13,11 @@ export interface IAddProductRequest {
   product: IProduct;
 }
 
-export interface IGetProductResponse {
-  products_list: IProduct[];
+export interface IGetProductsResponse {
+  products: IProduct[];
+}
+
+export interface IUserProductsDocument {
+  userId: string;
+  products: IProduct[];
 }
