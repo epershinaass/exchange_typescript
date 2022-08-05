@@ -45,7 +45,7 @@ message GetBalanceRequest {
 service AccountController {
   rpc SignIn (CredentialsRequest) returns (AuthResponse);
   rpc SignUp (CredentialsRequest) returns (MessageResponse);
-  rpc IsAuth (AuthRequest) returns (MessageResponse);
+  rpc Verify (AuthRequest) returns (MessageResponse);
 }
 
 message CredentialsRequest {

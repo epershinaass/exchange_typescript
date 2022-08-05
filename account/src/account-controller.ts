@@ -1,38 +1,27 @@
-import { Body, Controller } from '@nestjs/common';
+import { Body, Controller, UseFilters } from '@nestjs/common';
 import { AccountService } from './account-service';
 import { GrpcMethod } from '@nestjs/microservices';
-import { getGrpcErr } from './msg/account-err';
-import { AuthMessageDto, CredentialsDto, MessageDto } from './msg/account-dto';
+import { AnyExceptionFilter } from './msg/account-err';
+import { AuthTokenDto, CredentialsDto, MessageDto } from './msg/account-dto';
 
 
 @Controller()
+@UseFilters(AnyExceptionFilter)
 export class AccountController {
   constructor(private accountService: AccountService) { }
 
   @GrpcMethod('AccountController', 'SignIn')
-  async signIn(@Body() creds: CredentialsDto, metadata: any): Promise<AuthMessageDto> {
-    try {
-      return new AuthMessageDto(await this.accountService.signIn(creds));
-    } catch(err) {
-      throw getGrpcErr(err);
-    }
+  async signIn(@Body() creds: CredentialsDto, metadata: any): Promise<AuthTokenDto> {
+    return await this.accountService.signIn(creds);
   }
 
   @GrpcMethod('AccountController', 'SignUp')
   async signUp(@Body() creds: CredentialsDto, metadata: any): Promise<MessageDto> {
-    try {
-      return new MessageDto(await this.accountService.signUp(creds));
-    } catch(err) {
-      throw getGrpcErr(err);
-    }
+    return await this.accountService.signUp(creds);
   }
 
-  @GrpcMethod('AccountController', 'IsAuth')
-  async isAuth(@Body() auth: AuthMessageDto, metadata: any): Promise<MessageDto> {
-    try {
-      return new MessageDto(await this.accountService.isAuth(auth));
-    } catch(err) {
-      throw getGrpcErr(err);
-    }
+  @GrpcMethod('AccountController', 'Verify')
+  async verify(@Body() auth: AuthTokenDto, metadata: any): Promise<MessageDto> {
+    return await this.accountService.verify(auth);
   }
 }

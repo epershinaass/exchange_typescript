@@ -1,15 +1,15 @@
-import { Body, Controller, OnModuleInit } from '@nestjs/common';
+import { Body, Controller, OnModuleInit, UseFilters } from '@nestjs/common';
 import {
   Client,
   ClientGrpc,
   ClientOptions,
   GrpcMethod,
-  RpcException,
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
-import { CredentialsDto, AuthMessageDto, MessageDto } from './dto/account-dto';
+import { CredentialsDto, AuthTokenDto, MessageDto } from './dto/account-dto';
+import { AnyExceptionFilter } from './error/grpc-exception-filter';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 
 export const microserviceOptions: ClientOptions = {
@@ -22,6 +22,7 @@ export const microserviceOptions: ClientOptions = {
 };
 
 @Controller()
+@UseFilters(AnyExceptionFilter)
 export class AccountController implements OnModuleInit {
   @Client(microserviceOptions)
   private client: ClientGrpc;
@@ -34,29 +35,17 @@ export class AccountController implements OnModuleInit {
   }
 
   @GrpcMethod('AccountController', 'SignIn')
-  async signIn(@Body() creds: CredentialsDto): Promise<AuthMessageDto> {
-    try {
+  async signIn(@Body() creds: CredentialsDto): Promise<AuthTokenDto> {
       return await firstValueFrom(this.grpcService.signIn(creds))
-    } catch (err) {
-      throw new RpcException(err);
-    }
   }
 
   @GrpcMethod('AccountController', 'SignUp')
   async signUp(@Body() creds: CredentialsDto): Promise<MessageDto> {
-    try {
       return await firstValueFrom(this.grpcService.signUp(creds))
-    } catch (err) {
-      throw new RpcException(err);
-    }
   }
 
-  @GrpcMethod('AccountController', 'IsAuth')
-  async isAuth(@Body() auth: AuthMessageDto): Promise<MessageDto> {
-    try {
-      return await firstValueFrom(this.grpcService.isAuth(auth))
-    } catch (err) {
-      throw new RpcException(err);
-    }
+  @GrpcMethod('AccountController', 'Verify')
+  async verify(@Body() auth: AuthTokenDto): Promise<MessageDto> {
+      return await firstValueFrom(this.grpcService.verify(auth))
   }
 }

@@ -1,6 +1,11 @@
 import { status } from '@grpc/grpc-js';
 //import { IGrpcErr } from './account-grpc-interface';
 import { RpcException } from '@nestjs/microservices';
+import { ArgumentsHost, Catch, ExceptionFilter, RpcExceptionFilter } from "@nestjs/common";
+import { BaseExceptionFilter } from '@nestjs/core';
+import { Request, Response } from 'express';
+import { callbackify } from 'util';
+import { Observable, of, throwError } from 'rxjs';
 
 
 export enum codes {
@@ -15,23 +20,31 @@ export enum codes {
 }
 
 export enum messages {
-  USER_MD = 'user created',
+  USER_MADE = 'user created',
+}
+
+@Catch()
+export class AnyExceptionFilter implements RpcExceptionFilter {
+  catch(code: codes): Observable<any> {
+    const error = getGrpcErr(code);
+    return throwError(() => error.getError());
+  }
 }
 
 export function getGrpcErr(code: codes): RpcException {
 
-  switch (code.valueOf()) {
-    case status.UNKNOWN: return describe('something goes wrong');
-    case status.INVALID_ARGUMENT: return describe('invalid request parameters');
-    case status.NOT_FOUND: return describe('user with that login not found');
-    case status.ALREADY_EXISTS: return describe('user already exists');
-    case status.PERMISSION_DENIED: return describe('you don\'t have permission');
-    case status.ABORTED: return describe('request aborted');
-    case status.UNIMPLEMENTED: return describe('feature is not implemented');
-    case status.UNAUTHENTICATED: return describe('you are not authenticated');
+  switch (code) {
+    case codes.INVALID_ARGS: return describe('invalid request parameters');
+    case codes.NOT_FOUND: return describe('user with that login not found');
+    case codes.ALREADY_EXISTS: return describe('user already exists');
+    case codes.PERMISSION_DENIED: return describe('you don\'t have permission');
+    case codes.ABORTED: return describe('request aborted');
+    case codes.UNIMPLEMENTED: return describe('feature is not implemented');
+    case codes.UNAUTHENTICATED: return describe('you are not authenticated');
+    case codes.UNKNOWN: return describe('something goes wrong'); //default case?
   }
 
   function describe(message: string): RpcException {
-    return new RpcException({code, message});
+    return new RpcException({ code, message });
   }
 }
