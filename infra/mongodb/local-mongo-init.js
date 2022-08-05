@@ -156,6 +156,24 @@ db.createUser({
 /*****************************End init of Database for balance*********************************************************/
 
 
-/*****************************Init Database for other microservices****************************************************/
-/*...*/
+/*****************************Init Database for products****************************************************/
+db = db.getSiblingDB('products');
+
+/*db.products.insertMany([
+
+
+]);*/
+
+db.createUser({
+    user: 'products',
+    pwd: 'products',
+    roles: [
+        {
+            role: 'readWrite',
+            db: 'user-products',
+        },
+    ],
+});
+
+
 /**********************************************************************************************************************/

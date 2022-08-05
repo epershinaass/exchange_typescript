@@ -25,7 +25,7 @@ services:
       - facade
       - full
     ports:
-      - 5001:5000
+      - 5001:5001
     volumes:
       - ./products/.env:/app/.env
     <<: [*default-svc, *log-driver]
@@ -44,7 +44,7 @@ services:
       - mongo-dev
       - full-dev
     ports:
-      - 5001:5000
+      - 5001:5001
     volumes:
       - ./products:/app/
     <<: [*default-svc, *log-driver]
