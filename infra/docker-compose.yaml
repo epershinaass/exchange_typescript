@@ -343,6 +343,8 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-read:
@@ -361,6 +363,8 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-write:
@@ -387,6 +391,8 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
     <<: [*default-svc, *log-driver, *default-lables]
 
   minio:
@@ -649,6 +655,8 @@ configs:
     file: ../facade/.env
   balance_env:
     file: ../balance/.env
+  loki_alert:
+    file: ./loki-rules.yml
   keyfile:
     file: ./mongodb/mongo-replication.key
 
