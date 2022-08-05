@@ -23,7 +23,6 @@ export class ProductsService {
   }
   public async getProducts(userId: IUserId): Promise<any> {
     const productsList = await this.productModel.findOne({ userId: userId.userId }).exec();
-    // console.log(productsList.products_list)
     if (!productsList) {
       throw errCode.NOT_FOUND;
     }
