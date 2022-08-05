@@ -14,5 +14,5 @@ export interface IAddProductRequest {
 }
 
 export interface IGetProductResponse {
-  products: IProduct[];
+  products_list: IProduct[];
 }

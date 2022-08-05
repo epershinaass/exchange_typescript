@@ -13,12 +13,12 @@ userId: string
 @Prop({
   type: [
     {
-      productName: { type: String },
-      productCount: { type: Number },
+      name: { type: String },
+      quantity: { type: Number },
     },
   ],
 })
-products: IProduct[];
+products_list: IProduct[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

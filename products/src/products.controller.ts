@@ -26,6 +26,6 @@ export class ProductsController {
       throw new RpcException(getGrpcError(status.INVALID_ARGUMENT));
     }
     const UserProducts = await this.productsService.getProducts(userId);
-    return { products: UserProducts.products };
+    return { products_list: UserProducts.products_list };
   }
 }
