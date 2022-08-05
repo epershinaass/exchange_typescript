@@ -62,7 +62,7 @@ services:
     volumes:
       - ./facade:/app/
     ports:
-      - 3000:3001
+      - 3000:3000
     <<: [*default-svc, *log-driver]
 
   mongo:
