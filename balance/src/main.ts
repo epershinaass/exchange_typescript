@@ -17,6 +17,6 @@ async function bootstrap() {
     BalanceModule,
     microserviceOptions,
   );
-  app.listen(); // default url: 'localhost:5000'
+  app.listen();
 }
 bootstrap();
