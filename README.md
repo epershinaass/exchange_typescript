@@ -29,15 +29,24 @@ or
 export COMPOSE_PROFILES=profile_name
 docker-compose up -d
 
+2 or more profiles
+docker-compose --profile profile_name1 --profile profile_name2 up -d
+
 Profiles avail:
-- balance: balance + mongo + kafka
-- products: products + mongo + kafka
+- balance: balance + mongo
+- balance-dev: balance-dev + mongo
+- products: products + mongo
+- products-dev: products-dev + mongo
 - mongo: mongo + balance + products
-- facade: facade + balance + mongo + products
-- dev: facade + balance + mongo + loki + promtail + grafana + products
+- mongo-dev: mongo + balance-dev + products-dev
+- facade: facade + balance + products + mongo
+- facade-dev: facade-dev + balance-dev + products-dev + mongo
+- test: facade + balance +  products + mongo + loki + promtail + grafana
+- dev: facade-dev + balance-dev +  products-dev + mongo + loki + promtail + grafana
 - kafka: kafka + schema-registry + kafdrop
 - logs: loki + promtail + grafana
-- full: all services
+- full: all not dev services
+- full-dev: all dev services
 ```
 
 ### [Build](https://docs.docker.com/engine/reference/commandline/compose_build/)

@@ -14,12 +14,25 @@ x-labels: &default-lables
 
 services:
 
+  products:
+    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
+    hostname: products
+    container_name: products
+    profiles:
+      - products
+      - full
+    ports:
+      - 5001:5001
+    <<: [ *default-svc, *log-driver, *default-lables]
+    configs:
+      - source: products_env
+        target: /app/.env
+
   balance:
     image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
     hostname: balance
     container_name: balance
     profiles:
-      - mongo
       - balance
       - full
     ports:
@@ -43,104 +56,60 @@ services:
         target: /app/.env
     <<: [ *default-svc, *log-driver, *default-lables]
 
-  mongo_setup:
+  mongo-products:
     image: mongo:5.0.9
-    restart: no
-    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
+    hostname: mongo-products
+    container_name: mongo-products
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
-      MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
-      BALANCE_USER: balance
-      BALANCE_DB: balance
     profiles:
       - mongo
       - full
-      - haproxy
-      - mongo-only
-    depends_on:
-      - mongo1-balance
-      - mongo2-balance
-      - mongo3-balance
+      - products
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-products:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo-balance:
+    image: mongo:5.0.9
+    hostname: mongo-balance
+    container_name: mongo-balance
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - balance
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-balance:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo_setup:
+    image: mongo:5.0.9
+    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
+    profiles:
+      - mongo
+      - full
+      - products
+      - balance
     configs:
       - source: mongo_config_setup
         target: /docker-entrypoint-initdb.d/mongosetup.sh
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo1-balance:
-    image: mongo:5.0.9
-    hostname: mongo1-balance
-    container_name: mongo1-balance
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - db-data1:/data/db
-    configs:
-      - source: keyfile
-        target: /etc/mongo-replication.key
-    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
-    profiles:
-      - mongo
-      - full
-      - mongo-only
-      - haproxy
-    healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo2-balance:
-    image: mongo:5.0.9
-    hostname: mongo2-balance
-    container_name: mongo2-balance
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - db-data2:/data/db
-    configs:
-      - source: keyfile
-        target: /etc/mongo-replication.key
-    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
-    profiles:
-      - mongo
-      - full
-      - mongo-only
-      - haproxy
-    healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
-    <<: [*default-svc, *log-driver, *default-lables]
-  mongo3-balance:
-    image: mongo:5.0.9
-    hostname: mongo3-balance
-    container_name: mongo3-balance
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - db-data3:/data/db
-    configs:
-      - source: keyfile
-        target: /etc/mongo-replication.key
-    command: --replSet rs1 --bind_ip_all --keyFile /etc/mongo-replication.key
-    profiles:
-      - mongo
-      - full
-      - mongo-only
-      - haproxy
-    healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
-    <<: [*default-svc, *log-driver, *default-lables]
+    networks:
+      - stage-net
+    <<: [*log-driver, *default-lables]
 
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
@@ -148,6 +117,7 @@ services:
     container_name: kafka1
     profiles:
       - kafka
+      - infra
       - full
     healthcheck:
       test: kafka-topics --bootstrap-server kafka1:9092 --list
@@ -199,6 +169,7 @@ services:
     container_name: kafka2
     profiles:
       - kafka
+      - infra
       - full
     healthcheck:
       test: kafka-topics --bootstrap-server kafka2:9092 --list
@@ -250,6 +221,7 @@ services:
     container_name: kafka3
     profiles:
       - kafka
+      - infra
       - full
     healthcheck:
       test: kafka-topics --bootstrap-server kafka3:9092 --list
@@ -300,8 +272,8 @@ services:
     hostname: schema-registry
     container_name: schema-registry
     profiles:
-      - kafkafull
       - kafka
+      - infra
       - full
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092,PLAINTEXT://kafka3:9092,PLAINTEXT://kafka3:9092
@@ -330,9 +302,9 @@ services:
   loki-frontend:
     image: grafana/loki:2.6.1
     profiles:
-      - logs
+      - loki
       - full
-      - haproxy
+      - infra
     command: -config.file=/etc/loki/loki-config.yaml -target=query-frontend -frontend.downstream-url=http://loki-read:3100
     environment:
       LOKI_S3_USER: ${LOKI_S3_USER}
@@ -343,14 +315,18 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-read:
     image: grafana/loki:2.6.1
     profiles:
-      - logs
+      - loki
       - full
-      - haproxy
+      - infra
     command: -config.file=/etc/loki/loki-config.yaml -target=read
     environment:
       LOKI_S3_USER: ${LOKI_S3_USER}
@@ -361,14 +337,18 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-write:
     image: grafana/loki:2.6.1
     profiles:
-      - logs
+      - loki
       - full
-      - haproxy
+      - infra
     command: -config.file=/etc/loki/loki-config.yaml -target=write
     environment:
       LOKI_S3_USER: ${LOKI_S3_USER}
@@ -387,6 +367,10 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /tmp/rules
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   minio:
@@ -407,11 +391,9 @@ services:
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_UPDATE: off
     profiles:
-      - logs
-      - monitoring
       - minio
-      - haproxy
       - full
+      - infra
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -420,6 +402,8 @@ services:
     expose:
       - 9000
       - 9001
+    depends_on:
+      - haproxy
     volumes:
       - minio:/data
     <<: [*default-svc, *log-driver, *default-lables]
@@ -430,9 +414,9 @@ services:
     container_name: promtail
     userns_mode: "host"
     profiles:
-      - logs
-      - haproxy
+      - promtail
       - full
+      - infra
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -449,6 +433,8 @@ services:
     configs:
       - source: promtail_config
         target: /etc/promtail/promtail_config.yaml
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   grafana:
@@ -456,10 +442,9 @@ services:
     hostname: grafana
     container_name: grafana
     profiles:
-      - logs
+      - grafana
       - full
-      - monitoring
-      - haproxy
+      - infra
     environment:
       GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-127.0.0.1}
       GF_SERVER_ROOT_URL: "/grafana"
@@ -470,7 +455,7 @@ services:
       GRAFANA_DATASOURCE_PASSWORD: ${GRAFANA_DATASOURCE_PASSWORD}
     volumes:
       - grafana:/var/lib/grafana
-      - ./dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -482,6 +467,8 @@ services:
     configs:
       - source: datasource-auth
         target: /etc/grafana/provisioning/datasources/monitoring.yaml
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   prometheus:
@@ -496,9 +483,9 @@ services:
     - '--web.config.file=/etc/prometheus/web.yml'
     - '--config.file=/etc/prometheus/prometheus.yml'
     profiles:
-      - monitoring
+      - prometheus
       - full
-      - haproxy
+      - infra
     volumes:
       - prometheus_data:/prometheus
     configs:
@@ -508,6 +495,8 @@ services:
         target: /etc/prometheus/alert.rules
       - source: prometheus-auth
         target: /etc/prometheus/web.yml
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   cadvisor:
@@ -517,8 +506,8 @@ services:
     userns_mode: "host"
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -533,8 +522,8 @@ services:
     container_name: node-exporter
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     command:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
     <<: [*default-svc, *log-driver, *default-lables]
@@ -547,8 +536,9 @@ services:
       TELEGRAM_BOT_TOKEN: ${ALERTMANAGER_TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${ALERTMANAGER_TELEGRAM_CHAT_ID}
     profiles:
-      - monitoring
+      - prometheus
       - full
+      - infra
     command:
       - '--config.file=/etc/alertmanager/config.yml'
     configs:
@@ -564,6 +554,7 @@ services:
     profiles:
       - monitoring
       - full
+      - infra
     depends_on:
       kafka1:
         condition: service_healthy
@@ -576,8 +567,8 @@ services:
     command: --haproxy.scrape-uri="http://haproxy:8050/stats?stats;csv"
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -588,9 +579,9 @@ services:
     container_name: haproxy
     profiles:
       - haproxy
-      - logs
-      - minio
+      - vault
       - full
+      - infra
     ports:
       - 8080:80
     configs:
@@ -598,67 +589,122 @@ services:
         target: /usr/local/etc/haproxy/haproxy.cfg
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongodb-balance-cluster:
+  mongodb-balance:
     image: percona/mongodb_exporter:0.33
     hostname: mongodb-exporter
     container_name: mongodb-exporter
     command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo1-balance:27017'
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
     - '--compatible-mode'
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     depends_on:
-      - mongo1-balance
-      - mongo2-balance
-      - mongo3-balance
+      - mongo-balance
     <<: [*default-svc, *log-driver, *default-lables]
+
+  mongodb-products:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter
+    container_name: mongodb-exporter
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
+    - '--compatible-mode'
+    profiles:
+      - monitoring
+      - full
+      - infra
+    depends_on:
+      - mongo-products
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  vault:
+    image: vault:1.11.2
+    hostname: vault
+    container_name: vault
+    profiles:
+      - vault
+    # ports:
+    #   - 8200:8200
+    volumes:
+      - vault-data:/vault/file
+    command: server
+    configs:
+    - source: vault-config
+      target: /vault/config/config.hcl
+    cap_add:
+      - IPC_LOCK
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  vault-init:
+    image: vault:1.11.2
+    hostname: vault-init
+    container_name: vault-init
+    # restart: no
+    command: /usr/local/bin/vault-init.sh
+    environment:
+      VAULT_ADDR: http://vault:8200
+      MY_VAULT_TOKEN: ${MY_VAULT_TOKEN:-test}
+    profiles:
+      - vault
+    volumes:
+      - vault-data:/vault/file/
+      - vault-logs:/vault/logs
+      - ./vault/vault-root-token:/vault/file/vault-root-token
+    configs:
+    - source: vault-init
+      target: /usr/local/bin/vault-init.sh
+    depends_on:
+      - vault
+    networks:
+    - stage-net
+    <<: [*log-driver, *default-lables]
 
 
 configs:
   loki_config:
-    file: ./loki-config-scalable.yaml
+    file: ./loki/loki-config-scalable.yaml
   promtail_config:
-    file: ./promtail-config-scalable.yaml
+    file: ./promtail/promtail-config-scalable.yaml
   datasource-auth:
-    file: ./datasource-auth.yaml
+    file: ./grafana/datasource-auth.yaml
   alertmanager:
-    file: ./alertmanager-config.yml
+    file: ./prometheus/alertmanager-config.yml
   prometheus:
-    file: ./prometheus.yml
+    file: ./prometheus/prometheus.yml
   prometheus-alerts:
-    file: ./alert.rules
-  mongo_config:
-    file: ./mongodb/mongo-init.sh
+    file: ./prometheus/alert.rules
   haproxy:
-    file: ./haproxy.cfg
+    file: ./haproxy/haproxy.cfg
   prometheus-auth:
-    file: ./web.yml
+    file: ./prometheus/web.yml
   kafka_run:
-    file: ./update_run_cluster.sh
+    file: ./kafka/update_run_cluster.sh
   kafka_exporter_jar:
-    file: ./jmx_prometheus_javaagent-0.17.0.jar
+    file: ./kafka/jmx_prometheus_javaagent-0.17.0.jar
   kafka_exporter_config:
-    file: ./jmx-exporter-config.yml
+    file: ./kafka/jmx-exporter-config.yml
   schema_registry_exporter_config:
-    file: ./jmx-sr-exporter-config.yml
+    file: ./kafka/jmx-sr-exporter-config.yml
   mongo_config_setup:
     file: ./mongodb/mongosetup.sh
   facade_env:
     file: ../facade/.env
   balance_env:
     file: ../balance/.env
-  keyfile:
-    file: ./mongodb/mongo-replication.key
+  products_env:
+    file: ../products/.env
+  loki_alert:
+    file: ./loki/loki-rules.yml
+  vault-config:
+    file: ./vault/config.hcl
+  vault-init:
+    file: ./vault/vautl-init.sh
 
 volumes:
   grafana:
-  db-data1:
-  db-data2:
-  db-data3:
   prometheus_data:
-  loki-data:
   kafka1-data:
   kafka1-logs:
   kafka2-data:
@@ -666,6 +712,10 @@ volumes:
   kafka3-data:
   kafka3-logs:
   minio:
+  db-products:
+  db-balance:
+  vault-data:
+  vault-logs:
 
 networks:
   stage-net:
