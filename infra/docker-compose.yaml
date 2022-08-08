@@ -14,6 +14,21 @@ x-labels: &default-lables
 
 services:
 
+  products:
+    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
+    hostname: products
+    container_name: products
+    profiles:
+      - mongo
+      - products
+      - full
+    ports:
+      - 5001:5001
+    <<: [ *default-svc, *log-driver, *default-lables]
+    configs:
+      - source: products_env
+        target: /app/.env
+
   balance:
     image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
     hostname: balance
@@ -43,26 +58,37 @@ services:
         target: /app/.env
     <<: [ *default-svc, *log-driver, *default-lables]
 
+  mongo-products:
+    image: mongo:5.0.9
+    hostname: mongo-products
+    container_name: mongo-products
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - products
+      - infra
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo1-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-products:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
   mongo_setup:
     image: mongo:5.0.9
     restart: no
     entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
-      MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
-      BALANCE_USER: balance
-      BALANCE_DB: balance
     profiles:
       - mongo
       - full
+      - products
       - haproxy
       - mongo-only
-    depends_on:
-      - mongo1-balance
-      - mongo2-balance
-      - mongo3-balance
     configs:
       - source: mongo_config_setup
         target: /docker-entrypoint-initdb.d/mongosetup.sh
@@ -635,8 +661,6 @@ configs:
     file: ./prometheus.yml
   prometheus-alerts:
     file: ./alert.rules
-  mongo_config:
-    file: ./mongodb/mongo-init.sh
   haproxy:
     file: ./haproxy.cfg
   prometheus-auth:
@@ -655,6 +679,8 @@ configs:
     file: ../facade/.env
   balance_env:
     file: ../balance/.env
+  products_env:
+    file: ../products/.env
   loki_alert:
     file: ./loki-rules.yml
   keyfile:
@@ -674,6 +700,7 @@ volumes:
   kafka3-data:
   kafka3-logs:
   minio:
+  db-products:
 
 networks:
   stage-net:
