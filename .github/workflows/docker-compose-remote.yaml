@@ -4,12 +4,12 @@ on:
   pull_request:
     types: [closed]
     paths:
-    - 'infra/grafana/**'
-    - 'infra/haproxy/**'
-    - 'infra/kafka/**'
-    - 'infra/loki/**'
-    - 'infra/prometheus/**'
-    - 'infra/promtail/**'
+    - 'infra/grafana/*'
+    - 'infra/haproxy/*'
+    - 'infra/kafka/*'
+    - 'infra/loki/*'
+    - 'infra/prometheus/*'
+    - 'infra/promtail/*'
     - 'infra/docker-compose.yaml'
   workflow_dispatch:
 
@@ -59,7 +59,7 @@ jobs:
             infra:
               - 'infra/docker-compose.yaml'
 
-      - name: deploy grafana profile
+      - name: up grafana profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.grafana == 'true'
         with:
@@ -87,7 +87,7 @@ jobs:
             git restore .
             git clean -dxf
 
-      - name: deploy haproxy profile
+      - name: up haproxy profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.haproxy == 'true'
         with:
@@ -107,7 +107,7 @@ jobs:
             docker-compose --profile haproxy -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             rm .env
 
-      - name: deploy kafka profile
+      - name: up kafka profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.kafka == 'true'
         with:
@@ -131,7 +131,7 @@ jobs:
             git restore .
             git clean -dxf
 
-      - name: deploy loki profile
+      - name: up loki profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.loki == 'true'
         with:
@@ -157,7 +157,7 @@ jobs:
             git restore .
             git clean -dxf
 
-      - name: deploy prometheus profile
+      - name: up prometheus profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.prometheus == 'true'
         with:
@@ -191,7 +191,7 @@ jobs:
             git clean -dxf
 
 
-      - name: deploy promtail profile
+      - name: up promtail profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.promtail == 'true'
         with:
@@ -214,7 +214,7 @@ jobs:
             git restore .
             git clean -dxf
 
-      - name: deploy infra
+      - name: up infra profile
         uses: appleboy/ssh-action@master
         if: steps.changes.outputs.infra == 'true'
         with:
