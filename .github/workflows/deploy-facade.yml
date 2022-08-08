@@ -49,7 +49,7 @@ jobs:
 
 
             echo "
-            BALANCE_PORT=$BALANCE_PORT
+            BALANCE_PORT=$BALANCE_SERVICE_PORT
             BALANCE_URL=$BALANCE_URL
             SERVICE_URL=$SERVICE_URL
             SERVICE_PORT=$FACADE_SERVICE_PORT
