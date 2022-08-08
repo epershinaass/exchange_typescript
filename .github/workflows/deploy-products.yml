@@ -28,7 +28,6 @@ env:
 jobs:
   deploy:
     name: Deploy
-    if: github.event.pull_request.merged == true
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -47,7 +46,7 @@ jobs:
             fi
 
             echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
-            `MONGO_INITDB_ROOT_USERNAME`=$MONGO_INITDB_ROOT_USERNAME
+            MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
             MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
             SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
             JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
