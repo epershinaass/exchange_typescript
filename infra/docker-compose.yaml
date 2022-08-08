@@ -71,12 +71,33 @@ services:
       - products
       - infra
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo1-balance:27017/test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
       interval: 20s
       timeout: 10s
       retries: 5
     volumes:
       - db-products:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo-balance:
+    image: mongo:5.0.9
+    hostname: mongo-balance
+    container_name: mongo-balance
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - balance
+      - infra
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-balance:/data/db
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongo_setup:
@@ -701,6 +722,7 @@ volumes:
   kafka3-logs:
   minio:
   db-products:
+  db-balance:
 
 networks:
   stage-net:
