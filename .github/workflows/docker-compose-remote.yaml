@@ -94,6 +94,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -113,6 +114,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -136,7 +138,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: LOKI_S3_USER,LOKI_S3_PASSWORD
+          envs: LOKI_S3_USER,LOKI_S3_PASSWORD,PROJECT_DIR,GIT_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -196,6 +198,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
