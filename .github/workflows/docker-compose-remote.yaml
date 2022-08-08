@@ -4,12 +4,12 @@ on:
   pull_request:
     types: [closed]
     paths:
-    - 'infra/grafana/**'
-    - 'infra/haproxy/**'
-    - 'infra/kafka/**'
-    - 'infra/loki/**'
-    - 'infra/prometheus/**'
-    - 'infra/promtail/**'
+    - 'infra/grafana/*'
+    - 'infra/haproxy/*'
+    - 'infra/kafka/*'
+    - 'infra/loki/*'
+    - 'infra/prometheus/*'
+    - 'infra/promtail/*'
     - 'infra/docker-compose.yaml'
   workflow_dispatch:
 
