@@ -25,7 +25,7 @@ services:
       - facade
       - full
     ports:
-      - 5001:5000
+      - 5001:5001
     volumes:
       - ./products/.env:/app/.env
     <<: [*default-svc, *log-driver]
@@ -128,9 +128,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin-password
-      SERVICE_PASSWORD: balance
-      SERVICE_USER: balance
-      SERVICE_DB: balance
 
     volumes:
       - db-data:/data/db
