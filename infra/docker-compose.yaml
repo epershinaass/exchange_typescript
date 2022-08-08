@@ -590,8 +590,8 @@ services:
 
   mongodb-balance:
     image: percona/mongodb_exporter:0.33
-    hostname: mongodb-exporter
-    container_name: mongodb-exporter
+    hostname: mongodb-exporter-balance
+    container_name: mongodb-exporter-balance
     command:
     - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
     - '--compatible-mode'
@@ -605,8 +605,8 @@ services:
 
   mongodb-products:
     image: percona/mongodb_exporter:0.33
-    hostname: mongodb-exporter
-    container_name: mongodb-exporter
+    hostname: mongodb-exporter-products
+    container_name: mongodb-exporter-products
     command:
     - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
     - '--compatible-mode'
