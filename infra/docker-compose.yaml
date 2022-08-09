@@ -585,10 +585,14 @@ services:
       - infra
     ports:
       - 8080:80
+      - 8081:443
       - 8082:8080
+      - 8000:8200
     configs:
       - source: haproxy
         target: /usr/local/etc/haproxy/haproxy.cfg
+      - source: tls_key
+        target: /usr/local/etc/haproxy/haproxy.pem
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-balance:
@@ -703,6 +707,8 @@ configs:
     file: ./vault/config.hcl
   vault-init:
     file: ./vault/vautl-init.sh
+  tls_key:
+    file: ./terraform/output/localhost/localhost.pem
 
 volumes:
   grafana:
