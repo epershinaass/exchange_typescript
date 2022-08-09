@@ -2,7 +2,7 @@ name: Deploy to server1
 
 on:
   pull_request:
-    types: [closed]
+    types: [opened]
     paths:
     - 'infra/grafana/*'
     - 'infra/haproxy/*'
@@ -36,7 +36,6 @@ env:
 jobs:
   deploy:
     name: Deploy
-    if: github.event.pull_request.merged == true
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
