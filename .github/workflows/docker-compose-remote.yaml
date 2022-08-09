@@ -11,6 +11,8 @@ on:
     - 'infra/prometheus/*'
     - 'infra/promtail/*'
     - 'infra/docker-compose.yaml'
+    branches:
+    - 'main/**'
   workflow_dispatch:
 
 
