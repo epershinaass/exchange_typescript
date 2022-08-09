@@ -4,6 +4,7 @@ import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 import { Product, ProductSchema } from './schemas/product.schema';
 import { ConfigModule } from '@nestjs/config';
+import { Catalog, CatalogSchema } from './schemas/productsCollection.schema';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { ConfigModule } from '@nestjs/config';
     MongooseModule.forRoot(
       `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
     ),
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }, { name: Catalog.name, schema: CatalogSchema }]),
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

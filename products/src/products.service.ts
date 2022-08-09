@@ -5,17 +5,23 @@ import { Model } from 'mongoose';
 import { ProductDocument } from './schemas/product.schema';
 import { IAddProductRequest, IUserId, IUserProductsDocument } from './interfaces/object.interface';
 import { errCode } from './errors/products.error';
+import { Catalog, CatalogDocument } from './schemas/productsCollection.schema';
 
 @Injectable()
 export class ProductsService {
 
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Catalog.name) private catalogModel: Model<CatalogDocument>,
   ) { }
 
   public async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
     const product = await this.productModel.findOne({ userId: addProductRequest.userId });
+    const catalog = await this.catalogModel.findOne({ name: addProductRequest.product.name })
+    console.log(catalog)
     if (!product) {
+      throw errCode.NOT_FOUND;
+    } else if (!catalog) {
       throw errCode.NOT_FOUND;
     }
     product.products.push(addProductRequest.product);

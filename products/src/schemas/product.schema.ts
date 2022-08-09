@@ -13,7 +13,6 @@ export class Product {
   @Prop({
     type: [
       {
-        name: { type: String },
         quantity: { type: Number },
       },
     ],
