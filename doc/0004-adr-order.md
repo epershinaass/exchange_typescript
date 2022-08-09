@@ -40,13 +40,13 @@
 
 ```ts
 enum OrderStatus { // isDone: bool; 
-  processing;
-  done;
+  PROCESSING;
+  DONE;
 }
 
 enum OrderType { // isForSell: bool;
-  buy;
-  sell;
+  BUY;
+  SELL;
 }
 
 // как сделать так, чтобы пользователь знал об отклоненных заявках?
@@ -87,13 +87,18 @@ Order {
 
 Формат передачи (идентичен для Facade)
 ```proto3
+enum OrderType {
+  BUY = 0;
+  SELL = 1;
+}
+
 message OrderRequest {
   string order_id = 1;
   string user_id = 2;
   string product = 3;
   int32 quantity = 4;
   int64 cost = 5;
-  string order_type = 6; // bool isForSell;
+  OrderType order_type = 6; // bool isForSell;
 }
 ```
 
@@ -146,4 +151,4 @@ message OrderResponse {
 
 ## Заключение
 
-При написании ADR возникли новые вопросы, которые нужно проработать и принять решение. Основным решением оставляем самое простое решение чреез кафку, но для юзера оно будет наименее дружелюбно, возможно частично непонятно.
+При написании ADR возникли новые вопросы, которые нужно проработать и принять решение. Основным решением оставляем самое простое решение через кафку, но для юзера оно будет наименее дружелюбно, возможно частично непонятно.
