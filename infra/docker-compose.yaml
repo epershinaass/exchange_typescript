@@ -306,17 +306,12 @@ services:
       - full
       - infra
     command: -config.file=/etc/loki/loki-config.yaml -target=query-frontend -frontend.downstream-url=http://loki-read:3100
-    environment:
-      LOKI_S3_USER: ${LOKI_S3_USER}
-      LOKI_S3_PASSWORD: ${LOKI_S3_PASSWORD}
     deploy:
       mode: replicated
       replicas: 2
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
-      - source: loki_alert
-        target: /tmp/rules
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -338,7 +333,7 @@ services:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
       - source: loki_alert
-        target: /tmp/rules
+        target: /etc/loki/rules/rules.yml
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -367,8 +362,6 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
-      - source: loki_alert
-        target: /tmp/rules
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]

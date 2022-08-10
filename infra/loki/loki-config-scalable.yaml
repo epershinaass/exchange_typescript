@@ -110,14 +110,14 @@ ruler:
   enable_alertmanager_v2: true
   enable_api: true
   enable_sharding: true
-  rule_path: /tmp/rules
+  rule_path: /etc/loki/rules
   ring:
     kvstore:
       store: memberlist
   storage:
     s3:
       bucketnames: loki-ruler
-      endpoint: minio:9000
+      endpoint: s3://minio:9000
       insecure: true
       access_key_id: ${LOKI_S3_USER}
       secret_access_key: ${LOKI_S3_PASSWORD}
