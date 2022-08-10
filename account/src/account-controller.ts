@@ -1,12 +1,12 @@
 import { Body, Controller, UseFilters } from '@nestjs/common';
 import { AccountService } from './account-service';
 import { GrpcMethod } from '@nestjs/microservices';
-import { AnyExceptionFilter } from './msg/account-err';
+import { ServiceExceptionFilter } from './msg/account-err';
 import { AuthTokenDto, CredentialsDto, MessageDto } from './msg/account-dto';
 
 
 @Controller()
-@UseFilters(AnyExceptionFilter)
+@UseFilters(ServiceExceptionFilter)
 export class AccountController {
   constructor(private accountService: AccountService) { }
 

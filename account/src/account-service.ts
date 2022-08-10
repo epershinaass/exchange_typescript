@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Account, AccountDocument } from './account-model'
-import { codes, messages } from './msg/account-err';
+import { codes, messages, ServiceError } from './msg/account-err';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -20,8 +20,8 @@ export class AccountService {
 
   public async signIn(creds: CredentialsDto): Promise<AuthTokenDto> {
     const account = await this.accountModel.findOne({ login: creds.login });
-    if (!account) throw codes.NOT_FOUND;
-    if (account?.password !== creds.password) throw codes.UNAUTHENTICATED;
+    if (!account) throw new ServiceError(codes.NOT_FOUND);
+    if (account?.password !== creds.password) throw new ServiceError(codes.UNAUTHENTICATED);
 
     const payload = { username: account.login, sub: account._id };
     const token = this.jwtService.sign(payload);
@@ -32,12 +32,12 @@ export class AccountService {
 
   public async signUp(creds: CredentialsDto): Promise<MessageDto> {
     const account = await this.accountModel.findOne({ login: creds.login });
-    if (account) throw codes.ALREADY_EXISTS;
+    if (account) throw new ServiceError(codes.ALREADY_EXISTS);
 
     const AccountNotCreated = !await this.accountModel.create(creds);
-    if (AccountNotCreated) throw codes.ABORTED;
+    if (AccountNotCreated) throw new ServiceError(codes.ABORTED);
 
-    return new MessageDto(messages.USER_MADE);
+    return new MessageDto(messages.USER_CREATED);
   }
 
 
@@ -47,7 +47,7 @@ export class AccountService {
       const verified = this.jwtService.verify(auth.token, { secret: this.secret })
       verifyData = JSON.stringify(verified);
     } catch (err) {
-      throw codes.UNAUTHENTICATED;
+      throw new ServiceError(codes.UNAUTHENTICATED);
     }
     return new MessageDto(verifyData);
   }

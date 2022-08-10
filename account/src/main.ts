@@ -9,7 +9,7 @@ const microserviceOptions = {
   options: {
     url: `${process.env.ACC_URL}:${process.env.ACC_PORT}`,
     package: 'account',
-    protoPath: join(__dirname, 'msg/account-grpc.proto'),
+    protoPath: join(__dirname, 'msg/account.proto'),
   },
 };
 
