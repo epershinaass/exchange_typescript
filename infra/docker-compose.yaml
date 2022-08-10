@@ -157,7 +157,6 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka1-data:/var/lib/kafka/data
-      - kafka1-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -209,7 +208,6 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka2-data:/var/lib/kafka/data
-      - kafka2-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -261,7 +259,6 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka3-data:/var/lib/kafka/data
-      - kafka3-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -412,8 +409,11 @@ services:
       - infra
     volumes:
       - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/lib/docker:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log/journal/:/var/log/journal/:ro
+      - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
     command: -config.file=/etc/promtail/promtail_config.yaml
     # deploy: # Change after testing
     #   resources:
@@ -425,6 +425,30 @@ services:
     #       cpus: '0.1'
     configs:
       - source: promtail_config
+        target: /etc/promtail/promtail_config.yaml
+    depends_on:
+      - haproxy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  promtail-kafka:
+    image: grafana/promtail:2.6.1
+    hostname: promtail-kafka
+    container_name: promtail-kafka
+    profiles:
+      - promtail
+      - full
+      - infra
+    command: -config.file=/etc/promtail/promtail_config.yaml
+    # deploy: # Change after testing
+    #   resources:
+    #     limits:
+    #       memory: 35M
+    #       cpus: '0.2'
+    #     reservations:
+    #       memory: 25M
+    #       cpus: '0.1'
+    configs:
+      - source: promtail_config_kafka
         target: /etc/promtail/promtail_config.yaml
     depends_on:
       - haproxy
@@ -616,6 +640,8 @@ configs:
     file: ./loki/loki-config-scalable.yaml
   promtail_config:
     file: ./promtail/promtail-config-scalable.yaml
+  promtail_config_kafka:
+    file: ./promtail/promtail-kafka-config.yaml
   datasource-auth:
     file: ./grafana/datasource-auth.yaml
   alertmanager:
@@ -651,11 +677,8 @@ volumes:
   grafana:
   prometheus_data:
   kafka1-data:
-  kafka1-logs:
   kafka2-data:
-  kafka2-logs:
   kafka3-data:
-  kafka3-logs:
   minio:
   db-products:
   db-balance:

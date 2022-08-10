@@ -206,7 +206,7 @@ jobs:
             echo "COMPOSE_HTTP_TIMEOUT=500" > .env
 
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
-            docker-compose --promtail full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            docker-compose --profile promtail -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             rm .env
             git restore .
             git clean -dxf
