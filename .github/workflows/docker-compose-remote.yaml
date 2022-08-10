@@ -1,12 +1,9 @@
 name: Deploy to server1
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-    - 'infra/**'
+  push:
     branches:
-    - 'main/**'
+    - 'main'
   workflow_dispatch:
 
 concurrency:
