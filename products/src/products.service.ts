@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProductDocument } from './schemas/product.schema';
-import { IAddProductRequest, IUserId, IUserProductsDocument } from './interfaces/object.interface';
+import { IAddProductRequest, IUserId, IUserProductsDocument } from './interfaces/products.interfaces';
 import { errCode } from './errors/products.error';
 import { Catalog, CatalogDocument } from './schemas/productsCollection.schema';
 
@@ -17,8 +17,7 @@ export class ProductsService {
 
   public async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
     const product = await this.productModel.findOne({ userId: addProductRequest.userId });
-    const catalog = await this.catalogModel.findOne({ name: addProductRequest.product.name })
-    console.log(catalog)
+    const catalog = await this.catalogModel.findOne({ name: addProductRequest.product.name });
     if (!product) {
       throw errCode.NOT_FOUND;
     } else if (!catalog) {

@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
-import { IAddProductRequest, IGetProductsResponse, IUserId } from './interfaces/object.interface';
+import { IAddProductRequest, IGetProductsResponse, IUserId } from './interfaces/products.interfaces';
 import { getGrpcError } from './errors/products.error';
 import { status } from '@grpc/grpc-js';
 

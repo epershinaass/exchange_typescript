@@ -28,7 +28,7 @@ message Product {
 }
 
 message AddProductResponse {
-  string status = 1;
+  int32 status = 1;
 }
 
 message GetProductsRequest {
