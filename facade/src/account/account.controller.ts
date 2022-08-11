@@ -7,12 +7,12 @@ import { IAccountGrpcService } from './interface/account-grpc-interface';
 
 @Controller()
 export class AccountController implements OnModuleInit {
-
-  private accountService: IAccountGrpcService;
-
   constructor(
     @Inject('ACCOUNT_GRPC_SERVICE') private client: ClientGrpc,
   ) {}
+
+  private accountService: IAccountGrpcService;
+
   onModuleInit() {
     this.accountService =
       this.client.getService<IAccountGrpcService>('AccountController');

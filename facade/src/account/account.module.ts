@@ -8,9 +8,9 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: '.env',
-    }),
+    // ConfigModule.forRoot({
+    //   envFilePath: '.env',
+    // }),
     ClientsModule.register([
       {
         name: 'ACCOUNT_GRPC_SERVICE',
@@ -23,6 +23,6 @@ import { ConfigModule } from '@nestjs/config';
       }
     ]),
   ],
-  controllers: [ AccountController],
+  controllers: [AccountController],
 })
 export class AccountModule { }
