@@ -11,41 +11,27 @@ db.balances.insertMany([
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659072648876
-                    }
-                },
-
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "qwe123",
                 refillSum: 25,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659075273087
-                    }
-                },
-
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
-                transactionTime: {
-                    $date: {
-                        $numberLong: "1659088480057"
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e1")
 
             },
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659325183184
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e1")
             }
 
         ]
@@ -57,41 +43,29 @@ db.balances.insertMany([
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659072648876
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },
             {
                 transactionId: "qwe123",
                 refillSum: 25,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659075273087
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
-                transactionTime: {
-                    $date: {
-                        $numberLong: "1659088480057"
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659325183184
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e2")
             }
 
         ]
@@ -103,41 +77,29 @@ db.balances.insertMany([
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659072648876
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e3")
 
             },
             {
                 transactionId: "qwe123",
                 refillSum: 25,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659075273087
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e3")
 
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
-                transactionTime: {
-                    $date: {
-                        $numberLong: "1659088480057"
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e3")
 
             },
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
-                transactionTime: {
-                    $date: {
-                        $numberLong: 1659325183184
-                    }
-                },
+                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                _id: ObjectId("62e370f465eec4910c2ba2e3")
             }
         ]
     }
@@ -156,25 +118,28 @@ db.createUser({
 /*****************************End init of Database for balance*********************************************************/
 
 
-/*****************************Init Database for other microservices****************************************************/
-/*...*/
+/*****************************Init Database for products****************************************************************/
+
 db = db.getSiblingDB('products');
 db.products.insertMany([
     {
         "userId": "62ecda02aded95223f606777",
         "products": [
-          {
+        {
             "name": "magna",
-            "quantity": 946
-          },
-          {
+            "quantity": 946,
+            _id: ObjectId("62ecda02aded95223f606777")
+        },
+        {
             "name": "labore Ut officia adipisicing",
-            "quantity": 1327456
-          },
-          {
+            "quantity": 1327456,
+            _id: ObjectId("62ecda02aded95223f606777")
+        },
+        {
             "name": "non aliquip sint",
-            "quantity": 43
-          }
+            "quantity": 43,
+            _id: ObjectId("62ecda02aded95223f606777")
+        }
         ]
     }
 ]);
@@ -189,4 +154,8 @@ db.createUser({
         },
     ],
 });
+/*****************************End init of Database for products*********************************************************/
+
+/*****************************Init Database for other microservices****************************************************/
+/*...*/
 /**********************************************************************************************************************/
