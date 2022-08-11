@@ -198,7 +198,6 @@ services:
     <<: [*default-svc, *log-driver]
     volumes:
       - kafka1-data:/var/lib/kafka/data
-      - kafka1-logs:/var/lib/kafka/logs
     configs:
       - source: kafka_run
         target: /tmp/update_run.sh
@@ -230,6 +229,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    depends_on:
+      kafka1:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
+    profiles:
+      - kowl
+    ports:
+      - 9001:8080
+    environment:
+      KAFKA_BROKERS: kafka1:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
     depends_on:
       kafka1:
         condition: service_healthy

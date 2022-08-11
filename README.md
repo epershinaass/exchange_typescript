@@ -44,6 +44,7 @@ Profiles avail:
 - test: facade + balance +  products + mongo + loki + promtail + grafana
 - dev: facade-dev + balance-dev +  products-dev + mongo + loki + promtail + grafana
 - kafka: kafka + schema-registry + kafdrop
+- kowl: kowl
 - logs: loki + promtail + grafana
 - full: all not dev services
 - full-dev: all dev services
@@ -64,6 +65,7 @@ docker-compose build service_name
 - Kafka: 29092
 - Schema registry (kafka): 8081
 - Kafdrop(UI for kafka): 9000
+- Kowl(UI for kafka): 9001
 - Grafana: 3001
 - Mongodb: 27017
 ```
@@ -72,6 +74,7 @@ docker-compose build service_name
 
 - Grafana + loki url: <http://localhost:3001>
 - Kafdrop url: <http://localhost:9000>
+- [kowl  url](https://github.com/redpanda-data/console) : <http://localhost:9001>
 
 #### Работа в режиме dev
 
