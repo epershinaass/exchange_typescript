@@ -6,7 +6,7 @@ import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: 'example.env', isGlobal: true, }),
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true, }),
     AccountModule,
     BalanceModule,
     ProductsModule,

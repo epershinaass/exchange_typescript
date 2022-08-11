@@ -19,7 +19,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           transport: Transport.GRPC,
           options: {
             package: 'account',
-            url: `${process.env.ACCOUNT_URL}:${process.env.ACCOUNT_PORT}`,
+            url: `${config.get<string>('ACCOUNT_URL')}:${config.get<string>('ACCOUNT_PORT')}`,
             protoPath: join(__dirname, './proto/account.proto'),
           },
         }),

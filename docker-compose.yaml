@@ -30,6 +30,45 @@ services:
       - ./products/.env:/app/.env
     <<: [*default-svc, *log-driver]
 
+  account:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account
+    container_name: account
+    build:
+      context: account
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - account
+      - facade
+      - full
+    ports:
+      - 5003:5002
+    volumes:
+      - ./account/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+  account-dev:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account-dev
+    container_name: account-dev
+    build:
+      context: account
+      dockerfile: ../Dockerfile-dev
+    profiles:
+
+      - account-dev
+      - facade-dev
+      - dev
+      - mongo-dev
+      - full-dev
+    ports:
+      - 5003:5002
+    volumes:
+      - ./account/:/app/
+    <<: [*default-svc, *log-driver]
+
   products-dev:
     image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
     hostname: products-dev
@@ -146,6 +185,7 @@ services:
       - balance
       - products
       - products-dev
+      - account
       - full
       - full-dev
     ports:
