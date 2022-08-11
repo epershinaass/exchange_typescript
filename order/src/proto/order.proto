@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package order;
+
+service OrderController {
+  rpc CreateOrder (OrderRequest) returns (OrderResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  rpc GetOrders (GetOrdersRequest) returns (GetOrdersResponse); // for test
+}
+
+enum OrderType {
+  BUY = 0;
+  SELL = 1;
+}
+
+message OrderRequest {
+  string order_id = 1;
+  string user_id = 2;
+  string product_id = 3;
+  int32 quantity = 4;
+  int64 cost = 5;
+  OrderType order_type = 6;
+  bool isFullSize = 7; // сделка должна произойти разом
+}
+
+message OrderResponse {
+  int32 status = 1;
+}
+
+// for test
+message GetOrdersResponse {
+  repeated OrderRequest orders = 1;
+}
+
+message GetOrdersRequest {}
