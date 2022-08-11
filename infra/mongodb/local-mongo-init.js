@@ -158,4 +158,35 @@ db.createUser({
 
 /*****************************Init Database for other microservices****************************************************/
 /*...*/
+db = db.getSiblingDB('products');
+db.products.insertMany([
+    {
+        "userId": "62ecda02aded95223f606777",
+        "products": [
+          {
+            "name": "magna",
+            "quantity": 946
+          },
+          {
+            "name": "labore Ut officia adipisicing",
+            "quantity": 1327456
+          },
+          {
+            "name": "non aliquip sint",
+            "quantity": 43
+          }
+        ]
+    }
+]);
+
+db.createUser({
+    user: 'products',
+    pwd: 'products',
+    roles: [
+        {
+            role: 'readWrite',
+            db: 'products',
+        },
+    ],
+});
 /**********************************************************************************************************************/
