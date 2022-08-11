@@ -45,11 +45,12 @@ mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MON
 db = db.getSiblingDB('$SERVICE_DB');
 db.$SERVICE_DB.insertMany([
   {
-    "userId": "1",
+    "userId": "62ecda02aded95223f606777",
     "products": [
       {
-        "name": "init",
-        "quantity": 1
+        "name": "teapot",
+        "quantity": 1,
+        _id: ObjectId("62ecda02aded95223f606777")
       }
     ]
   }
@@ -84,13 +85,10 @@ mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MON
 db = db.getSiblingDB('$SERVICE_DB');
 db.$SERVICE_DB.insertMany([
   {
-    "userId": "1",
-    "products": [
-      {
-        "name": "init",
-        "quantity": 1
-      }
-    ]
+    "userId": "62ecda02aded95223f606777",
+    "login": "first_user",
+    "password": "$FIRST_USER_PASSWORD",
+    _id: ObjectId("62ecda02aded95223f606777")
   }
 ]);
 db.createUser({

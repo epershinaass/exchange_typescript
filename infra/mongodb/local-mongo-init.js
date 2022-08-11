@@ -156,6 +156,30 @@ db.createUser({
 });
 /*****************************End init of Database for products*********************************************************/
 
+/*****************************Init Database for account****************************************************************/
+
+db = db.getSiblingDB('account');
+db.account.insertMany([
+    {
+        "userId": "62ecda02aded95223f606777",
+        "login": "vasya",
+        "password": "secret",
+        _id: ObjectId("62ecda02aded95223f606777")
+    }
+]);
+
+db.createUser({
+    user: 'account',
+    pwd: 'account',
+    roles: [
+        {
+            role: 'readWrite',
+            db: 'account',
+        },
+    ],
+});
+/*****************************End init of Database for account*********************************************************/
+
 /*****************************Init Database for other microservices****************************************************/
 /*...*/
 /**********************************************************************************************************************/
