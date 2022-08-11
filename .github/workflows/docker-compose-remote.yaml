@@ -1,17 +1,16 @@
 name: Deploy to server1
 
 on:
+  push:
+    branches:
+    - 'main'
   workflow_dispatch:
-  pull_request:
-    types: [closed]
-    paths:
-    - 'infra/**'
 
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
 
 env:
-  MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
   MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
-  MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
   GRAFANA_DOMAIN: ${{ secrets.SERVER1 }}
   GRAFANA_DEFAULT_ADMIN_PASSWORD: ${{ secrets.GRAFANA_DEFAULT_ADMIN_PASSWORD }}
   GRAFANA_DATASOURCE_USER: grafana
@@ -19,9 +18,6 @@ env:
   PROMETHEUS_DOMAIN: ${{ secrets.SERVER1 }}
   ALERTMANAGER_TELEGRAM_BOT_TOKEN: ${{ secrets.ALERTMANAGER_TELEGRAM_BOT_TOKEN }}
   ALERTMANAGER_TELEGRAM_CHAT_ID: ${{ secrets.ALERTMANAGER_TELEGRAM_CHAT_ID }}
-  JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
-  JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
-  JFROG_URL: exchangetypescript.jfrog.io
   LOKI_S3_USER: ${{ secrets.LOKI_S3_USER }}
   LOKI_S3_PASSWORD: ${{ secrets.LOKI_S3_PASSWORD }}
   MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
@@ -30,29 +26,41 @@ env:
   PROJECT_DIR: "exchange_typescript"
   GIT_URL: "https://github.com/epershinaass/exchange_typescript"
 
-  BALANCE_DB_URL: "mongo1-balance"
-  SERVICE_DB_PORT: 27017
-  BALANCE_DB_USER: "balance"
-  SERVICE_URL: "0.0.0.0"
-  BALANCE_SERVICE_PORT: 5000
-
-  FACADE_SERVICE_URL: 3000
-
-
 jobs:
   deploy:
     name: Deploy
-    if: github.event.pull_request.merged == true
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
-      - name: executing remote ssh commands using ssh key
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          list-files: 'none'
+          filters: |
+            grafana:
+              - 'infra/grafana/**'
+            haproxy:
+              - 'infra/haproxy/**'
+            kafka:
+              - 'infra/kafka/**'
+            loki:
+              - 'infra/loki/**'
+            prometheus:
+              - 'infra/prometheus/**'
+            promtail:
+              - 'infra/promtail/**'
+            infra:
+              - 'infra/docker-compose.yaml'
+
+      - name: up grafana profile
         uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.grafana == 'true'
         with:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_USER,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,JFROG_URL,LOKI_S3_USER,LOKI_S3_PASSWORD,MINIO_ROOT_USER,MINIO_ROOT_PASSWORD,BALANCE_DB_URL,SERVICE_DB_PORT,BALANCE_DB_USER,SERVICE_URL,BALANCE_SERVICE_PORT,FACADE_SERVICE_URL
+          envs: GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_USER,GRAFANA_DATASOURCE_PASSWORD,PROJECT_DIR,GIT_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -60,9 +68,162 @@ jobs:
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
 
-            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
+            echo "GRAFANA_DOMAIN=$GRAFANA_DOMAIN
+            GRAFANA_DATASOURCE_USER=$GRAFANA_DATASOURCE_USER
+            GRAFANA_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            GRAFANA_DEFAULT_ADMIN_PASSWORD=$GRAFANA_DEFAULT_ADMIN_PASSWORD
+            COMPOSE_HTTP_TIMEOUT=500" > .env
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            envsubst<infra/grafana/datasource-auth.yaml>temp && cat temp > infra/grafana/datasource-auth.yaml
+            docker-compose --profile grafana -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            rm .env
+            git restore .
+            git clean -dxf
+
+      - name: up haproxy profile
+        uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.haproxy == 'true'
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "COMPOSE_HTTP_TIMEOUT=500" > .env
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            docker-compose --profile haproxy -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            rm .env
+
+      - name: up kafka profile
+        uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.kafka == 'true'
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "COMPOSE_HTTP_TIMEOUT=500" > .env
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            wget -P ./infra/kafka https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
+            docker-compose --profile kafka -f ./infra/docker-compose.yaml --env-file .env up -d
+            rm .env
+            git restore .
+            git clean -dxf
+
+      - name: up loki profile
+        uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.loki == 'true'
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: LOKI_S3_USER,LOKI_S3_PASSWORD,PROJECT_DIR,GIT_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "COMPOSE_HTTP_TIMEOUT=500
+            LOKI_S3_USER=$LOKI_S3_USER
+            LOKI_S3_PASSWORD=$LOKI_S3_PASSWORD" > .env
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            envsubst<infra/loki/loki-config-scalable.yaml>temp && cat temp > infra/loki/loki-config-scalable.yaml
+            docker-compose --profile loki -f ./infra/docker-compose.yaml --env-file .env up -d
+            rm .env
+            git restore .
+            git clean -dxf
+
+      - name: up prometheus profile
+        uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.prometheus == 'true'
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "GRAFANA_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            PROMETHEUS_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
+            PROMETHEUS_DOMAIN=$PROMETHEUS_DOMAIN
+            ALERTMANAGER_TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
+            TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
+            TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
+            COMPOSE_HTTP_TIMEOUT=500
             MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
-            MONGO_SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
+            ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            envsubst<infra/prometheus/alertmanager-config.yml>temp && cat temp > infra/prometheus/alertmanager-config.yml
+            envsubst<infra/prometheus/prometheus.yml>temp && cat temp > infra/prometheus/prometheus.yml
+            docker-compose --profile prometheus --profile monitoring -f ./infra/docker-compose.yaml --env-file .env up -d
+            rm .env
+            git restore .
+            git clean -dxf
+
+
+      - name: up promtail profile
+        uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.promtail == 'true'
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "COMPOSE_HTTP_TIMEOUT=500" > .env
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            docker-compose --profile promtail -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            rm .env
+            git restore .
+            git clean -dxf
+
+      - name: up infra profile
+        uses: appleboy/ssh-action@master
+        if: steps.changes.outputs.infra == 'true'
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: MONGO_MONGODB_EXPORTER_PASSWORD,GRAFANA_DOMAIN,GRAFANA_DEFAULT_ADMIN_PASSWORD,GRAFANA_DATASOURCE_USER,GRAFANA_DATASOURCE_PASSWORD,PROMETHEUS_DOMAIN,ALERTMANAGER_TELEGRAM_BOT_TOKEN,ALERTMANAGER_TELEGRAM_CHAT_ID,PROJECT_DIR,GIT_URL,LOKI_S3_USER,LOKI_S3_PASSWORD,MINIO_ROOT_USER,MINIO_ROOT_PASSWORD
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
             GRAFANA_DOMAIN=$GRAFANA_DOMAIN
             GRAFANA_DATASOURCE_USER=$GRAFANA_DATASOURCE_USER
             GRAFANA_DATASOURCE_PASSWORD=$GRAFANA_DATASOURCE_PASSWORD
@@ -73,37 +234,19 @@ jobs:
             TELEGRAM_BOT_TOKEN=$ALERTMANAGER_TELEGRAM_BOT_TOKEN
             TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
             ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID
-            JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
-            JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
-            JFROG_URL=$JFROG_URL
             COMPOSE_HTTP_TIMEOUT=500
             LOKI_S3_USER=$LOKI_S3_USER
             LOKI_S3_PASSWORD=$LOKI_S3_PASSWORD
             MINIO_ROOT_USER=$MINIO_ROOT_USER
-            MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD
-            ALERTMANAGER_TELEGRAM_CHAT_ID=$ALERTMANAGER_TELEGRAM_CHAT_ID" > .env
-
-
-            echo "DB_URL=$BALANCE_DB_URL
-            DB_PASSWORD=$MONGO_SERVICE_PASSWORD
-            DB_PORT=$SERVICE_DB_PORT
-            DB_USER=$BALANCE_DB_USER
-            DB_NAME=$BALANCE_DB_USER
-            SERVICE_URL=$SERVICE_URL
-            SERVICE_PORT=$BALANCE_SERVICE_PORT" > ./balance/.env
-
-            echo "SERVICE_URL=$SERVICE_URL
-            SERVICE_PORT=$FACADE_SERVICE_URL" > ./facade/.env
+            MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD" > .env
 
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
-            envsubst<infra/alertmanager-config.yml>temp && cat temp > infra/alertmanager-config.yml
-            envsubst<infra/datasource-auth.yaml>temp && cat temp > infra/datasource-auth.yaml
-            envsubst<infra/prometheus.yml>temp && cat temp > infra/prometheus.yml
-            envsubst<infra/loki-config-scalable.yaml>temp && cat temp > infra/loki-config-scalable.yaml
-            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
-            wget -P ./infra https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
-            openssl rand -base64 768 > ./infra/mongodb/mongo-replication.key
-            docker-compose --profile full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            envsubst<infra/prometheus/alertmanager-config.yml>temp && cat temp > infra/prometheus/alertmanager-config.yml
+            envsubst<infra/grafana/datasource-auth.yaml>temp && cat temp > infra/grafana/datasource-auth.yaml
+            envsubst<infra/prometheus/prometheus.yml>temp && cat temp > infra/prometheus/prometheus.yml
+            envsubst<infra/loki/loki-config-scalable.yaml>temp && cat temp > infra/loki/loki-config-scalable.yaml
+            wget -P ./infra/kafka https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.0/jmx_prometheus_javaagent-0.17.0.jar
+            docker-compose --profile infra -f ./infra/docker-compose.yaml --env-file .env up -d
+            rm .env
             git restore .
             git clean -dxf
-            docker logout

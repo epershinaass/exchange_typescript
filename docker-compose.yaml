@@ -25,7 +25,7 @@ services:
       - facade
       - full
     ports:
-      - 5001:5000
+      - 5001:5001
     volumes:
       - ./products/.env:/app/.env
     <<: [*default-svc, *log-driver]
@@ -44,7 +44,7 @@ services:
       - mongo-dev
       - full-dev
     ports:
-      - 5001:5000
+      - 5001:5001
     volumes:
       - ./products:/app/
     <<: [*default-svc, *log-driver]
@@ -128,9 +128,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin-password
-      SERVICE_PASSWORD: balance
-      SERVICE_USER: balance
-      SERVICE_DB: balance
 
     volumes:
       - db-data:/data/db
@@ -177,7 +174,7 @@ services:
       retries: 3
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
@@ -323,7 +320,7 @@ services:
     ports: ["3001:3000"]
     volumes:
       - grafana:/var/lib/grafana
-      - ./infra/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./infra/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     deploy:
       resources:
         limits:
@@ -340,15 +337,15 @@ services:
 
 configs:
   loki_config:
-    file: ./infra/loki-config.yaml
+    file: ./infra/loki/loki-config.yaml
   promtail_config:
-    file: ./infra/promtail-config.yaml
+    file: ./infra/promtail/promtail-config.yaml
   datasource:
-    file: ./infra/datasource.yaml
+    file: ./infra/grafana/datasource.yaml
   mongo_config:
-    file: infra/mongodb/local-mongo-init.js
+    file: ./infra/mongodb/local-mongo-init.js
   kafka_run:
-    file: ./infra/update_run.sh
+    file: ./infra/kafka/update_run.sh
 
 volumes:
   grafana:
