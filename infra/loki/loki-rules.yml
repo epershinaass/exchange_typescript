@@ -5,7 +5,7 @@ groups:
         expr: |
           sum by (container)
             (rate({level="error"}[1m]))
-            > 60
+            > 10
         for: 1m
         labels:
             severity: warning

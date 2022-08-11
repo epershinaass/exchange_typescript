@@ -18,7 +18,7 @@ password:
 $2b$12$hNf2lSsxfm0.i4a.1kVpSOVyBCfIB51VRjgBUyv6kdnyTlgWj81Ay
 ```
 
-Save that password in web.yml
+Save that password in prometheus/web.yml
 
 To use Prometheus Datasource, set variable `GRAFANA_DATASOURCE_PASSWORD`
 
