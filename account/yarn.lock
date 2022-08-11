@@ -2839,7 +2839,7 @@ grpc@^1.24.11:
     lodash.camelcase "^4.3.0"
     lodash.clone "^4.5.0"
     nan "^2.13.2"
-    protobufjs "^5.0.3"
+    protobufjs "^6.11.3"
 
 has-flag@^3.0.0:
   version "3.0.0"
