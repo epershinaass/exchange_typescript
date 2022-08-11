@@ -12,6 +12,7 @@ export class AccountController {
 
   @GrpcMethod('AccountController', 'SignIn')
   async signIn(@Body() creds: CredentialsDto, metadata: any): Promise<AuthTokenDto> {
+    console.log('in');
     return await this.accountService.signIn(creds);
   }
 

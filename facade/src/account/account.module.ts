@@ -3,16 +3,19 @@ import { AccountController } from './account.controller';
 import { ClientsModule } from '@nestjs/microservices/module/clients.module';
 import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 
 @Module({
   imports: [
     // ConfigModule.forRoot({
-    //   envFilePath: '.env',
+    //   envFilePath: 'example.env',
     // }),
-    ClientsModule.register([
+    // ConfigModule,
+    ClientsModule.registerAsync([
       {
+        inject:[ConfigService],
+        useFactory: (config: ConfigService) => {}
         name: 'ACCOUNT_GRPC_SERVICE',
         transport: Transport.GRPC,
         options: {

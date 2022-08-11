@@ -1,4 +1,3 @@
-import { ProductsController } from './products/products.controller';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AccountModule } from './account/account.module';
@@ -7,11 +6,12 @@ import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ envFilePath: 'example.env' }),
+    ConfigModule.forRoot({ envFilePath: 'example.env', isGlobal: true, }),
     AccountModule,
     BalanceModule,
     ProductsModule,
   ],
+  exports: [ConfigModule],
   providers: [],
 })
 export class AppModule { }

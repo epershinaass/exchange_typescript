@@ -10,7 +10,7 @@ import { AccountModel, Account } from './account-model';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: 'example.env',
     }),
     MongooseModule.forRoot(`mongodb://${process.env.ACC_DB_URL}:${process.env.ACC_DB_PORT}/${process.env.ACC_DB_NAME}`),
     MongooseModule.forFeature([
