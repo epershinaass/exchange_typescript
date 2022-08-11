@@ -319,8 +319,6 @@ services:
         condition: service_healthy
       schema-registry:
         condition: service_healthy
-      haproxy:
-        condition: service_healthy
     <<: [*default-svc, *log-driver, *default-lables]
 
   loki-frontend:
