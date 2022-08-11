@@ -159,7 +159,7 @@ db.createUser({
 /*****************************Init Database for account****************************************************************/
 
 db = db.getSiblingDB('account');
-db.account.insertMany([
+db.accounts.insertMany([
     {
         "userId": "62ecda02aded95223f606777",
         "login": "vasya",

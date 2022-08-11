@@ -1,7 +1,7 @@
 balance () {
 mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" <<EOF
 db = db.getSiblingDB('$SERVICE_DB');
-db.$SERVICE_DB.insertMany([
+db.${SERVICE_DB}s.insertMany([
   {
     total: 100,
     userId: "62e370f465eec4910c2ba2e1",
@@ -83,7 +83,7 @@ EOF
 account () {
 mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" <<EOF
 db = db.getSiblingDB('$SERVICE_DB');
-db.$SERVICE_DB.insertMany([
+db.${SERVICE_DB}s.insertMany([
   {
     "userId": "62ecda02aded95223f606777",
     "login": "first_user",
