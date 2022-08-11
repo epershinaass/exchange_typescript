@@ -1,0 +1,79 @@
+name: Deploy products
+
+on:
+  workflow_run:
+    workflows:
+      - "Build products image"
+    types:
+      - "completed"
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+
+env:
+  MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+  MONGO_INITDB_ROOT_USERNAME: "admin"
+  MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
+  MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
+  JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
+  JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
+  JFROG_URL: exchangetypescript.jfrog.io
+
+  PROJECT_DIR: "exchange_typescript"
+  GIT_URL: "https://github.com/epershinaass/exchange_typescript"
+
+  PRODUCTS_DB_URL: "mongo-products"
+  SERVICE_DB_PORT: 27017
+  PRODUCTS_DB_USER: "products"
+  SERVICE_URL: "0.0.0.0"
+  PRODUCTS_SERVICE_PORT: 5001
+
+jobs:
+  deploy:
+    name: Deploy
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,PRODUCTS_DB_URL,SERVICE_DB_PORT,PRODUCTS_DB_USER,SERVICE_URL,PRODUCTS_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
+            MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
+            MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
+            SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
+            JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
+            JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
+            JFROG_URL=$JFROG_URL
+            COMPOSE_HTTP_TIMEOUT=500
+            SERVICE_DB_URL=$PRODUCTS_DB_URL
+            SERVICE_USER=$PRODUCTS_DB_USER
+            SERVICE_DB=$PRODUCTS_DB_USER" > .env
+
+
+            echo "DB_URL=$PRODUCTS_DB_URL
+            DB_PASSWORD=$MONGO_SERVICE_PASSWORD
+            DB_PORT=$SERVICE_DB_PORT
+            DB_USER=$PRODUCTS_DB_USER
+            DB_NAME=$PRODUCTS_DB_USER
+            SERVICE_URL=$SERVICE_URL
+            SERVICE_PORT=$PRODUCTS_SERVICE_PORT" > ./products/.env
+
+            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
+            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
+            docker-compose --profile products -f ./infra/docker-compose.yaml --env-file .env up -d
+            rm .env
+            rm ./products/.env
+            git restore .
+            git clean -dxf
+            docker logout

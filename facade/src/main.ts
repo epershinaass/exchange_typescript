@@ -7,7 +7,7 @@ import { AllRpcExceptionFilter } from './filter/grpc-exception-filter';
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
-    url: '0.0.0.0:3000',
+    url: `${process.env.SERVICE_URL}:${process.env.SERVICE_PORT}`,
     package: 'facade',
     protoPath: join(__dirname, '/proto/facade.proto'),
   },

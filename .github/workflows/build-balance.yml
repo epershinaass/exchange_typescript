@@ -3,7 +3,13 @@ on:
   pull_request:
     types: [opened, reopened]
     paths:
-    - 'balance/**'
+    - "balance/**"
+    branches: ["main"]
+  push:
+    paths:
+    - "balance/**"
+    branches:
+    - "!main"
   workflow_dispatch:
 
 env:
@@ -15,6 +21,7 @@ env:
 jobs:
   build-images:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -35,6 +42,12 @@ jobs:
       with:
         images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
+        tags: |
+          type=edge
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=sha
+          type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Upload Dockerfile as artifact
       uses: actions/upload-artifact@v3
@@ -55,9 +68,8 @@ jobs:
         context: ./balance
         file: /tmp/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
-        build-args: buildDate=$(date +'%Y-%m-%d')
-        labels: buildDate=$(date +'%Y-%m-%d')
         push: true
         cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
         cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
-        tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:latest,${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:${{ github.run_id }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}

@@ -15,7 +15,6 @@ export class Balance {
     type: [
       {
         transactionId: { type: String },
-        currentBalance: { type: Number },
         refillSum: { type: Number },
         transactionTime: { type: Date },
       },
