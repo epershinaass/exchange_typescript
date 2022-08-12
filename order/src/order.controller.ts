@@ -11,15 +11,15 @@ import { Observer } from 'rxjs';
 
 @Controller()
 export class OrderController implements OnModuleInit {
-  private orders;
+  private orders: any[];
   constructor(/*private readonly orderService: OrderService*/) {
     this.orders = [];
   }
 
-  @MessagePattern('orders')
-  getoOrder(@Payload() order): string {
+  @MessagePattern('order')
+  getOrder(@Payload() order) {
     console.log('Recieved from kafka: ', JSON.stringify(order));
-    return this.orders.push(order);
+    this.orders.push(order);
   }
 
   @Client({
@@ -40,7 +40,7 @@ export class OrderController implements OnModuleInit {
   client: ClientKafka;
 
   async onModuleInit() {
-    this.client.subscribeToResponseOf('orders'); // topic
+    this.client.subscribeToResponseOf('order'); // topic
     await this.client.connect();
     console.log('Init OK');
   }
@@ -57,12 +57,13 @@ export class OrderController implements OnModuleInit {
         console.log('Send messaage to kafka complete');
       },
     };
-    this.client.send('orders', order).subscribe(sentToKafkaObserver);
+    this.client.send('order', order).subscribe(sentToKafkaObserver);
     return { status: 0 };
   }
 
   @GrpcMethod('OrderController', 'GetOrders')
   async getOrders() {
+    console.log('getOrders');
     return { orders: this.orders };
   }
 }

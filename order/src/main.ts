@@ -25,7 +25,7 @@ export const KAFKA_TRANSPORT_OPTIONS: KafkaOptions = {
       brokers: ['localhost:29092'],
     },
     consumer: {
-      groupId: 'orders',
+      groupId: 'order',
       allowAutoTopicCreation: true,
     },
     subscribe: {
