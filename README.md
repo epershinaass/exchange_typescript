@@ -12,13 +12,13 @@
 ### Run
 
 ```bash
-docker-compose --profile dev up -d --build
+docker-compose --profile facade up -d --build
 ```
 
 ### Stop
 
 ```bash
-docker-compose --profile dev down
+docker-compose --profile facade down
 ```
 
 ### [Profiles](https://docs.docker.com/engine/reference/commandline/compose_up/)
@@ -43,8 +43,8 @@ Profiles avail:
 - facade-dev: facade-dev + balance-dev + products-dev + mongo
 - test: facade + balance +  products + mongo + loki + promtail + grafana
 - dev: facade-dev + balance-dev +  products-dev + mongo + loki + promtail + grafana
-- kafka: kafka + schema-registry + kafdrop
-- kowl: kowl
+- kafka: kafka + schema-registry + kowl
+- kafdrop: kafdrop
 - logs: loki + promtail + grafana
 - full: all not dev services
 - full-dev: all dev services
@@ -80,4 +80,3 @@ docker-compose build service_name
 
 - Не забыть скопировать файл example.env для каждого микросервиса в папку с микросервисом под именем .env
 - Переходим в корень проекта и запускаем сервисы командой: docker-compose --profile profile_name up -d --build
-- Чтобы перейти в режим prod: DOCKER_FILENAME=Dockerfile docker-compose --profile profile_name up -d --build
