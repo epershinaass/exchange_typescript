@@ -12,7 +12,7 @@ const GRPC_TRANSPORT_OPTIONS: GrpcOptions = {
   transport: Transport.GRPC,
   options: {
     // url: `${process.env.SERVICE_URL}:${process.env.SERVICE_PORT}`,
-    url: `0.0.0.0:5003`,
+    url: `localhost:5003`,
     package: 'order',
     protoPath: join(__dirname, 'proto/order.proto'),
   },
@@ -22,7 +22,7 @@ export const KAFKA_TRANSPORT_OPTIONS: KafkaOptions = {
   transport: Transport.KAFKA,
   options: {
     client: {
-      brokers: ['kafka1:9092'],
+      brokers: ['localhost:29092'],
     },
     consumer: {
       groupId: 'order',
