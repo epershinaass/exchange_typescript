@@ -1,4 +1,4 @@
-import { IAuthToken, ICredentials, IMessage } from "./account-grpc-interface";
+import { IAuthToken, ICredentials, IMessage } from "../interfaces/account.interface";
 
 
 export class AuthTokenDto implements IAuthToken {

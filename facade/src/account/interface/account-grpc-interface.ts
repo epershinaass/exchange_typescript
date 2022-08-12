@@ -1,5 +1,4 @@
-import { Observable } from "rxjs";
-
+import { Observable } from 'rxjs';
 
 export interface IAccountGrpcService {
   signIn(credentials: ICredentials): Observable<IAuthToken>;

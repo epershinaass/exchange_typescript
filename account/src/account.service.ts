@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Account, AccountDocument } from './account-model'
-import { codes, messages, ServiceError } from './msg/account-err';
+import { Account, AccountDocument } from './schemas/account.schema'
+import { codes, messages, ServiceError } from './errors/account.error';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
-import { AuthTokenDto, CredentialsDto, MessageDto } from './msg/account-dto';
+import { AuthTokenDto, CredentialsDto, MessageDto } from './dto/account.dto';
 
 
 @Injectable()

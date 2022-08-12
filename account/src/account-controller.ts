@@ -1,8 +1,8 @@
 import { Body, Controller, UseFilters } from '@nestjs/common';
-import { AccountService } from './account-service';
+import { AccountService } from './account.service';
 import { GrpcMethod } from '@nestjs/microservices';
-import { ServiceExceptionFilter } from './msg/account-err';
-import { AuthTokenDto, CredentialsDto, MessageDto } from './msg/account-dto';
+import { ServiceExceptionFilter } from './errors/account.error';
+import { AuthTokenDto, CredentialsDto, MessageDto } from './dto/account.dto';
 
 
 @Controller()

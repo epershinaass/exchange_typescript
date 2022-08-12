@@ -5,12 +5,9 @@ import { CLIENT_OPTS } from './constants';
 import { CredentialsDto, AuthTokenDto, MessageDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 
-
 @Controller()
 export class AccountController implements OnModuleInit {
-  constructor(
-    @Inject(CLIENT_OPTS) private client: ClientGrpc,
-  ) {}
+  constructor(@Inject(CLIENT_OPTS) private client: ClientGrpc) {}
 
   private accountService: IAccountGrpcService;
 
@@ -21,16 +18,16 @@ export class AccountController implements OnModuleInit {
 
   @GrpcMethod('AccountController', 'SignIn')
   async signIn(@Body() creds: CredentialsDto): Promise<AuthTokenDto> {
-      return await firstValueFrom(this.accountService.signIn(creds))
+    return await firstValueFrom(this.accountService.signIn(creds));
   }
 
   @GrpcMethod('AccountController', 'SignUp')
   async signUp(@Body() creds: CredentialsDto): Promise<MessageDto> {
-      return await firstValueFrom(this.accountService.signUp(creds))
+    return await firstValueFrom(this.accountService.signUp(creds));
   }
 
   @GrpcMethod('AccountController', 'Verify')
   async verify(@Body() auth: AuthTokenDto): Promise<MessageDto> {
-      return await firstValueFrom(this.accountService.verify(auth))
+    return await firstValueFrom(this.accountService.verify(auth));
   }
 }

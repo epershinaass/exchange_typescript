@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { AccountModule } from './account-module';
+import { AccountModule } from './account.module';
 
 
 const microserviceOptions = {

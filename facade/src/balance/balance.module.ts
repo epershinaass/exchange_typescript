@@ -4,8 +4,7 @@ import { ClientsModule } from '@nestjs/microservices/module/clients.module';
 import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
-import { NAME, CLIENT_OPTS } from './constants';
-
+import { NAME, CLIENT_OPTS } from './constatns/constants';
 
 @Module({
   imports: [
@@ -17,7 +16,9 @@ import { NAME, CLIENT_OPTS } from './constants';
           transport: Transport.GRPC,
           options: {
             package: NAME.toLowerCase(),
-            url: `${config.get<string>(`${NAME}_URL`)}:${config.get<string>(`${NAME}_PORT`)}`,
+            url: `${config.get<string>(`${NAME}_URL`)}:${config.get<string>(
+              `${NAME}_PORT`,
+            )}`,
             protoPath: join(__dirname, `./proto/${NAME.toLowerCase()}.proto`),
           },
         }),
@@ -26,4 +27,4 @@ import { NAME, CLIENT_OPTS } from './constants';
   ],
   controllers: [BalanceController],
 })
-export class BalanceModule { }
+export class BalanceModule {}
