@@ -35,6 +35,8 @@ docker-compose --profile profile_name1 --profile profile_name2 up -d
 Profiles avail:
 - balance: balance + mongo
 - balance-dev: balance-dev + mongo
+- order: order + mongo
+- order-dev: order-dev + mongo
 - products: products + mongo
 - products-dev: products-dev + mongo
 - mongo: mongo + balance + products
@@ -60,6 +62,7 @@ docker-compose build service_name
 ```md
 - Balance: 5000
 - Products: 5001
+- Order: 5003
 - Facade: 3000
 - Kafka: 29092
 - Schema registry (kafka): 8081

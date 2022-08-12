@@ -11,6 +11,54 @@ x-log: &log-driver
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  order:
+    image: ourrepo/order:${ORDER_VERSION:-0.1.0}
+    hostname: order
+    container_name: order
+    build:
+      context: order
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - order
+      - facade
+      - full
+    ports:
+      - 5003:5003
+    volumes:
+      - ./order/.env:/app/.env
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
+  order-dev:
+    image: ourrepo/order:${ORDER_VERSION:-0.1.0}
+    hostname: order-dev
+    container_name: order-dev
+    build:
+      context: order
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - order
+      - facade
+      - full
+    ports:
+      - 5003:5003
+    volumes:
+      - ./order:/app/
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
   products:
     image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
     hostname: products
@@ -194,7 +242,7 @@ services:
       KAFKA_HEAP_OPTS: -Xmx2048M -Xms1024M
       KAFKA_RETENTION_BYTES: 10000000 # 10Mb
       KAFKA_LOG_RETENTION_HOURS: 5
-      KAFKA_COMPRESSION_TYPE: zstd
+      KAFKA_COMPRESSION_TYPE: gzip
     <<: [*default-svc, *log-driver]
     volumes:
       - kafka1-data:/var/lib/kafka/data
