@@ -194,7 +194,7 @@ services:
       KAFKA_HEAP_OPTS: -Xmx800M -Xms256M
       KAFKA_RETENTION_BYTES: 10000000 # 10Mb
       KAFKA_LOG_RETENTION_HOURS: 5
-      KAFKA_COMPRESSION_TYPE: zstd
+      KAFKA_COMPRESSION_TYPE: gzip
     <<: [*default-svc, *log-driver]
     volumes:
       - kafka1-data:/var/lib/kafka/data
