@@ -26,7 +26,7 @@ export class OrderController implements OnModuleInit {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: ['localhost:29092'],
+        brokers: ['kafka1:9092'],
       },
       consumer: {
         groupId: 'orders',
