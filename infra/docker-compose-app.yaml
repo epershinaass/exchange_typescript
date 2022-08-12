@@ -24,6 +24,9 @@ services:
     profiles:
       - account
       - full
+    depends_on:
+      mongo-account:
+        condition: service_healthy
     ports:
       - ${ACCOUNT_SERVICE_PORT}:${ACCOUNT_SERVICE_PORT}
     <<: [ *default-svc, *log-driver, *default-lables, *pull]
@@ -38,6 +41,9 @@ services:
     profiles:
       - products
       - full
+    depends_on:
+      mongo-products:
+        condition: service_healthy
     ports:
       - ${PRODUCTS_SERVICE_PORT}:${PRODUCTS_SERVICE_PORT}
     <<: [ *default-svc, *log-driver, *default-lables, *pull]
@@ -52,6 +58,9 @@ services:
     profiles:
       - balance
       - full
+    depends_on:
+      mongo-balance:
+        condition: service_healthy
     ports:
       - ${BALANCE_SERVICE_PORT}:${BALANCE_SERVICE_PORT}
     <<: [ *default-svc, *log-driver, *default-lables, *pull]
