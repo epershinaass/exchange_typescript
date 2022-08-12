@@ -39,8 +39,8 @@ Profiles avail:
 - account-dev: account-dev + mongo
 - products: products + mongo
 - products-dev: products-dev + mongo
-- mongo: mongo + balance + products
-- mongo-dev: mongo + balance-dev + products-dev
+- mongo: mongo + balance + products + account
+- mongo-dev: mongo + balance-dev + products-dev + account-dev
 - facade: facade + balance + products + mongo + account
 - facade-dev: facade-dev + balance-dev + products-dev + mongo + account-dev
 - test: facade + balance +  products + mongo + loki + promtail + grafana
