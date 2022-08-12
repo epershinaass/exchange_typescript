@@ -1,7 +1,7 @@
 name: Build products image
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
     paths:
     - "products/**"
     branches: ["main"]
@@ -9,7 +9,7 @@ on:
     paths:
     - "products/**"
     branches:
-    - "!main"
+    - "main"
   workflow_dispatch:
 
 env:

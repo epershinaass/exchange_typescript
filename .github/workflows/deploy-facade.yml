@@ -47,7 +47,7 @@ jobs:
             echo "JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
             JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
             JFROG_URL=$JFROG_URL
-            COMPOSE_HTTP_TIMEOUT=500" > .env
+            COMPOSE_HTTP_TIMEOUT=500" > fs.env
 
 
             echo "
@@ -58,10 +58,10 @@ jobs:
             PRODUCTS_URL=$PRODUCTS_URL
             PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT" > ./facade/.env
 
-            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            export $(cat fs.env | egrep -v "(^#.*|^$)" | xargs)
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
-            docker-compose --profile facade -f ./infra/docker-compose.yaml --env-file .env up -d
-            rm .env
+            docker-compose --profile facade -f ./infra/docker-compose-app.yaml --env-file fs.env up -d
+            rm fs.env
             rm ./facade/.env
             git restore .
             git clean -dxf

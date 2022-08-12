@@ -57,7 +57,8 @@ jobs:
             COMPOSE_HTTP_TIMEOUT=500
             SERVICE_DB_URL=$PRODUCTS_DB_URL
             SERVICE_USER=$PRODUCTS_DB_USER
-            SERVICE_DB=$PRODUCTS_DB_USER" > .env
+            SERVICE_DB=$PRODUCTS_DB_USER
+            PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT" > pr.env
 
 
             echo "DB_URL=$PRODUCTS_DB_URL
@@ -68,11 +69,11 @@ jobs:
             SERVICE_URL=$SERVICE_URL
             SERVICE_PORT=$PRODUCTS_SERVICE_PORT" > ./products/.env
 
-            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            export $(cat pr.env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
-            docker-compose --profile products -f ./infra/docker-compose.yaml --env-file .env up -d
-            rm .env
+            docker-compose --profile products -f ./infra/docker-compose-app.yaml --env-file pr.env up -d
+            rm pr.env
             rm ./products/.env
             git restore .
             git clean -dxf
