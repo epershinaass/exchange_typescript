@@ -190,3 +190,14 @@ db.createUser({
     ],
 });
 /**********************************************************************************************************************/
+db = db.getSiblingDB('order');
+db.createUser({
+    user: 'order',
+    pwd: 'order',
+    roles: [
+        {
+            role: 'readWrite',
+            db: 'order',
+        },
+    ],
+});
