@@ -1,4 +1,4 @@
-name: Deploy to server1
+name: Deploy infra to server1
 
 on:
   push:
