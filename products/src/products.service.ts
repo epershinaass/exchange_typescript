@@ -17,7 +17,7 @@ export class ProductsService {
 
   public async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
     const product = await this.productModel.findOne({ userId: addProductRequest.userId });
-    const catalog = await this.catalogModel.findOne({ name: addProductRequest.product.name });
+    const catalog = await this.catalogModel.findOne({ productId: addProductRequest.product.productId });
     if (!product) {
       throw errCode.NOT_FOUND;
     } else if (!catalog) {

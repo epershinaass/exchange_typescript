@@ -6,8 +6,8 @@ export interface IProductsService {
 }
 
 export interface IProduct {
-  name: string;
   quantity: number;
+  productId: string;
   id?: string;
 }
 

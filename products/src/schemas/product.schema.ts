@@ -14,6 +14,7 @@ export class Product {
     type: [
       {
         quantity: { type: Number },
+        productId: { type: String },
       },
     ],
   })

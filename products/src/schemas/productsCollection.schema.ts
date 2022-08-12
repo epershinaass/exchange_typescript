@@ -9,6 +9,9 @@ export class Catalog {
   @Prop()
   name: string
 
+  @Prop()
+  productId: string
+
 }
 
 export const CatalogSchema = SchemaFactory.createForClass(Catalog);
