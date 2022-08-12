@@ -19,9 +19,9 @@ export class ProductsController {
     try {
       const isAdded = await this.productsService.addProduct(addProductRequest);
       if (isAdded) {
-        return { status: "OK" }
+        return { status: 0 }
       }
-      return { status: "NOT OK" }
+      return { status: 2 }
     } catch (e) {
       throw new RpcException(getGrpcError(e));
     }
