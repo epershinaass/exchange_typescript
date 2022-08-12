@@ -14,103 +14,6 @@ x-labels: &default-lables
 
 services:
 
-  products:
-    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
-    hostname: products
-    container_name: products
-    profiles:
-      - products
-      - full
-    ports:
-      - 5001:5001
-    <<: [ *default-svc, *log-driver, *default-lables]
-    configs:
-      - source: products_env
-        target: /app/.env
-
-  balance:
-    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
-    hostname: balance
-    container_name: balance
-    profiles:
-      - balance
-      - full
-    ports:
-      - 5000:5000
-    <<: [ *default-svc, *log-driver, *default-lables]
-    configs:
-      - source: balance_env
-        target: /app/.env
-
-  facade:
-    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
-    hostname: facade
-    container_name: facade
-    profiles:
-      - facade
-      - full
-    ports:
-      - 3000:3000
-    configs:
-      - source: facade_env
-        target: /app/.env
-    <<: [ *default-svc, *log-driver, *default-lables]
-
-  mongo-products:
-    image: mongo:5.0.9
-    hostname: mongo-products
-    container_name: mongo-products
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    profiles:
-      - mongo
-      - full
-      - products
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
-      interval: 20s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - db-products:/data/db
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo-balance:
-    image: mongo:5.0.9
-    hostname: mongo-balance
-    container_name: mongo-balance
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    profiles:
-      - mongo
-      - full
-      - balance
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
-      interval: 20s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - db-balance:/data/db
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo_setup:
-    image: mongo:5.0.9
-    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
-    profiles:
-      - mongo
-      - full
-      - products
-      - balance
-    configs:
-      - source: mongo_config_setup
-        target: /docker-entrypoint-initdb.d/mongosetup.sh
-    networks:
-      - stage-net
-    <<: [*log-driver, *default-lables]
-
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka1
@@ -687,14 +590,6 @@ configs:
     file: ./kafka/jmx-exporter-config.yml
   schema_registry_exporter_config:
     file: ./kafka/jmx-sr-exporter-config.yml
-  mongo_config_setup:
-    file: ./mongodb/mongosetup.sh
-  facade_env:
-    file: ../facade/.env
-  balance_env:
-    file: ../balance/.env
-  products_env:
-    file: ../products/.env
   loki_alert:
     file: ./loki/loki-rules.yml
 
@@ -705,8 +600,6 @@ volumes:
   kafka2-data:
   kafka3-data:
   minio:
-  db-products:
-  db-balance:
 
 networks:
   stage-net:
