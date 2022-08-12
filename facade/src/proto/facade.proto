@@ -42,9 +42,8 @@ service ProductsController {
 }
 
 message Products {
-  string name = 1;
+  string productId = 1;
   uint64 quantity = 2;
-  string productId = 3;
 }
 
 message AddProductRequest {
