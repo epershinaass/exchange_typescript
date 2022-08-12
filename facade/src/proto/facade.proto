@@ -92,3 +92,7 @@ message AuthResponse {
   string token = 1;
 }
 
+message MessageResponse {
+  string message = 1;
+}
+
