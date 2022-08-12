@@ -296,6 +296,31 @@ services:
         condition: service_healthy
     <<: [*default-svc, *log-driver, *default-lables]
 
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
+    profiles:
+      - kowl
+      - kafka
+      - infra
+      - full
+    environment:
+      KAFKA_BROKERS: kafka1:9092,kafka2:9092,kafka3:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
+      SERVER_BASEPATH: /kafka
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver, *default-lables]
+
   loki-frontend:
     image: grafana/loki:2.6.1
     profiles:
