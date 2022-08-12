@@ -1,6 +1,7 @@
 import { Body, Controller, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { CLIENT_OPTS } from './constants';
 import { CredentialsDto, AuthTokenDto, MessageDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 
@@ -8,7 +9,7 @@ import { IAccountGrpcService } from './interface/account-grpc-interface';
 @Controller()
 export class AccountController implements OnModuleInit {
   constructor(
-    @Inject('ACCOUNT_GRPC_SERVICE') private client: ClientGrpc,
+    @Inject(CLIENT_OPTS) private client: ClientGrpc,
   ) {}
 
   private accountService: IAccountGrpcService;

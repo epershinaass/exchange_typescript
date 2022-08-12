@@ -7,12 +7,16 @@ import { ConfigModule } from '@nestjs/config';
 import { AccountModel, Account } from './account-model';
 
 
+const db_path = () => {
+  const user = process.env.ACC_DB_USER!=='' ?`${process.env.ACC_DB_USER}:${process.env.ACC_DB_PASSWORD}@` : '';
+  return `mongodb://${user}${process.env.ACC_DB_URL}:${process.env.ACC_DB_PORT}/${process.env.ACC_DB_NAME}`
+}
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot(`mongodb://${process.env.ACC_DB_USER}:${process.env.ACC_DB_PASSWORD}@${process.env.ACC_DB_URL}:${process.env.ACC_DB_PORT}/${process.env.ACC_DB_NAME}`),
+    MongooseModule.forRoot((console.log(db_path()), db_path())),
     MongooseModule.forFeature([
       {
         name: Account.name,

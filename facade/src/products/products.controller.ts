@@ -2,12 +2,13 @@ import { Body, Controller, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
 import { AddProductsDto, GetProductDto } from './dto/add-products.dto';
 import { IProductsService } from './interfaces/grpc.interface';
+import { CLIENT_OPTS } from './constants';
 
 
 @Controller()
 export class ProductsController implements OnModuleInit {
   constructor(
-    @Inject('PRODUCTS_GRPC_SERVICE') private client: ClientGrpc,
+    @Inject(CLIENT_OPTS) private client: ClientGrpc,
   ) {}
 
   private productService: IProductsService;

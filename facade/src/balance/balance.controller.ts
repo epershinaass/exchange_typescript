@@ -7,12 +7,13 @@ import { lastValueFrom } from 'rxjs';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { IBalanceService } from './interfaces/grpc.interface';
+import { CLIENT_OPTS } from './constants';
 
 
 @Controller()
 export class BalanceController implements OnModuleInit {
   constructor(
-    @Inject('BALANCE_GRPC_SERVICE') private client: ClientGrpc,
+    @Inject(CLIENT_OPTS) private client: ClientGrpc,
   ) {}
 
   private balanceService: IBalanceService;

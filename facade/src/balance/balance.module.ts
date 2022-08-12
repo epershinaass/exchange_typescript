@@ -3,24 +3,25 @@ import { BalanceController } from './balance.controller';
 import { ClientsModule } from '@nestjs/microservices/module/clients.module';
 import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
+import { NAME, CLIENT_OPTS } from './constants';
 
 
 @Module({
   imports: [
-    // ConfigModule.forRoot({
-    //   envFilePath: '.env',
-    // }),
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
-        name: 'BALANCE_GRPC_SERVICE',
-        transport: Transport.GRPC,
-        options: {
-          package: 'balance',
-          url: `${process.env.BALANCE_URL}:${process.env.BALANCE_PORT}`,
-          protoPath: join(__dirname, './proto/balance.proto'),
-        },
-      }
+        name: CLIENT_OPTS,
+        inject: [ConfigService],
+        useFactory: async (config: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: NAME.toLowerCase(),
+            url: `${config.get<string>(`${NAME}_URL`)}:${config.get<string>(`${NAME}_PORT`)}`,
+            protoPath: join(__dirname, `./proto/${NAME.toLowerCase()}.proto`),
+          },
+        }),
+      },
     ]),
   ],
   controllers: [BalanceController],
