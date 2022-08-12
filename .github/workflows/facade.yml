@@ -1,13 +1,13 @@
-name: Products
+name: Facade
 on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-    - "products/**"
+    - "facade/**"
     branches: ["main"]
   push:
     paths:
-    - "products/**"
+    - "facade/**"
     branches:
     - "main"
   workflow_dispatch:
@@ -23,8 +23,8 @@ jobs:
       docker-tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
     env:
       IMAGE_REGISTRY: exchangetypescript.jfrog.io
-      IMAGE_REPOSITORY: products-docker
-      DOCKER_IMAGE: products
+      IMAGE_REPOSITORY: facade-docker
+      DOCKER_IMAGE: facade
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -52,42 +52,25 @@ jobs:
           type=sha
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Upload Dockerfile as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: dockerfile-artifact
-        path: Dockerfile
-        retention-days: 1
-
-    - name: Download artifact from previous step
-      uses: actions/download-artifact@v3
-      with:
-        name: dockerfile-artifact
-        path: /tmp
-
     - name: Build and push
       uses: docker/build-push-action@v3
       id: buildx
       with:
-        context: ./products
-        file: /tmp/Dockerfile
+        context: ./facade
+        file: ./Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
-        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
-        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache-facade
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache-facade,mode=max
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
     timeout-minutes: 10
+    runs-on: ubuntu-latest
     needs: build-images
     env:
-      MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
-      MONGO_INITDB_ROOT_USERNAME: "admin"
-      MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
-      MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
       JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
       JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
       JFROG_URL: exchangetypescript.jfrog.io
@@ -95,15 +78,16 @@ jobs:
       PROJECT_DIR: "exchange_typescript"
       GIT_URL: "https://github.com/epershinaass/exchange_typescript"
 
-      PRODUCTS_DB_URL: "mongo-products"
-      SERVICE_DB_PORT: 27017
-      PRODUCTS_DB_USER: "products"
       SERVICE_URL: "0.0.0.0"
-      PRODUCTS_SERVICE_PORT: 5001
-      BALANCE_SERVICE_PORT: 5000
       FACADE_SERVICE_PORT: 3000
+      BALANCE_URL: "balance"
+      BALANCE_SERVICE_PORT: 5000
+      PRODUCTS_URL: "products"
+      PRODUCTS_SERVICE_PORT: 5001
+      ACCOUNT_URL: "account"
       ACCOUNT_SERVICE_PORT: 5002
-      PRODUCTS_TAG: ${{needs.build-images.outputs.docker-tag}}
+      FACADE_TAG: ${{needs.build-images.outputs.docker-tag}}
+
     steps:
       - name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
@@ -111,7 +95,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,BALANCE_DB_URL,SERVICE_DB_PORT,BALANCE_DB_USER,SERVICE_URL,BALANCE_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME,FACADE_SERVICE_PORT,ACCOUNT_SERVICE_PORT,PRODUCTS_SERVICE_PORT,JFROG_URL,PRODUCTS_TAG
+          envs: PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,SERVICE_URL,FACADE_SERVICE_PORT,BALANCE_URL,BALANCE_SERVICE_PORT,PRODUCTS_URL,PRODUCTS_SERVICE_PORT,ACCOUNT_SERVICE_PORT,ACCOUNT_URL,JFROG_URL,FACADE_TAG
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -119,41 +103,33 @@ jobs:
               git clone $GIT_URL && cd $PROJECT_DIR
             fi
 
-            echo $PRODUCTS_TAG
-            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
-            MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
-            MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
-            MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
-            SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
-            JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
+            echo $FACADE_TAG
+            echo "JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
             JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
             JFROG_URL=$JFROG_URL
-            COMPOSE_HTTP_TIMEOUT=500
-            SERVICE_DB_URL=$BALANCE_DB_URL
-            SERVICE_USER=$BALANCE_DB_USER
-            SERVICE_DB=$BALANCE_DB_USER
             FACADE_SERVICE_PORT=$FACADE_SERVICE_PORT
             ACCOUNT_SERVICE_PORT=$ACCOUNT_SERVICE_PORT
             PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
             BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
-            PRODUCTS_TAG=$PRODUCTS_TAG" > bl.env
+            COMPOSE_HTTP_TIMEOUT=500
+            FACADE_TAG=$FACADE_TAG" > fs.env
 
-
-            echo "DB_URL=$BALANCE_DB_URL
-            DB_PASSWORD=$MONGO_SERVICE_PASSWORD
-            DB_PORT=$SERVICE_DB_PORT
-            DB_USER=$BALANCE_DB_USER
-            DB_NAME=$BALANCE_DB_USER
+            echo "
+            BALANCE_PORT=$BALANCE_SERVICE_PORT
+            BALANCE_URL=$BALANCE_URL
+            ACCOUNT_URL=$ACCOUNT_URL
+            ACCOUNT_PORT=$ACCOUNT_SERVICE_PORT
             SERVICE_URL=$SERVICE_URL
-            SERVICE_PORT=$BALANCE_SERVICE_PORT" > ./balance/.env
+            SERVICE_PORT=$FACADE_SERVICE_PORT
+            PRODUCTS_URL=$PRODUCTS_URL
+            PRODUCTS_PORT=$PRODUCTS_SERVICE_PORT" > ./facade/.env
 
-            export $(cat bl.env | egrep -v "(^#.*|^$)" | xargs)
-            envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
+            export $(cat fs.env | egrep -v "(^#.*|^$)" | xargs)
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
-            docker-compose --profile balance -f ./infra/docker-compose-app.yaml --env-file bl.env up -d
-            docker-compose --profile balance-app -f ./infra/docker-compose-app.yaml --env-file bl.env up -d --force-recreate
-            rm bl.env
-            rm ./balance/.env
+            docker-compose --profile facade -f ./infra/docker-compose-app.yaml --env-file fs.env up -d
+            docker-compose --profile facade-app -f ./infra/docker-compose-app.yaml --env-file fs.env up -d --force-recreate
+            rm fs.env
+            rm ./facade/.env
             git restore .
             git clean -dxf
             docker logout

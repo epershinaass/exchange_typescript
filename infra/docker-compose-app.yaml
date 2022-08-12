@@ -22,7 +22,7 @@ services:
     hostname: account
     container_name: account
     profiles:
-      - account
+      - account-app
       - full
     depends_on:
       mongo-account:
@@ -39,7 +39,7 @@ services:
     hostname: products
     container_name: products
     profiles:
-      - products
+      - products-app
       - full
     depends_on:
       mongo-products:
@@ -56,7 +56,7 @@ services:
     hostname: balance
     container_name: balance
     profiles:
-      - balance
+      - balance-app
       - full
     depends_on:
       mongo-balance:
@@ -73,7 +73,7 @@ services:
     hostname: facade
     container_name: facade
     profiles:
-      - facade
+      - facade-app
       - full
     ports:
       - ${FACADE_SERVICE_PORT}:${FACADE_SERVICE_PORT}
