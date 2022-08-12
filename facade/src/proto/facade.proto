@@ -68,8 +68,7 @@ message AddProductResponse {
 message GetProductsRequest {
   string user_id = 1;
 }
-<<<<<<< HEAD
-=======
+
 
 // ===AccountController===
 
