@@ -141,12 +141,55 @@ services:
       - full
       - products
       - balance
+      - account
     configs:
       - source: mongo_config_setup
         target: /docker-entrypoint-initdb.d/mongosetup.sh
     networks:
       - stage-net
     <<: [*log-driver, *default-lables]
+
+  mongodb-balance:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-balance
+    container_name: mongodb-exporter-balance
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
+    - '--compatible-mode'
+    profiles:
+      - balance
+      - full
+    depends_on:
+      - mongo-balance
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongodb-products:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-products
+    container_name: mongodb-exporter-products
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
+    - '--compatible-mode'
+    profiles:
+      - products
+      - full
+    depends_on:
+      - mongo-products
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongodb-account:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-account
+    container_name: mongodb-exporter-account
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
+    - '--compatible-mode'
+    profiles:
+      - account
+      - full
+    depends_on:
+      - mongo-account
+    <<: [*default-svc, *log-driver, *default-lables]
 
 configs:
   mongo_config_setup:
