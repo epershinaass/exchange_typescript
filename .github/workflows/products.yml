@@ -146,13 +146,13 @@ jobs:
             SERVICE_URL=$SERVICE_URL
             SERVICE_PORT=$PRODUCTS_SERVICE_PORT" > ./products/.env
 
-            export $(cat bl.env | egrep -v "(^#.*|^$)" | xargs)
+            export $(cat pr.env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
             docker-compose --profile products -f ./infra/docker-compose-app.yaml --env-file pr.env up -d
             docker-compose --profile products-app -f ./infra/docker-compose-app.yaml --env-file pr.env up -d --force-recreate
-            rm bl.env
-            rm ./balance/.env
+            rm pr.env
+            rm ./products/.env
             git restore .
             git clean -dxf
             docker logout
