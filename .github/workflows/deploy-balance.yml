@@ -57,7 +57,8 @@ jobs:
             COMPOSE_HTTP_TIMEOUT=500
             SERVICE_DB_URL=$BALANCE_DB_URL
             SERVICE_USER=$BALANCE_DB_USER
-            SERVICE_DB=$BALANCE_DB_USER" > .env
+            SERVICE_DB=$BALANCE_DB_USER
+            BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT" > bl.env
 
 
             echo "DB_URL=$BALANCE_DB_URL
@@ -68,11 +69,11 @@ jobs:
             SERVICE_URL=$SERVICE_URL
             SERVICE_PORT=$BALANCE_SERVICE_PORT" > ./balance/.env
 
-            export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
+            export $(cat bl.env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
             docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
-            docker-compose --profile balance -f ./infra/docker-compose.yaml --env-file .env up -d
-            rm .env
+            docker-compose --profile balance -f ./infra/docker-compose-app.yaml --env-file bl.env up -d
+            rm bl.env
             rm ./balance/.env
             git restore .
             git clean -dxf
