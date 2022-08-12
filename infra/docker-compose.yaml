@@ -44,7 +44,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -95,7 +95,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -146,7 +146,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
