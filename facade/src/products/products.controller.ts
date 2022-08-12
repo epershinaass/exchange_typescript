@@ -13,7 +13,7 @@ import { IProductsService } from './interfaces/grpc.interface';
 export const microserviceOptions: ClientOptions = {
   transport: Transport.GRPC,
   options: {
-    url: '0.0.0.0:5001',
+    url: 'products:5001',
     package: 'products',
     protoPath: join(__dirname, './proto/products.proto'),
   },

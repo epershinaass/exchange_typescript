@@ -149,7 +149,7 @@ services:
       - full
       - full-dev
     ports:
-      - 27017:27017
+      - 28000:27017
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
