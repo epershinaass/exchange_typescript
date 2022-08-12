@@ -35,12 +35,14 @@ docker-compose --profile profile_name1 --profile profile_name2 up -d
 Profiles avail:
 - balance: balance + mongo
 - balance-dev: balance-dev + mongo
+- account: account + mongo
+- account-dev: account-dev + mongo
 - products: products + mongo
 - products-dev: products-dev + mongo
-- mongo: mongo + balance + products
-- mongo-dev: mongo + balance-dev + products-dev
-- facade: facade + balance + products + mongo
-- facade-dev: facade-dev + balance-dev + products-dev + mongo
+- mongo: mongo + balance + products + account
+- mongo-dev: mongo + balance-dev + products-dev + account-dev
+- facade: facade + balance + products + mongo + account
+- facade-dev: facade-dev + balance-dev + products-dev + mongo + account-dev
 - test: facade + balance +  products + mongo + loki + promtail + grafana
 - dev: facade-dev + balance-dev +  products-dev + mongo + loki + promtail + grafana
 - kafka: kafka + schema-registry + kowl
