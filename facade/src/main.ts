@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { AllRpcExceptionFilter } from './filter/grpc-exception-filter';
 
 const microserviceOptions = {
   transport: Transport.GRPC,
@@ -17,6 +18,7 @@ async function bootstrap() {
     AppModule,
     microserviceOptions,
   );
+  app.useGlobalFilters(new AllRpcExceptionFilter());
   app.listen();
 }
 bootstrap();

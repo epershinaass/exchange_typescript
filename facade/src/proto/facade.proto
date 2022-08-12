@@ -68,3 +68,28 @@ message AddProductResponse {
 message GetProductsRequest {
   string user_id = 1;
 }
+<<<<<<< HEAD
+=======
+
+// ===AccountController===
+
+service AccountController {
+  rpc SignIn (CredentialsRequest) returns (AuthResponse);
+  rpc SignUp (CredentialsRequest) returns (MessageResponse);
+  rpc Verify (AuthRequest) returns (MessageResponse);
+}
+
+message CredentialsRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message AuthRequest {
+  string token = 1;
+}
+
+//Same as AuthRequest
+message AuthResponse {
+  string token = 1;
+}
+

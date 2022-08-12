@@ -12,7 +12,7 @@ import { Catalog, CatalogSchema } from './schemas/productsCollection.schema';
       envFilePath: '.env',
     }),
     MongooseModule.forRoot(
-      `mongodb://${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+      `mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
     ),
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }, { name: Catalog.name, schema: CatalogSchema }]),
   ],

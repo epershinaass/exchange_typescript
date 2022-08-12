@@ -1,47 +1,27 @@
-MONGODB1=mongo1-balance
-MONGODB2=mongo2-balance
-MONGODB3=mongo3-balance
-
-echo "**********************************************" ${MONGODB1}
-
-echo SETUP.sh time now: $(date +"%T")
-mongosh --host ${MONGODB1}:27017 -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD} <<EOF
-var cfg = {
-    "_id": "rs1",
-    "protocolVersion": 1,
-    "version": 1,
-    "members": [
-        {
-            "_id": 0,
-            "host": "${MONGODB1}:27017",
-            "priority": 1
-        },
-        {
-            "_id": 1,
-            "host": "${MONGODB2}:27017",
-            "priority": 0
-        },
-        {
-            "_id": 2,
-            "host": "${MONGODB3}:27017",
-            "priority": 0,
-        }
+balance () {
+mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" <<EOF
+db = db.getSiblingDB('$SERVICE_DB');
+db.${SERVICE_DB}s.insertMany([
+  {
+    total: 100,
+    userId: "62e370f465eec4910c2ba2e1",
+    transactions: [
+      {
+        transactionId: "init",
+        refillSum: 100,
+        transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+        _id: ObjectId("62e370f465eec4910c2ba2e1")
+      }
     ]
-};
-rs.initiate(cfg, { force: true });
-rs.secondaryOk();
-db.getMongo().setReadPref('primary');
-rs.reconfig(cfg);
-rs.status();
-
-db = db.getSiblingDB('$BALANCE_DB');
+  }
+])
 db.createUser({
-  user: '$BALANCE_USER',
+  user: '$SERVICE_USER',
   pwd: '$SERVICE_PASSWORD',
   roles: [
     {
       role: 'readWrite',
-      db: '$BALANCE_DB',
+      db: '$SERVICE_DB',
     },
   ],
 });
@@ -51,10 +31,98 @@ db.createUser(
     user: 'mongodb_exporter',
     pwd: '$MONGODB_EXPORTER_PASSWORD',
     roles: [
-        { role: 'clusterMonitor', db: 'admin' },
-        { role: 'read', db: 'local' }
+      { role: 'clusterMonitor', db: 'admin' },
+      { role: 'read', db: 'local' }
     ]
   }
 );
 quit();
 EOF
+}
+
+products () {
+mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" <<EOF
+db = db.getSiblingDB('$SERVICE_DB');
+db.$SERVICE_DB.insertMany([
+  {
+    "userId": "62ecda02aded95223f606777",
+    "products": [
+      {
+        "name": "teapot",
+        "quantity": 1,
+        _id: ObjectId("62ecda02aded95223f606777")
+      }
+    ]
+  }
+]);
+db.createUser({
+  user: '$SERVICE_USER',
+  pwd: '$SERVICE_PASSWORD',
+  roles: [
+    {
+      role: 'readWrite',
+      db: '$SERVICE_DB',
+    },
+  ],
+});
+use admin;
+db.createUser(
+  {
+    user: 'mongodb_exporter',
+    pwd: '$MONGODB_EXPORTER_PASSWORD',
+    roles: [
+      { role: 'clusterMonitor', db: 'admin' },
+      { role: 'read', db: 'local' }
+    ]
+  }
+);
+quit();
+EOF
+}
+
+account () {
+mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" <<EOF
+db = db.getSiblingDB('$SERVICE_DB');
+db.${SERVICE_DB}s.insertMany([
+  {
+    "userId": "62ecda02aded95223f606777",
+    "login": "first_user",
+    "password": "$FIRST_USER_PASSWORD",
+    _id: ObjectId("62ecda02aded95223f606777")
+  }
+]);
+db.createUser({
+  user: '$SERVICE_USER',
+  pwd: '$SERVICE_PASSWORD',
+  roles: [
+    {
+      role: 'readWrite',
+      db: '$SERVICE_DB',
+    },
+  ],
+});
+use admin;
+db.createUser(
+  {
+    user: 'mongodb_exporter',
+    pwd: '$MONGODB_EXPORTER_PASSWORD',
+    roles: [
+      { role: 'clusterMonitor', db: 'admin' },
+      { role: 'read', db: 'local' }
+    ]
+  }
+);
+quit();
+EOF
+}
+
+echo "**********************************************" "$SERVICE_DB_URL"
+
+echo SETUP.sh time now: "$(date +"%T")"
+if [[ "$SERVICE_DB" == "balance" ]]; then
+  balance
+elif [[ "$SERVICE_DB" == "products" ]]; then
+  products
+elif [[ "$SERVICE_DB" == "account" ]]; then
+  account
+fi

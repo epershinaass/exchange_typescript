@@ -71,7 +71,15 @@ scrape_configs:
 
   - job_name: 'mongodb-balance'
     static_configs:
-    - targets: ['mongodb-balance-cluster:9216']
+    - targets: ['mongodb-balance:9216']
+
+  - job_name: 'mongodb-products'
+    static_configs:
+    - targets: ['mongodb-products:9216']
+
+  - job_name: 'mongodb-account'
+    static_configs:
+    - targets: ['mongodb-account:9216']
 
   - job_name: 'minio-s3'
     metrics_path: /minio/v2/metrics/cluster

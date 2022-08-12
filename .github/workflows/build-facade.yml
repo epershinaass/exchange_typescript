@@ -1,7 +1,7 @@
 name: Build facade image
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
     paths:
     - "facade/**"
     branches: ["main"]
@@ -9,7 +9,7 @@ on:
     paths:
     - "facade/**"
     branches:
-    - "!main"
+    - "main"
   workflow_dispatch:
 
 env:
