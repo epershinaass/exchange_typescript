@@ -1,4 +1,6 @@
-# Prometheus basic auth
+# Basic auth
+
+## Prometheus basic auth
 
 [guide](https://prometheus.io/docs/guides/basic-auth/)
 
@@ -27,3 +29,26 @@ export GRAFANA_DATASOURCE_PASSWORD=<your user password>
 ```
 
 The `grafana` user is used by default, the password is stored in GitHub secrets.
+
+## Haproxy basic auth
+
+[docs](https://www.haproxy.com/documentation/hapee/latest/security/authentication/basic-authentication/)
+
+[stackoverflow](https://stackoverflow.com/a/64138986)
+
+```bash
+mkpasswd -m sha-512 'your_password'
+```
+
+Expected output
+
+```bash
+$6$gnGNapo/XeXYg39A$T/7TDfMrZXUDPbv5UPYemrdxdh5xEwqBrzSbpJYs9rfxLbQtgQzxyzkSGWIVOEGze8KrsA0urh3/dG.1xOx3M0
+```
+
+Copy the generated password and paste in haproxy.cfg file
+
+```bash
+userlist mycredentials
+   user joe password <hashed password>
+```
