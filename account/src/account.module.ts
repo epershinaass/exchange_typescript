@@ -16,7 +16,7 @@ const db_path = () => {
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot((console.log(db_path()), db_path())),
+    MongooseModule.forRoot(db_path()),
     MongooseModule.forFeature([
       {
         name: Account.name,
