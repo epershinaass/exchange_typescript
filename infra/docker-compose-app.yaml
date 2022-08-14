@@ -160,7 +160,7 @@ services:
       - balance
       - full
     depends_on:
-      - mongo-balance
+      - mongo_setup
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-products:
@@ -174,7 +174,7 @@ services:
       - products
       - full
     depends_on:
-      - mongo-products
+      - mongo_setup
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-account:
@@ -188,7 +188,7 @@ services:
       - account
       - full
     depends_on:
-      - mongo-account
+      - mongo_setup
     <<: [*default-svc, *log-driver, *default-lables]
 
 configs:
