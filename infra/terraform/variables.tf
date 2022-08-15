@@ -13,7 +13,7 @@ variable "root_ca_crl" {
 variable "server_cert_domain" {
   description = "We create a role to create client certs, what DNS domain will these certs be in"
   type        = list(string)
-  default     = ["example.com", "my.domain", "cluster.local", "domain.local", "92.53.65.114", "localhost"]
+  default     = ["cluster.local", "domain.local", "92.53.65.114"]
 }
 
 variable "common_name" {
@@ -31,10 +31,4 @@ variable "stage_common_name" {
   description = "Common_name"
   type        = string
   default     = "92.53.65.114"
-}
-
-variable "localhost_common_name" {
-  description = "Common_name"
-  type        = string
-  default     = "localhost"
 }

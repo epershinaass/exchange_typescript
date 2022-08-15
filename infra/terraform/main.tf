@@ -144,17 +144,3 @@ resource "local_sensitive_file" "stage_certificate" {
   file_permission = "0400"
 }
 
-
-resource "vault_pki_secret_backend_cert" "localhost" {
-  depends_on  = [vault_pki_secret_backend_role.my_role]
-  backend     = vault_mount.intermediate.path
-  name        = vault_pki_secret_backend_role.my_role.name
-  format      = "pem_bundle"
-  common_name = var.localhost_common_name
-}
-
-resource "local_sensitive_file" "localhost_certificate" {
-  content         = vault_pki_secret_backend_cert.localhost.certificate
-  filename        = "${path.root}/output/localhost/localhost.pem"
-  file_permission = "0400"
-}
