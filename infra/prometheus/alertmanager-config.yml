@@ -4,15 +4,11 @@ route:
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
-  group_by: ['alertname', 'cluster', 'service', 'severity']
+  group_by: ['alertname', 'instance', 'severity']
   routes:
-  - match:
-      severity: warning
+  - matchers:
+    - team=~".*(devops).*"
     receiver: warning-devops
-    routes:
-    - match_re:
-        team: .*(devops).*
-      receiver: warning-devops
 
 receivers:
   - name: telegram
@@ -22,7 +18,6 @@ receivers:
       bot_token: ${TELEGRAM_BOT_TOKEN}
       chat_id: ${TELEGRAM_CHAT_ID}
       message:  "Alertname: {{ .GroupLabels.alertname }}\n Severity: {{ .CommonLabels.severity }}\n {{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
-      # <b>  parse_mode: ''</b>
       parse_mode: ''
 
   - name: warning-devops
@@ -31,14 +26,5 @@ receivers:
       api_url: https://api.telegram.org # default = global.telegram_api_url - > default = "https://api.telegram.org"
       bot_token: ${TELEGRAM_BOT_TOKEN}
       chat_id: ${TELEGRAM_CHAT_ID}
-      parse_mode: ''
-      message:  "{{ range .Alerts }}
-          *Description:* {{ .Annotations.description }}
-          *Severity:* `{{ .Labels.severity }}`
-          *Graph:* {{ if eq .Labels.category 'logs' }}<{{ .Annotations.logurl }}|:chart_with_upwards_trend:>{{ else }}<{{ .GeneratorURL }}|:chart_with_upwards_trend:>{{ end }} *Dashboard:* <{{ .Annotations.dashboard }}|:bar_chart:> *Runbook:* <{{ .Annotations.runbook }}|:spiral_note_pad:>
-          *Details:*
-          {{ range .Labels.SortedPairs }} - *{{ .Name }}:* `{{ .Value }}`
-          {{ end }}
-           - *Impact*: {{ .Annotations.impact }}
-           - *Receiver*: warning-{{ .Labels.team }}
-        {{ end }}"
+      parse_mode: 'MarkdownV2'
+      message:  "{{ range .Alerts }}\n *Description:* {{ .Annotations.description }}\n *Severity:* `{{ .Labels.severity }}`\n *Graph:* {{ if eq .Labels.category 'logs' }}<{{ .Annotations.logurl }}|:chart_with_upwards_trend:>{{ else }}<{{ .GeneratorURL }}|:chart_with_upwards_trend:>{{ end }} *Dashboard:* <{{ .Annotations.dashboard }}|:bar_chart:> *Runbook:* <{{ .Annotations.runbook }}|:spiral_note_pad:>*Details:*\n {{ range .Labels.SortedPairs }} - *{{ .Name }}:* `{{ .Value }}` {{ end }}\n - *Impact*: {{ .Annotations.impact }}\n - *Receiver*: warning-{{ .Labels.team }}{{ end }}"

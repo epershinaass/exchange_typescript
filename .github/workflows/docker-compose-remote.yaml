@@ -1,18 +1,13 @@
-name: Deploy to server1
+name: Deploy infra to server1
 
 on:
-  pull_request:
-    types: [closed]
-    paths:
-    - 'infra/grafana/*'
-    - 'infra/haproxy/*'
-    - 'infra/kafka/*'
-    - 'infra/loki/*'
-    - 'infra/prometheus/*'
-    - 'infra/promtail/*'
-    - 'infra/docker-compose.yaml'
+  push:
+    branches:
+    - 'main'
   workflow_dispatch:
 
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
 
 env:
   MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
@@ -34,7 +29,6 @@ env:
 jobs:
   deploy:
     name: Deploy
-    if: github.event.pull_request.merged == true
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -209,7 +203,7 @@ jobs:
             echo "COMPOSE_HTTP_TIMEOUT=500" > .env
 
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
-            docker-compose --promtail full -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
+            docker-compose --profile promtail -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             rm .env
             git restore .
             git clean -dxf

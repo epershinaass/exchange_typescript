@@ -14,103 +14,6 @@ x-labels: &default-lables
 
 services:
 
-  products:
-    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
-    hostname: products
-    container_name: products
-    profiles:
-      - products
-      - full
-    ports:
-      - 5001:5001
-    <<: [ *default-svc, *log-driver, *default-lables]
-    configs:
-      - source: products_env
-        target: /app/.env
-
-  balance:
-    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
-    hostname: balance
-    container_name: balance
-    profiles:
-      - balance
-      - full
-    ports:
-      - 5000:5000
-    <<: [ *default-svc, *log-driver, *default-lables]
-    configs:
-      - source: balance_env
-        target: /app/.env
-
-  facade:
-    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
-    hostname: facade
-    container_name: facade
-    profiles:
-      - facade
-      - full
-    ports:
-      - 3000:3000
-    configs:
-      - source: facade_env
-        target: /app/.env
-    <<: [ *default-svc, *log-driver, *default-lables]
-
-  mongo-products:
-    image: mongo:5.0.9
-    hostname: mongo-products
-    container_name: mongo-products
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    profiles:
-      - mongo
-      - full
-      - products
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
-      interval: 20s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - db-products:/data/db
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo-balance:
-    image: mongo:5.0.9
-    hostname: mongo-balance
-    container_name: mongo-balance
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    profiles:
-      - mongo
-      - full
-      - balance
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
-      interval: 20s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - db-balance:/data/db
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo_setup:
-    image: mongo:5.0.9
-    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
-    profiles:
-      - mongo
-      - full
-      - products
-      - balance
-    configs:
-      - source: mongo_config_setup
-        target: /docker-entrypoint-initdb.d/mongosetup.sh
-    networks:
-      - stage-net
-    <<: [*log-driver, *default-lables]
-
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka1
@@ -141,7 +44,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -157,7 +60,6 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka1-data:/var/lib/kafka/data
-      - kafka1-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -193,7 +95,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -209,7 +111,6 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka2-data:/var/lib/kafka/data
-      - kafka2-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -245,7 +146,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -261,7 +162,6 @@ services:
     command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka3-data:/var/lib/kafka/data
-      - kafka3-logs:/var/lib/kafka/logs
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -299,6 +199,31 @@ services:
         condition: service_healthy
     <<: [*default-svc, *log-driver, *default-lables]
 
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
+    profiles:
+      - kowl
+      - kafka
+      - infra
+      - full
+    environment:
+      KAFKA_BROKERS: kafka1:9092,kafka2:9092,kafka3:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
+      SERVER_BASEPATH: /kafka
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver, *default-lables]
+
   loki-frontend:
     image: grafana/loki:2.6.1
     profiles:
@@ -306,17 +231,12 @@ services:
       - full
       - infra
     command: -config.file=/etc/loki/loki-config.yaml -target=query-frontend -frontend.downstream-url=http://loki-read:3100
-    environment:
-      LOKI_S3_USER: ${LOKI_S3_USER}
-      LOKI_S3_PASSWORD: ${LOKI_S3_PASSWORD}
     deploy:
       mode: replicated
       replicas: 2
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
-      - source: loki_alert
-        target: /tmp/rules
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -338,7 +258,7 @@ services:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
       - source: loki_alert
-        target: /tmp/rules
+        target: /etc/loki/rules/rules.yml
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -367,8 +287,6 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
-      - source: loki_alert
-        target: /tmp/rules
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -420,8 +338,11 @@ services:
       - infra
     volumes:
       - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/lib/docker:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log/journal/:/var/log/journal/:ro
+      - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
     command: -config.file=/etc/promtail/promtail_config.yaml
     # deploy: # Change after testing
     #   resources:
@@ -433,6 +354,30 @@ services:
     #       cpus: '0.1'
     configs:
       - source: promtail_config
+        target: /etc/promtail/promtail_config.yaml
+    depends_on:
+      - haproxy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  promtail-kafka:
+    image: grafana/promtail:2.6.1
+    hostname: promtail-kafka
+    container_name: promtail-kafka
+    profiles:
+      - promtail
+      - full
+      - infra
+    command: -config.file=/etc/promtail/promtail_config.yaml
+    # deploy: # Change after testing
+    #   resources:
+    #     limits:
+    #       memory: 35M
+    #       cpus: '0.2'
+    #     reservations:
+    #       memory: 25M
+    #       cpus: '0.1'
+    configs:
+      - source: promtail_config_kafka
         target: /etc/promtail/promtail_config.yaml
     depends_on:
       - haproxy
@@ -595,84 +540,13 @@ services:
       #   target: /usr/local/etc/haproxy/haproxy.pem
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongodb-balance:
-    image: percona/mongodb_exporter:0.33
-    hostname: mongodb-exporter
-    container_name: mongodb-exporter
-    command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
-    - '--compatible-mode'
-    profiles:
-      - monitoring
-      - full
-      - infra
-    depends_on:
-      - mongo-balance
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongodb-products:
-    image: percona/mongodb_exporter:0.33
-    hostname: mongodb-exporter
-    container_name: mongodb-exporter
-    command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
-    - '--compatible-mode'
-    profiles:
-      - monitoring
-      - full
-      - infra
-    depends_on:
-      - mongo-products
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  vault:
-    image: vault:1.11.2
-    hostname: vault
-    container_name: vault
-    profiles:
-      - vault
-    # ports:
-    #   - 8200:8200
-    volumes:
-      - vault-data:/vault/file
-    command: server
-    configs:
-    - source: vault-config
-      target: /vault/config/config.hcl
-    cap_add:
-      - IPC_LOCK
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  vault-init:
-    image: vault:1.11.2
-    hostname: vault-init
-    container_name: vault-init
-    # restart: no
-    command: /usr/local/bin/vault-init.sh
-    environment:
-      VAULT_ADDR: http://vault:8200
-      MY_VAULT_TOKEN: ${MY_VAULT_TOKEN:-test}
-    profiles:
-      - vault
-    volumes:
-      - vault-data:/vault/file/
-      - vault-logs:/vault/logs
-      - ./vault/vault-root-token:/vault/file/vault-root-token
-    configs:
-    - source: vault-init
-      target: /usr/local/bin/vault-init.sh
-    depends_on:
-      - vault
-    networks:
-    - stage-net
-    <<: [*log-driver, *default-lables]
-
-
 configs:
   loki_config:
     file: ./loki/loki-config-scalable.yaml
   promtail_config:
     file: ./promtail/promtail-config-scalable.yaml
+  promtail_config_kafka:
+    file: ./promtail/promtail-kafka-config.yaml
   datasource-auth:
     file: ./grafana/datasource-auth.yaml
   alertmanager:
@@ -693,14 +567,6 @@ configs:
     file: ./kafka/jmx-exporter-config.yml
   schema_registry_exporter_config:
     file: ./kafka/jmx-sr-exporter-config.yml
-  mongo_config_setup:
-    file: ./mongodb/mongosetup.sh
-  facade_env:
-    file: ../facade/.env
-  balance_env:
-    file: ../balance/.env
-  products_env:
-    file: ../products/.env
   loki_alert:
     file: ./loki/loki-rules.yml
   vault-config:
@@ -714,11 +580,8 @@ volumes:
   grafana:
   prometheus_data:
   kafka1-data:
-  kafka1-logs:
   kafka2-data:
-  kafka2-logs:
   kafka3-data:
-  kafka3-logs:
   minio:
   db-products:
   db-balance:
