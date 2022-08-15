@@ -4,8 +4,7 @@ service CreateIdController {
   rpc CreateId (CreateId) returns (CreateIdResult);
 }
 
-message CreateId{
-}
+message CreateId{}
 message CreateIdResult {
-  string new_id = 1;
+  string newId = 1;
 }

@@ -79,4 +79,3 @@ message CreateId{
 message CreateIdResult {
   string new_id = 1;
 }
-
