@@ -14,103 +14,6 @@ x-labels: &default-lables
 
 services:
 
-  products:
-    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
-    hostname: products
-    container_name: products
-    profiles:
-      - products
-      - full
-    ports:
-      - 5001:5001
-    <<: [ *default-svc, *log-driver, *default-lables]
-    configs:
-      - source: products_env
-        target: /app/.env
-
-  balance:
-    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
-    hostname: balance
-    container_name: balance
-    profiles:
-      - balance
-      - full
-    ports:
-      - 5000:5000
-    <<: [ *default-svc, *log-driver, *default-lables]
-    configs:
-      - source: balance_env
-        target: /app/.env
-
-  facade:
-    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
-    hostname: facade
-    container_name: facade
-    profiles:
-      - facade
-      - full
-    ports:
-      - 3000:3000
-    configs:
-      - source: facade_env
-        target: /app/.env
-    <<: [ *default-svc, *log-driver, *default-lables]
-
-  mongo-products:
-    image: mongo:5.0.9
-    hostname: mongo-products
-    container_name: mongo-products
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    profiles:
-      - mongo
-      - full
-      - products
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
-      interval: 20s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - db-products:/data/db
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo-balance:
-    image: mongo:5.0.9
-    hostname: mongo-balance
-    container_name: mongo-balance
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    profiles:
-      - mongo
-      - full
-      - balance
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
-      interval: 20s
-      timeout: 10s
-      retries: 5
-    volumes:
-      - db-balance:/data/db
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongo_setup:
-    image: mongo:5.0.9
-    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
-    profiles:
-      - mongo
-      - full
-      - products
-      - balance
-    configs:
-      - source: mongo_config_setup
-        target: /docker-entrypoint-initdb.d/mongosetup.sh
-    networks:
-      - stage-net
-    <<: [*log-driver, *default-lables]
-
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
     hostname: kafka1
@@ -141,7 +44,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -192,7 +95,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -243,7 +146,7 @@ services:
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_COMPRESSION_TYPE: gzip
       EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
     configs:
@@ -293,6 +196,31 @@ services:
       kafka2:
         condition: service_healthy
       kafka3:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
+    profiles:
+      - kowl
+      - kafka
+      - infra
+      - full
+    environment:
+      KAFKA_BROKERS: kafka1:9092,kafka2:9092,kafka3:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
+      SERVER_BASEPATH: /kafka
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+      schema-registry:
         condition: service_healthy
     <<: [*default-svc, *log-driver, *default-lables]
 
@@ -605,36 +533,6 @@ services:
         target: /usr/local/etc/haproxy/haproxy.cfg
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongodb-balance:
-    image: percona/mongodb_exporter:0.33
-    hostname: mongodb-exporter-balance
-    container_name: mongodb-exporter-balance
-    command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
-    - '--compatible-mode'
-    profiles:
-      - monitoring
-      - full
-      - infra
-    depends_on:
-      - mongo-balance
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  mongodb-products:
-    image: percona/mongodb_exporter:0.33
-    hostname: mongodb-exporter-products
-    container_name: mongodb-exporter-products
-    command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
-    - '--compatible-mode'
-    profiles:
-      - monitoring
-      - full
-      - infra
-    depends_on:
-      - mongo-products
-    <<: [*default-svc, *log-driver, *default-lables]
-
 configs:
   loki_config:
     file: ./loki/loki-config-scalable.yaml
@@ -662,14 +560,6 @@ configs:
     file: ./kafka/jmx-exporter-config.yml
   schema_registry_exporter_config:
     file: ./kafka/jmx-sr-exporter-config.yml
-  mongo_config_setup:
-    file: ./mongodb/mongosetup.sh
-  facade_env:
-    file: ../facade/.env
-  balance_env:
-    file: ../balance/.env
-  products_env:
-    file: ../products/.env
   loki_alert:
     file: ./loki/loki-rules.yml
 
@@ -680,8 +570,6 @@ volumes:
   kafka2-data:
   kafka3-data:
   minio:
-  db-products:
-  db-balance:
 
 networks:
   stage-net:
