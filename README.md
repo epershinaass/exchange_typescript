@@ -63,6 +63,7 @@ docker-compose build service_name
 ```md
 - Balance: 5000
 - Products: 5001
+- Account: 5002
 - Facade: 3000
 - Kafka: 29092
 - Schema registry (kafka): 8081
