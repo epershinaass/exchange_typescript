@@ -1,11 +1,10 @@
 import { status } from '@grpc/grpc-js';
-import { Controller, OnModuleInit } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import {
-  Client,
-  ClientKafka,
   GrpcMethod,
+  MessagePattern,
+  Payload,
   RpcException,
-  Transport,
 } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
 import { GetBalanceDto } from './dto/get-balance.dto';
@@ -15,30 +14,13 @@ import { getGrpcError } from './errors/balance.error';
 const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 
 @Controller()
-export class BalanceController implements OnModuleInit {
+export class BalanceController {
   constructor(private balanceService: BalanceService) {}
 
-  @Client({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: ['kafka1:9092'], // localhost:29092
-      },
-      consumer: {
-        groupId: 'order-balance',
-        allowAutoTopicCreation: true,
-      },
-      subscribe: {
-        fromBeginning: true,
-      },
-    },
-  })
-  client: ClientKafka;
-
-  async onModuleInit() {
-    this.client.subscribeToResponseOf('order'); // topic
-    await this.client.connect();
-    console.log('Init OK');
+  @MessagePattern('freeze.balance')
+  freezeBalance(@Payload() order: any) {
+    console.log('balance is frozen, or not...: ' + JSON.stringify(order));
+    return 'balance is frozen!!!';
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')

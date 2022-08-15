@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import {
   GrpcOptions,
-  KafkaOptions,
   MicroserviceOptions,
   Transport,
 } from '@nestjs/microservices';
@@ -18,25 +17,9 @@ const GRPC_TRANSPORT_OPTIONS: GrpcOptions = {
   },
 };
 
-export const KAFKA_TRANSPORT_OPTIONS: KafkaOptions = {
-  transport: Transport.KAFKA,
-  options: {
-    client: {
-      brokers: ['kafka1:9092'], // localhost:29092
-    },
-    consumer: {
-      groupId: 'order-balance',
-      allowAutoTopicCreation: true,
-    },
-    subscribe: {
-      fromBeginning: true,
-    },
-  },
-};
-
 async function bootstrap() {
   const app = await NestFactory.create(OrderModule);
-  app.connectMicroservice<MicroserviceOptions>(KAFKA_TRANSPORT_OPTIONS);
+  // app.connectMicroservice<MicroserviceOptions>(KAFKA_TRANSPORT_OPTIONS);
   app.connectMicroservice<MicroserviceOptions>(GRPC_TRANSPORT_OPTIONS);
 
   await app.startAllMicroservices();
