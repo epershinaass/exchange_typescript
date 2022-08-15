@@ -131,13 +131,13 @@ jobs:
               JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
               JFROG_URL=$JFROG_URL
               COMPOSE_HTTP_TIMEOUT=500
-              SERVICE_DB_URL=$order_DB_URL
-              SERVICE_USER=$order_DB_USER
-              SERVICE_DB=$order_DB_USER
+              SERVICE_DB_URL=$ORDER_DB_URL
+              SERVICE_USER=$ORDER_DB_USER
+              SERVICE_DB=$ORDER_DB_USER
               FACADE_SERVICE_PORT=$FACADE_SERVICE_PORT
               ACCOUNT_SERVICE_PORT=$ACCOUNT_SERVICE_PORT
               PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
-              BALANCE_SERVICE_PORT=$order_SERVICE_PORT
+              BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
               ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT
               ORDER_TAG=$ORDER_TAG" > or.env
 
@@ -148,7 +148,7 @@ jobs:
               DB_USER=$ORDER_DB_USER
               DB_NAME=$ORDER_DB_USER
               SERVICE_URL=$SERVICE_URL
-              SERVICE_PORT=$
+              SERVICE_PORT=$ORDER_SERVICE_PORT
               KAFKA_URL=$KAFKA_URL" > ./order/.env
 
               export $(cat or.env | egrep -v "(^#.*|^$)" | xargs)
