@@ -17,7 +17,7 @@ import { NAME, CLIENT_OPTS } from './constants';
           transport: Transport.GRPC,
           options: {
             package: NAME.toLowerCase(),
-            url: `${config.get<string>(`${NAME}_URL`)}:${config.get<string>(`${NAME}_PORT`)}`,
+            url: `${(config.get<string>(`${NAME}_URL`))}:${config.get<string>(`${NAME}_PORT`)}`,
             protoPath: join(__dirname, `./proto/${NAME.toLowerCase()}.proto`),
           },
         }),

@@ -1,24 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { IProduct } from 'src/interfaces/object.interface';
+import { IProduct } from 'src/interfaces/products.interfaces';
 
 export type ProductDocument = Product & Document;
 
 @Schema()
 export class Product {
 
-@Prop({type: mongoose.Types.ObjectId})
-userId: string
+  @Prop({ type: mongoose.Types.ObjectId })
+  userId: string
 
-@Prop({
-  type: [
-    {
-      productName: { type: String },
-      productCount: { type: Number },
-    },
-  ],
-})
-products: IProduct[];
+  @Prop({
+    type: [
+      {
+        quantity: { type: Number },
+        productId: { type: String },
+      },
+    ],
+  })
+  products: IProduct[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
