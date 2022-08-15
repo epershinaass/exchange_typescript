@@ -43,11 +43,11 @@ services:
       context: order
       dockerfile: ../Dockerfile
     profiles:
-      - mongo
-      - test
+      - mongo-dev
+      - dev
       - order-dev
-      - facade
-      - full
+      - facade-dev
+      - full-dev
     ports:
       - 5003:5003
     volumes:
