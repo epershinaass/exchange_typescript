@@ -1,20 +1,20 @@
-import { Observable } from "rxjs";
+import { Observable } from 'rxjs';
 
 export interface IAccountGrpcService {
-  signIn(credentials: ICredentialsRequest): Observable<IAuthMessage>;
-  signUp(credentials: ICredentialsRequest): Observable<IResponse>;
-  isAuth(authMessage: IAuthMessage): Observable<IResponse>;
+  signIn(credentials: ICredentials): Observable<IAuthToken>;
+  signUp(credentials: ICredentials): Observable<IMessage>;
+  verify(authToken: IAuthToken): Observable<IMessage>;
 }
 
-export interface ICredentialsRequest {
+export interface ICredentials {
   login: string;
   password: string;
 }
 
-export interface IAuthMessage {
+export interface IAuthToken {
   token: string;
 }
 
-export interface IResponse {
+export interface IMessage {
   message: string;
 }

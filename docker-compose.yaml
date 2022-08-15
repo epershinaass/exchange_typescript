@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 x-app: &default-svc
   restart: always
@@ -11,6 +11,84 @@ x-log: &log-driver
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  products:
+    image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
+    hostname: products
+    container_name: products
+    build:
+      context: products
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - products
+      - facade
+      - full
+    ports:
+      - 5001:5001
+    volumes:
+      - ./products/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+
+  products-dev:
+    image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
+    hostname: products-dev
+    container_name: products-dev
+    build:
+      context: products
+      dockerfile: ../Dockerfile-dev
+    profiles:
+      - products-dev
+      - facade-dev
+      - dev
+      - mongo-dev
+      - full-dev
+    ports:
+      - 5001:5001
+    volumes:
+      - ./products:/app/
+    <<: [*default-svc, *log-driver]
+
+  account:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account
+    container_name: account
+    build:
+      context: account
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - account
+      - facade
+      - full
+    ports:
+      - 5002:5002
+    volumes:
+      - ./account/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+  account-dev:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account-dev
+    container_name: account-dev
+    build:
+      context: account
+      dockerfile: ../Dockerfile-dev
+    profiles:
+
+      - account-dev
+      - facade-dev
+      - dev
+      - mongo-dev
+      - full-dev
+    ports:
+      - 5002:5002
+    volumes:
+      - ./account/:/app/
+    <<: [*default-svc, *log-driver]
+
   balance:
     image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
     hostname: balance
@@ -18,12 +96,36 @@ services:
     build:
       context: balance
       dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - balance
+      - facade
+      - full
     ports:
       - 5000:5000
+    volumes:
+      - ./balance/.env:/app/.env
     <<: [*default-svc, *log-driver]
-    environment:
-      DB_PORT: 27017
-      DB_URL: mongo
+
+  balance-dev:
+    image: ourrepo/balance:${BALANCE_VERSION:-0.1.0}
+    hostname: balance-dev
+    container_name: balance-dev
+    build:
+      context: balance
+      dockerfile: ../Dockerfile-dev
+    profiles:
+      - balance-dev
+      - facade-dev
+      - mongo-dev
+      - dev
+      - full-dev
+    ports:
+      - 5000:5000
+    volumes:
+      - ./balance:/app/
+    <<: [*default-svc, *log-driver]
 
   facade:
     image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
@@ -32,6 +134,29 @@ services:
     build:
       context: facade
       dockerfile: ./Dockerfile
+    profiles:
+      - facade
+      - test
+      - full
+    volumes:
+      - ./facade/.env:/app/.env
+    ports:
+      - 3000:3000
+    <<: [*default-svc, *log-driver]
+
+  facade-dev:
+    image: ourrepo/facade:${FACADE_VERSION:-0.1.0}
+    hostname: facade-dev
+    container_name: facade-dev
+    build:
+      context: facade
+      dockerfile: ./Dockerfile-dev
+    profiles:
+      - facade-dev
+      - dev
+      - full-dev
+    volumes:
+      - ./facade:/app/
     ports:
       - 3000:3000
     <<: [*default-svc, *log-driver]
@@ -40,25 +165,30 @@ services:
     image: mongo:5.0.9
     hostname: mongo
     container_name: mongo
-
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      SERVICE_PASSWORD: balance
-      SERVICE_USER: balance
-      SERVICE_DB: balance
+      MONGO_INITDB_ROOT_PASSWORD: admin-password
 
     volumes:
       - db-data:/data/db
     configs:
       - source: mongo_config
-        target: /docker-entrypoint-initdb.d/mongo-init.sh
+        target: /docker-entrypoint-initdb.d/mongo-init.js
 
     profiles:
       - mongo
-      - kafkamng
-      - kafkafull
+      - mongo-dev
+      - facade
+      - facade-dev
+      - dev
+      - test
+      - balance-dev
+      - balance
+      - products
+      - products-dev
+      - account
       - full
+      - full-dev
     ports:
       - 27017:27017
     healthcheck:
@@ -66,39 +196,7 @@ services:
       interval: 10s
       timeout: 2s
       retries: 10
-    labels:
-      org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
-
-  zoo1:
-    image: confluentinc/cp-zookeeper:7.2.1
-    hostname: zoo1
-    container_name: zoo1
-    profiles:
-      - kafka
-      - kafkamng
-      - kafkafull
-      - full
-      - monitoring
-    healthcheck:
-      test: echo srvr | nc zoo1 2181 || exit 1
-      retries: 20
-      interval: 10s
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_HEAP_OPTS: -Xmx512M -Xms256M
-    labels:
-      org.label-schema.group: "monitoring"
-    ports:
-      - 2181:2181
-    <<: [*default-svc, *log-driver]
-    deploy:
-      resources:
-        limits:
-          memory: 1024M
-
 
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
@@ -106,13 +204,8 @@ services:
     container_name: kafka1
     profiles:
       - kafka
-      - kafkamng
-      - kafkafull
       - full
-      - monitoring
-    depends_on:
-      zoo1:
-        condition: service_healthy
+      - full-dev
     ports:
       - 29092:29092
     healthcheck:
@@ -121,50 +214,117 @@ services:
       timeout: 10s
       retries: 3
     environment:
-      # KAFKA_BROKER_ID: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
-      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: kafka1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093'
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093,CONNECTIONS_FROM_HOST://0.0.0.0:29092
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_HEAP_OPTS: -Xmx2048M -Xms1024M
+      KAFKA_HEAP_OPTS: -Xmx800M -Xms256M
+      KAFKA_RETENTION_BYTES: 10000000 # 10Mb
+      KAFKA_LOG_RETENTION_HOURS: 5
+      KAFKA_COMPRESSION_TYPE: zstd
     <<: [*default-svc, *log-driver]
-    labels:
-      org.label-schema.group: "monitoring"
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
+    configs:
+      - source: kafka_run
+        target: /tmp/update_run.sh
+        uid: "1000"
+        gid: "1000"
+        mode: 0777
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     deploy:
       resources:
         limits:
-          memory: 4096M
+          memory: 900M
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.2.1
     hostname: schema-registry
     container_name: schema-registry
     profiles:
-      - kafkafull
+      - kafka
       - full
+      - full-dev
     ports:
       - 8081:8081
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
       # SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081" # Default
+    deploy:
+      resources:
+        limits:
+          memory: 550M
     healthcheck:
       test: curl --output /dev/null --silent --head --fail http://schema-registry:8081/subjects
       interval: 30s
       timeout: 10s
       retries: 3
     depends_on:
-      zoo1:
-        condition: service_healthy
       kafka1:
         condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
+    <<: [*default-svc, *log-driver]
+
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
+    profiles:
+      - kafka
+      - full
+      - full-dev
+      - kowl
+    ports:
+      - 9001:8080
+    environment:
+      KAFKA_BROKERS: kafka1:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
+    deploy:
+      resources:
+        limits:
+          memory: 30M
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    hostname: kafdrop
+    container_name: kafdrop
+    profiles:
+      - kafdrop
+    ports:
+      - 9000:9000
+    environment:
+      KAFKA_BROKERCONNECT: kafka1:9092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    command: -schemaregistry.connect=http://schema-registry:8081
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    depends_on:
+      kafka1:
+        condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   loki:
@@ -173,9 +333,10 @@ services:
     container_name: loki
     profiles:
       - logs
+      - test
+      - dev
       - full
-    ports:
-      - 3100:3100
+      - full-dev
     command: -config.file=/etc/loki/loki-config.yaml
     deploy:
       resources:
@@ -188,8 +349,6 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
-    labels:
-      org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
   promtail:
@@ -198,7 +357,10 @@ services:
     container_name: promtail
     profiles:
       - logs
+      - test
+      - dev
       - full
+      - full-dev
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -215,8 +377,6 @@ services:
     configs:
       - source: promtail_config
         target: /etc/promtail/promtail_config.yaml
-    labels:
-      org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
   grafana:
@@ -225,12 +385,14 @@ services:
     container_name: grafana
     profiles:
       - logs
+      - test
+      - dev
       - full
-      - monitoring
-    ports: ["3000:3000"]
+      - full-dev
+    ports: ["3001:3000"]
     volumes:
       - grafana:/var/lib/grafana
-      - ./infra/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./infra/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     deploy:
       resources:
         limits:
@@ -242,134 +404,26 @@ services:
     configs:
       - source: datasource
         target: /etc/grafana/provisioning/datasources/monitoring.yaml
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
-  prometheus:
-    image: prom/prometheus:v2.9.2
-    hostname: prometheus
-    container_name: prometheus
-    profiles:
-      - monitoring
-      - full
-    # ports: # No need to publish
-    # - 9090:9090
-    volumes:
-      - prometheus_data:/prometheus
-    configs:
-      - source: prometheus
-        target: /etc/prometheus/prometheus.yml
-      - source: prometheus-alerts
-        target: /etc/prometheus/alert.rules
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.44.0
-    hostname: cadvisor
-    container_name: cadvisor
-    profiles:
-      - monitoring
-      - full
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
-  node-exporter:
-    image: prom/node-exporter:v1.3.1
-    hostname: node-exporter
-    container_name: node-exporter
-    profiles:
-      - monitoring
-      - full
-    command:
-      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
-    # ports: # No need to publish
-    #   - 9100:9100
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
-  alertmanager:
-    image: prom/alertmanager:v0.24.0
-    hostname: alertmanager
-    container_name: alertmanager
-    profiles:
-      - monitoring
-      - full
-    command:
-      - '--config.file=/etc/alertmanager/config.yml'
-    # ports: # No need to publish
-    #   - 9093:9093
-    configs:
-      - source: alertmanager
-        target: /etc/alertmanager/config.yml
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
-  zookeeper-exporter:
-    image: dabealu/zookeeper-exporter:v0.1.12
-    hostname: zookeeper-exporter
-    container_name: zookeeper-exporter
-    profiles:
-      - monitoring
-      - full
-    # ports: # No need to publish
-    #   - 9141:9141
-    command: --zk-hosts="zoo1:2181" --timeout=5
-    depends_on:
-      zoo1:
-        condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
-    <<: [*default-svc, *log-driver]
-
-  kafka-exporter:
-    image: danielqsj/kafka-exporter:v1.4.2
-    hostname: kafka-exporter
-    container_name: kafka-exporter
-    command: --kafka.server=kafka1:9092
-    profiles:
-      - monitoring
-      - full
-    # ports: # No need to publish
-    #   - 9308:9308
-    depends_on:
-      kafka1:
-        condition: service_healthy
-    labels:
-      org.label-schema.group: "monitoring"
     <<: [*default-svc, *log-driver]
 
 
 configs:
   loki_config:
-    file: ./infra/loki-config.yaml
+    file: ./infra/loki/loki-config.yaml
   promtail_config:
-    file: ./infra/promtail-config.yaml
+    file: ./infra/promtail/promtail-config.yaml
   datasource:
-    file: ./infra/datasource.yaml
-  prometheus:
-    file: ./infra/prometheus.yml
-  alertmanager:
-    file: ./infra/alertmanager-config.yml
-  prometheus-alerts:
-    file: ./infra/alert.rules
+    file: ./infra/grafana/datasource.yaml
   mongo_config:
-    file: ./infra/mongodb/mongo-init.sh
+    file: ./infra/mongodb/local-mongo-init.js
+  kafka_run:
+    file: ./infra/kafka/update_run.sh
 
 volumes:
   grafana:
   db-data:
-  prometheus_data:
+  kafka1-data:
+  kafka1-logs:
 
 networks:
   dev-net:

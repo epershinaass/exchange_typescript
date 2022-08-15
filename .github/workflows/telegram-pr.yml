@@ -1,0 +1,30 @@
+name: Telegram message on PR
+on:
+  pull_request:
+    types:
+      - "opened"
+      - "reopened"
+      - "closed"
+      - "converted_to_draft"
+      - "synchronize"
+jobs:
+
+  message:
+    name: message
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: send telegram message on pull request
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} ${{ github.event.action }} PR #${{ github.event.number }}:
+            From ${{ github.head_ref }} to ${{ github.base_ref }}
+            Title: ${{ github.event.pull_request.title }}
+            ${{ github.event.pull_request.body }}
+            Head branch: ${{ github.event.pull_request.head.ref }}
+            Repository: ${{ github.repository }}
+
+            See changes: https://github.com/${{ github.repository }}/pull/${{ github.event.number }}

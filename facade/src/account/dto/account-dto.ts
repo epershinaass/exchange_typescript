@@ -1,14 +1,14 @@
-import { IAuthMessage, ICredentialsRequest, IResponse } from "../interface/account-grpc-interface";
+import { IAuthToken, ICredentials, IMessage } from "../interface/account-grpc-interface";
 
 
-export class AuthMessageDto implements IAuthMessage {
+export class AuthTokenDto implements IAuthToken {
   constructor(token: string) {
     this.token = token;
   }
   token: string;
 }
 
-export class CredentialsDto implements ICredentialsRequest {
+export class CredentialsDto implements ICredentials {
   constructor(login: string, password: string) {
     this.login = login;
     this.password = password;
@@ -17,18 +17,9 @@ export class CredentialsDto implements ICredentialsRequest {
   password: string;
 }
 
-export class MessageDto implements IResponse {
+export class MessageDto implements IMessage {
   constructor(message: string) {
     this.message = message;
   }
   message: string;
 }
-
-// export class GrpcErr implements IGrpcErr {
-//   constructor(code: number, message: string) {
-//       this.code = code;
-//       this.message = message;
-//   }
-//   code: number;
-//   message: string;
-// }

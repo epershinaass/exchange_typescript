@@ -7,45 +7,74 @@ package facade;
 // получаем баланс по id пользователя
 
 service BalanceController {
-  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse);
-  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse);
+  rpc RefillBalance (RefillBalanceRequest) returns (RefillBalanceResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message RefillBalanceRequest {
-  string userId = 1;
-  string transactionId = 2;
-  uint64 refillSum = 3;
+  string user_id = 1;
+  // idempotency field
+  // Пока вводит пользователь, будет генерироваться
+  string transaction_id = 2;
+  uint64 refill_sum = 3;
 }
 
 message RefillBalanceResponse {
-  oneof response {
     int32 status = 1;
-    RequsetResponse error = 2;
-  }
-}
-
-message RequsetResponse {
-  int32 code = 1;
-  string message = 2;
 }
 
 message GetBalanceResponse {
-  oneof response {
     uint64 total = 1;
-    RequsetResponse error = 2;
-  }
 }
 
 message GetBalanceRequest {
-  string userId = 1;
+  string user_id = 1;
+}
+
+
+service ProductsController {
+  rpc AddProduct (AddProductRequest) returns (AddProductResponse);
+  rpc GetProducts (GetProductRequest) returns (GetProductResponse);
+}
+
+message Product {
+  string name = 1;
+  uint64 quantity = 2;
+}
+
+message AddProductRequest {
+  string user_id = 1;
+  Product product = 2;
+}
+
+message GetProductResponse {
+  repeated Products product = 1;
+}
+
+message Products {
+  string id = 1;
+  string name = 2;
+  uint64 quantity = 3;
+}
+
+message AddProductResponse {
+  string response = 1;
+}
+
+message GetProductRequest {
+  string user_id = 1;
 }
 
 // ===AccountController===
 
 service AccountController {
-  rpc SignIn (CredentialsRequest) returns (AuthMessage);
-  rpc SignUp (CredentialsRequest) returns (Response);
-  rpc IsAuth (AuthMessage) returns (Response);
+  rpc SignIn (CredentialsRequest) returns (AuthResponse);
+  rpc SignUp (CredentialsRequest) returns (MessageResponse);
+  rpc Verify (AuthRequest) returns (MessageResponse);
 }
 
 message CredentialsRequest {
@@ -53,9 +82,15 @@ message CredentialsRequest {
   string password = 2;
 }
 
-message AuthMessage {
+message AuthRequest {
   string token = 1;
 }
-message Response {
+
+//Same as AuthRequest
+message AuthResponse {
+  string token = 1;
+}
+
+message MessageResponse {
   string message = 1;
 }

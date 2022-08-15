@@ -1,51 +1,33 @@
-import { Body, Controller, OnModuleInit } from '@nestjs/common';
-import {
-  Client,
-  ClientGrpc,
-  ClientOptions,
-  GrpcMethod,
-  Transport,
-} from '@nestjs/microservices';
-import { join } from 'path';
+import { Body, Controller, Inject, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
-import { IGrpcService } from './interfaces/grpc.interface';
-
-export const microserviceOptions: ClientOptions = {
-  transport: Transport.GRPC,
-  options: {
-    package: 'balance',
-    protoPath: join(__dirname, './proto/balance.proto'),
-  },
-};
+import { IBalanceService } from './interfaces/grpc.interface';
+import { CLIENT_OPTS } from './constatns/constants';
 
 @Controller()
 export class BalanceController implements OnModuleInit {
-  @Client(microserviceOptions)
-  private client: ClientGrpc;
+  constructor(@Inject(CLIENT_OPTS) private client: ClientGrpc) {}
 
-  private grpcService: IGrpcService;
+  private balanceService: IBalanceService;
 
   onModuleInit() {
-    this.grpcService =
-      this.client.getService<IGrpcService>('BalanceController');
+    this.balanceService =
+      this.client.getService<IBalanceService>('BalanceController');
   }
 
-  /* запрос через grpc делаем такого вида
-  http://localhost:3000/      RefillBalance
-  {
-    "balanceId": "62d9abf5c79d1502fdf98d97",
-    "transactionId": "1233213",
-    "refillSum": 100
-  }
-  */
   @GrpcMethod('BalanceController', 'RefillBalance')
-  refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
-    return this.grpcService.refillBalance(refillBalanceDto);
+  async refillBalance(@Body() refillBalanceDto: RefillBalanceDto) {
+    const refillStatusObservable =
+      this.balanceService.refillBalance(refillBalanceDto);
+    return await lastValueFrom(refillStatusObservable);
   }
 
   @GrpcMethod('BalanceController', 'GetBalance')
-  getBalance(@Body() getBalanceDto: GetBalanceDto) {
-    return this.grpcService.getBalance(getBalanceDto);
+  async getBalance(@Body() getBalanceDto: GetBalanceDto) {
+    const balanceObservable = this.balanceService.getBalance(getBalanceDto);
+    const balance = await lastValueFrom(balanceObservable);
+    return { total: balance.total };
   }
 }

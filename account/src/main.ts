@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
-import { AccountModule } from './account-module';
+import { AccountModule } from './account.module';
 
 
 const microserviceOptions = {
@@ -9,7 +9,7 @@ const microserviceOptions = {
   options: {
     url: `${process.env.ACC_URL}:${process.env.ACC_PORT}`,
     package: 'account',
-    protoPath: join(__dirname, 'msg/account-grpc.proto'),
+    protoPath: join(__dirname, 'proto/account.proto'),
   },
 };
 

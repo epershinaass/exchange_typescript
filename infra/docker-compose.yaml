@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 x-app: &default-svc
   restart: always
@@ -13,61 +13,103 @@ x-labels: &default-lables
     org.label-schema.group: "monitoring"
 
 services:
-  mongo:
-    image: mongo:5.0.9
-    hostname: mongo
-    container_name: mongo
 
+  products:
+    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
+    hostname: products
+    container_name: products
+    profiles:
+      - products
+      - full
+    ports:
+      - 5001:5001
+    <<: [ *default-svc, *log-driver, *default-lables]
+    configs:
+      - source: products_env
+        target: /app/.env
+
+  balance:
+    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
+    hostname: balance
+    container_name: balance
+    profiles:
+      - balance
+      - full
+    ports:
+      - 5000:5000
+    <<: [ *default-svc, *log-driver, *default-lables]
+    configs:
+      - source: balance_env
+        target: /app/.env
+
+  facade:
+    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
+    hostname: facade
+    container_name: facade
+    profiles:
+      - facade
+      - full
+    ports:
+      - 3000:3000
+    configs:
+      - source: facade_env
+        target: /app/.env
+    <<: [ *default-svc, *log-driver, *default-lables]
+
+  mongo-products:
+    image: mongo:5.0.9
+    hostname: mongo-products
+    container_name: mongo-products
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGODB_EXPORTER_PASSWORD: ${MONGO_MONGODB_EXPORTER_PASSWORD}
-      SERVICE_PASSWORD: ${MONGO_SERVICE_PASSWORD}
-      SERVICE_USER: balance
-      SERVICE_DB: balance
-
-    volumes:
-      - db-data:/data/db
-    configs:
-      - source: mongo_config
-        target: /docker-entrypoint-initdb.d/mongo-init.sh
-
     profiles:
       - mongo
       - full
-      # - haproxy
+      - products
     healthcheck:
-      test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
-      interval: 10s
-      timeout: 2s
-      retries: 10
-    <<: [*default-svc, *log-driver, *default-lables]
-
-  zoo1:
-    image: confluentinc/cp-zookeeper:7.2.1
-    hostname: zoo1
-    container_name: zoo1
-    profiles:
-      - kafka
-      - kafkafull
-      - full
-      - monitoring
-    healthcheck:
-      test: echo srvr | nc zoo1 2181 || exit 1
-      retries: 20
-      interval: 10s
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_TICK_TIME: 2000
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
     volumes:
-      - zoo1-data:/var/lib/zookeeper/data
+      - db-products:/data/db
     <<: [*default-svc, *log-driver, *default-lables]
-    # deploy: # Change after testing
-    #   resources:
-    #     limits:
-    #       memory: 1024M
 
+  mongo-balance:
+    image: mongo:5.0.9
+    hostname: mongo-balance
+    container_name: mongo-balance
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - balance
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-balance:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo_setup:
+    image: mongo:5.0.9
+    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
+    profiles:
+      - mongo
+      - full
+      - products
+      - balance
+    configs:
+      - source: mongo_config_setup
+        target: /docker-entrypoint-initdb.d/mongosetup.sh
+    networks:
+      - stage-net
+    <<: [*log-driver, *default-lables]
 
   kafka1:
     image: confluentinc/cp-kafka:7.2.1
@@ -75,31 +117,148 @@ services:
     container_name: kafka1
     profiles:
       - kafka
-      - kafkafull
+      - infra
       - full
-      - monitoring
-    depends_on:
-      zoo1:
-        condition: service_healthy
     healthcheck:
       test: kafka-topics --bootstrap-server kafka1:9092 --list
       interval: 30s
       timeout: 10s
       retries: 3
     environment:
-      # KAFKA_BROKER_ID: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
-      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_NODE_ID: 1
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093
+      CLUSTER_ID: YjFmNDMxMzk4NmEyNDEyMj
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_LOG_CLEANUP_POLICY: compact,delete
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
+      KAFKA_COMPRESSION_TYPE: lz4
+      EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
     <<: [*default-svc, *log-driver, *default-lables]
+    configs:
+      - source: kafka_run
+        target: /tmp/update_run.sh
+        uid: "1000"
+        gid: "1000"
+        mode: 0777
+      - source: kafka_exporter_config
+        target: /etc/jmx-exporter/config.yml
+      - source: kafka_exporter_jar
+        target: /usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
     volumes:
       - kafka1-data:/var/lib/kafka/data
+    # deploy: # Change after testing
+    #   resources:
+    #     limits:
+    #       memory: 4096M
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.2.1
+    hostname: kafka2
+    container_name: kafka2
+    profiles:
+      - kafka
+      - infra
+      - full
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka2:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_NODE_ID: 2
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
+      KAFKA_LISTENERS: PLAINTEXT://kafka2:9092,CONTROLLER://kafka2:9093
+      CLUSTER_ID: YjFmNDMxMzk4NmEyNDEyMj
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_LOG_CLEANUP_POLICY: compact,delete
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
+      KAFKA_COMPRESSION_TYPE: lz4
+      EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
+    <<: [*default-svc, *log-driver, *default-lables]
+    configs:
+      - source: kafka_run
+        target: /tmp/update_run.sh
+        uid: "1000"
+        gid: "1000"
+        mode: 0777
+      - source: kafka_exporter_config
+        target: /etc/jmx-exporter/config.yml
+      - source: kafka_exporter_jar
+        target: /usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
+    # deploy: # Change after testing
+    #   resources:
+    #     limits:
+    #       memory: 4096M
+
+  kafka3:
+    image: confluentinc/cp-kafka:7.2.1
+    hostname: kafka3
+    container_name: kafka3
+    profiles:
+      - kafka
+      - infra
+      - full
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka3:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_NODE_ID: 3
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
+      KAFKA_LISTENERS: PLAINTEXT://kafka3:9092,CONTROLLER://kafka3:9093
+      CLUSTER_ID: YjFmNDMxMzk4NmEyNDEyMj
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_LOG_CLEANUP_POLICY: compact,delete
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:9093,2@kafka2:9093,3@kafka3:9093'
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+      KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
+      KAFKA_COMPRESSION_TYPE: lz4
+      EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
+    <<: [*default-svc, *log-driver, *default-lables]
+    configs:
+      - source: kafka_run
+        target: /tmp/update_run.sh
+        uid: "1000"
+        gid: "1000"
+        mode: 0777
+      - source: kafka_exporter_config
+        target: /etc/jmx-exporter/config.yml
+      - source: kafka_exporter_jar
+        target: /usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar
+    command: "bash -c 'if [ ! -f /tmp/update_run.sh ]; then echo \"ERROR: Did you forget the update_run.sh file that came with this docker-compose.yml file?\" && exit 1 ; else /tmp/update_run.sh && /etc/confluent/docker/run ; fi'"
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -110,35 +269,110 @@ services:
     hostname: schema-registry
     container_name: schema-registry
     profiles:
-      - kafkafull
+      - kafka
+      - infra
       - full
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092,PLAINTEXT://kafka3:9092,PLAINTEXT://kafka3:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
       # SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081" # Default
+      EXTRA_ARGS: '-javaagent:/usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar=9101:/etc/jmx-exporter/config.yml'
+    configs:
+      - source: schema_registry_exporter_config
+        target: /etc/jmx-exporter/config.yml
+      - source: kafka_exporter_jar
+        target: /usr/share/jmx-exporter/jmx_prometheus_javaagent-0.17.0.jar
     healthcheck:
       test: curl --output /dev/null --silent --head --fail http://schema-registry:8081/subjects
       interval: 30s
       timeout: 10s
       retries: 3
     depends_on:
-      zoo1:
-        condition: service_healthy
       kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
         condition: service_healthy
     <<: [*default-svc, *log-driver, *default-lables]
 
-  loki:
-    image: grafana/loki:2.6.1
-    hostname: loki
-    container_name: loki
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
     profiles:
-      - logs
+      - kowl
+      - kafka
+      - infra
       - full
+    environment:
+      KAFKA_BROKERS: kafka1:9092,kafka2:9092,kafka3:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
+      SERVER_BASEPATH: /kafka
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy
+      kafka3:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  loki-frontend:
+    image: grafana/loki:2.6.1
+    profiles:
+      - loki
+      - full
+      - infra
+    command: -config.file=/etc/loki/loki-config.yaml -target=query-frontend -frontend.downstream-url=http://loki-read:3100
+    deploy:
+      mode: replicated
+      replicas: 2
+    configs:
+      - source: loki_config
+        target: /etc/loki/loki-config.yaml
+    depends_on:
       - haproxy
-    command: -config.file=/etc/loki/loki-config.yaml
-    volumes:
-      - loki-data:/loki
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  loki-read:
+    image: grafana/loki:2.6.1
+    profiles:
+      - loki
+      - full
+      - infra
+    command: -config.file=/etc/loki/loki-config.yaml -target=read
+    environment:
+      LOKI_S3_USER: ${LOKI_S3_USER}
+      LOKI_S3_PASSWORD: ${LOKI_S3_PASSWORD}
+    deploy:
+      mode: replicated
+      replicas: 3
+    configs:
+      - source: loki_config
+        target: /etc/loki/loki-config.yaml
+      - source: loki_alert
+        target: /etc/loki/rules/rules.yml
+    depends_on:
+      - haproxy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  loki-write:
+    image: grafana/loki:2.6.1
+    profiles:
+      - loki
+      - full
+      - infra
+    command: -config.file=/etc/loki/loki-config.yaml -target=write
+    environment:
+      LOKI_S3_USER: ${LOKI_S3_USER}
+      LOKI_S3_PASSWORD: ${LOKI_S3_PASSWORD}
+    deploy:
+      mode: replicated
+      replicas: 3
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -150,20 +384,61 @@ services:
     configs:
       - source: loki_config
         target: /etc/loki/loki-config.yaml
+    depends_on:
+      - haproxy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2022-07-30T05-21-40Z
+    hostname: minio
+    container_name: minio
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler &&
+        minio server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT_URL: http://${GRAFANA_DOMAIN:-127.0.0.1}:8080/minio
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+      MINIO_UPDATE: off
+    profiles:
+      - minio
+      - full
+      - infra
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    expose:
+      - 9000
+      - 9001
+    depends_on:
+      - haproxy
+    volumes:
+      - minio:/data
     <<: [*default-svc, *log-driver, *default-lables]
 
   promtail:
     image: grafana/promtail:2.6.1
     hostname: promtail
     container_name: promtail
+    userns_mode: "host"
     profiles:
-      - logs
-      - haproxy
+      - promtail
       - full
+      - infra
     volumes:
       - /var/log:/var/log:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/lib/docker:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log/journal/:/var/log/journal/:ro
+      - /run/log/journal/:/run/log/journal/:ro
+      - /etc/machine-id:/etc/machine-id:ro
     command: -config.file=/etc/promtail/promtail_config.yaml
     # deploy: # Change after testing
     #   resources:
@@ -176,6 +451,32 @@ services:
     configs:
       - source: promtail_config
         target: /etc/promtail/promtail_config.yaml
+    depends_on:
+      - haproxy
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  promtail-kafka:
+    image: grafana/promtail:2.6.1
+    hostname: promtail-kafka
+    container_name: promtail-kafka
+    profiles:
+      - promtail
+      - full
+      - infra
+    command: -config.file=/etc/promtail/promtail_config.yaml
+    # deploy: # Change after testing
+    #   resources:
+    #     limits:
+    #       memory: 35M
+    #       cpus: '0.2'
+    #     reservations:
+    #       memory: 25M
+    #       cpus: '0.1'
+    configs:
+      - source: promtail_config_kafka
+        target: /etc/promtail/promtail_config.yaml
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   grafana:
@@ -183,10 +484,9 @@ services:
     hostname: grafana
     container_name: grafana
     profiles:
-      - logs
+      - grafana
       - full
-      - monitoring
-      - haproxy
+      - infra
     environment:
       GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-127.0.0.1}
       GF_SERVER_ROOT_URL: "/grafana"
@@ -197,7 +497,7 @@ services:
       GRAFANA_DATASOURCE_PASSWORD: ${GRAFANA_DATASOURCE_PASSWORD}
     volumes:
       - grafana:/var/lib/grafana
-      - ./dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     # deploy: # Change after testing
     #   resources:
     #     limits:
@@ -209,6 +509,8 @@ services:
     configs:
       - source: datasource-auth
         target: /etc/grafana/provisioning/datasources/monitoring.yaml
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   prometheus:
@@ -223,13 +525,11 @@ services:
     - '--web.config.file=/etc/prometheus/web.yml'
     - '--config.file=/etc/prometheus/prometheus.yml'
     profiles:
-      - monitoring
+      - prometheus
       - full
-      - haproxy
+      - infra
     volumes:
       - prometheus_data:/prometheus
-    ports:
-      - 9090:9090
     configs:
       - source: prometheus
         target: /etc/prometheus/prometheus.yml
@@ -237,6 +537,8 @@ services:
         target: /etc/prometheus/alert.rules
       - source: prometheus-auth
         target: /etc/prometheus/web.yml
+    depends_on:
+      - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
 
   cadvisor:
@@ -246,13 +548,14 @@ services:
     userns_mode: "host"
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/kmsg:/dev/kmsg:ro
     <<: [*default-svc, *log-driver, *default-lables]
 
   node-exporter:
@@ -261,8 +564,8 @@ services:
     container_name: node-exporter
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     command:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($$|/)'
     <<: [*default-svc, *log-driver, *default-lables]
@@ -275,8 +578,9 @@ services:
       TELEGRAM_BOT_TOKEN: ${ALERTMANAGER_TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${ALERTMANAGER_TELEGRAM_CHAT_ID}
     profiles:
-      - monitoring
+      - prometheus
       - full
+      - infra
     command:
       - '--config.file=/etc/alertmanager/config.yml'
     configs:
@@ -284,27 +588,15 @@ services:
         target: /etc/alertmanager/config.yml
     <<: [*default-svc, *log-driver, *default-lables]
 
-  zookeeper-exporter:
-    image: dabealu/zookeeper-exporter:v0.1.12
-    hostname: zookeeper-exporter
-    container_name: zookeeper-exporter
-    profiles:
-      - monitoring
-      - full
-    command: --zk-hosts="zoo1:2181" --timeout=5
-    depends_on:
-      zoo1:
-        condition: service_healthy
-    <<: [*default-svc, *log-driver, *default-lables]
-
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.4.2
     hostname: kafka-exporter
     container_name: kafka-exporter
-    command: --kafka.server=kafka1:9092
+    command: --kafka.server=kafka1:9092 --kafka.server=kafka2:9092 --kafka.server=kafka3:9092
     profiles:
       - monitoring
       - full
+      - infra
     depends_on:
       kafka1:
         condition: service_healthy
@@ -317,8 +609,8 @@ services:
     command: --haproxy.scrape-uri="http://haproxy:8050/stats?stats;csv"
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     depends_on:
       - haproxy
     <<: [*default-svc, *log-driver, *default-lables]
@@ -330,6 +622,7 @@ services:
     profiles:
       - haproxy
       - full
+      - infra
     ports:
       - 8080:80
     configs:
@@ -337,50 +630,83 @@ services:
         target: /usr/local/etc/haproxy/haproxy.cfg
     <<: [*default-svc, *log-driver, *default-lables]
 
-  mongodb-exporter:
-    image: percona/mongodb_exporter:0.30
-    hostname: mongodb-exporter
-    container_name: mongodb-exporter
+  mongodb-balance:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-balance
+    container_name: mongodb-exporter-balance
     command:
-    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo:27017'
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
+    - '--compatible-mode'
     profiles:
       - monitoring
-      - haproxy
       - full
+      - infra
     depends_on:
-      - mongo
+      - mongo-balance
     <<: [*default-svc, *log-driver, *default-lables]
 
+  mongodb-products:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-products
+    container_name: mongodb-exporter-products
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
+    - '--compatible-mode'
+    profiles:
+      - monitoring
+      - full
+      - infra
+    depends_on:
+      - mongo-products
+    <<: [*default-svc, *log-driver, *default-lables]
 
 configs:
   loki_config:
-    file: ./loki-config.yaml
+    file: ./loki/loki-config-scalable.yaml
   promtail_config:
-    file: ./promtail-config.yaml
-  datasource:
-    file: ./datasource.yaml
+    file: ./promtail/promtail-config-scalable.yaml
+  promtail_config_kafka:
+    file: ./promtail/promtail-kafka-config.yaml
   datasource-auth:
-    file: ./datasource-auth.yaml
-  prometheus:
-    file: ./prometheus.yml
+    file: ./grafana/datasource-auth.yaml
   alertmanager:
-    file: ./alertmanager-config.yml
+    file: ./prometheus/alertmanager-config.yml
+  prometheus:
+    file: ./prometheus/prometheus.yml
   prometheus-alerts:
-    file: ./alert.rules
-  mongo_config:
-    file: ./mongodb/mongo-init.sh
+    file: ./prometheus/alert.rules
   haproxy:
-    file: ./haproxy.cfg
+    file: ./haproxy/haproxy.cfg
   prometheus-auth:
-    file: ./web.yml
+    file: ./prometheus/web.yml
+  kafka_run:
+    file: ./kafka/update_run_cluster.sh
+  kafka_exporter_jar:
+    file: ./kafka/jmx_prometheus_javaagent-0.17.0.jar
+  kafka_exporter_config:
+    file: ./kafka/jmx-exporter-config.yml
+  schema_registry_exporter_config:
+    file: ./kafka/jmx-sr-exporter-config.yml
+  mongo_config_setup:
+    file: ./mongodb/mongosetup.sh
+  facade_env:
+    file: ../facade/.env
+  balance_env:
+    file: ../balance/.env
+  products_env:
+    file: ../products/.env
+  loki_alert:
+    file: ./loki/loki-rules.yml
 
 volumes:
   grafana:
-  db-data:
   prometheus_data:
-  loki-data:
   kafka1-data:
-  zoo1-data:
+  kafka2-data:
+  kafka3-data:
+  minio:
+  db-products:
+  db-balance:
 
 networks:
   stage-net:
