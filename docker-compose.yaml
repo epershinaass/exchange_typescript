@@ -45,7 +45,7 @@ services:
     profiles:
       - mongo
       - test
-      - order
+      - order-dev
       - facade
       - full
     ports:
@@ -186,6 +186,8 @@ services:
     profiles:
       - mongo
       - mongo-dev
+      - order
+      - order-dev
       - facade
       - facade-dev
       - dev
