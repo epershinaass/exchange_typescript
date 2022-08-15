@@ -1,6 +1,6 @@
 export interface IProduct {
-  name: string;
-  count: number;
+  quantity: number;
+  productId: string;
   id?: string;
 }
 
@@ -13,6 +13,11 @@ export interface IAddProductRequest {
   product: IProduct;
 }
 
-export interface IGetProductResponse {
+export interface IGetProductsResponse {
+  products: IProduct[];
+}
+
+export interface IUserProductsDocument {
+  userId: string;
   products: IProduct[];
 }
