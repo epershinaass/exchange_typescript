@@ -28,11 +28,11 @@ services:
       - 5003:5003
     volumes:
       - ./order/.env:/app/.env
-    depends_on:
-      kafka1:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   order-dev:
@@ -41,7 +41,7 @@ services:
     container_name: order-dev
     build:
       context: order
-      dockerfile: ../Dockerfile
+      dockerfile: ../Dockerfile-dev
     profiles:
       - mongo-dev
       - dev
@@ -52,11 +52,11 @@ services:
       - 5003:5003
     volumes:
       - ./order:/app/
-    depends_on:
-      kafka1:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   products:
