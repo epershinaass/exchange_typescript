@@ -1,0 +1,3 @@
+[submodule "infra/ansible/k8s"]
+	path = infra/ansible/k8s
+	url = https://github.com/epershinaass/libvirt-k8s-provisioner.git
