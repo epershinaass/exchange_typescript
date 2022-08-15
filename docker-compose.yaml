@@ -41,7 +41,7 @@ services:
     container_name: order-dev
     build:
       context: order
-      dockerfile: ../Dockerfile
+      dockerfile: ../Dockerfile-dev
     profiles:
       - mongo-dev
       - dev
