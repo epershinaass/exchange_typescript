@@ -197,14 +197,3 @@ db.createUser({
 /*****************************Init Database for other microservices****************************************************/
 /*...*/
 /**********************************************************************************************************************/
-db = db.getSiblingDB('order');
-db.createUser({
-    user: 'order',
-    pwd: 'order',
-    roles: [
-        {
-            role: 'readWrite',
-            db: 'order',
-        },
-    ],
-});
