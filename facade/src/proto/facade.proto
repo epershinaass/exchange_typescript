@@ -69,6 +69,16 @@ message GetProductsRequest {
   string user_id = 1;
 }
 
+service CreateIdController {
+  rpc CreateId (CreateId) returns (CreateIdResult);
+}
+
+message CreateId{
+
+}
+message CreateIdResult {
+  string new_id = 1;
+}
 
 // ===AccountController===
 
