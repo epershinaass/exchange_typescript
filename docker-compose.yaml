@@ -30,6 +30,7 @@ services:
       - ./products/.env:/app/.env
     <<: [*default-svc, *log-driver]
 
+
   products-dev:
     image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
     hostname: products-dev
@@ -47,6 +48,45 @@ services:
       - 5001:5001
     volumes:
       - ./products:/app/
+    <<: [*default-svc, *log-driver]
+
+  account:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account
+    container_name: account
+    build:
+      context: account
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - account
+      - facade
+      - full
+    ports:
+      - 5002:5002
+    volumes:
+      - ./account/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+  account-dev:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account-dev
+    container_name: account-dev
+    build:
+      context: account
+      dockerfile: ../Dockerfile-dev
+    profiles:
+
+      - account-dev
+      - facade-dev
+      - dev
+      - mongo-dev
+      - full-dev
+    ports:
+      - 5002:5002
+    volumes:
+      - ./account/:/app/
     <<: [*default-svc, *log-driver]
 
   balance:
@@ -146,6 +186,7 @@ services:
       - balance
       - products
       - products-dev
+      - account
       - full
       - full-dev
     ports:
@@ -191,14 +232,13 @@ services:
       KAFKA_LISTENERS: PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093,CONNECTIONS_FROM_HOST://0.0.0.0:29092
       KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
       KAFKA_SCHEMA_REGISTRY_URL: schema-registry:8081
-      KAFKA_HEAP_OPTS: -Xmx2048M -Xms1024M
+      KAFKA_HEAP_OPTS: -Xmx800M -Xms256M
       KAFKA_RETENTION_BYTES: 10000000 # 10Mb
       KAFKA_LOG_RETENTION_HOURS: 5
-      KAFKA_COMPRESSION_TYPE: zstd
+      KAFKA_COMPRESSION_TYPE: gzip
     <<: [*default-svc, *log-driver]
     volumes:
       - kafka1-data:/var/lib/kafka/data
-      - kafka1-logs:/var/lib/kafka/logs
     configs:
       - source: kafka_run
         target: /tmp/update_run.sh
@@ -209,7 +249,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4096M
+          memory: 900M
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.2.1
@@ -225,6 +265,10 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:9092
       SCHEMA_REGISTRY_HOST_NAME: schema-registry # https://docs.confluent.io/platform/current/schema-registry/installation/config.html#host-name
       # SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081" # Default
+    deploy:
+      resources:
+        limits:
+          memory: 550M
     healthcheck:
       test: curl --output /dev/null --silent --head --fail http://schema-registry:8081/subjects
       interval: 30s
@@ -235,21 +279,49 @@ services:
         condition: service_healthy
     <<: [*default-svc, *log-driver]
 
+  kowl:
+    image: quay.io/cloudhut/kowl:master
+    hostname: kowl
+    container_name: kowl
+    profiles:
+      - kafka
+      - full
+      - full-dev
+      - kowl
+    ports:
+      - 9001:8080
+    environment:
+      KAFKA_BROKERS: kafka1:9092
+      KAFKA_SCHEMAREGISTRY_ENABLED: true
+      KAFKA_SCHEMAREGISTRY_URLS: http://schema-registry:8081
+    deploy:
+      resources:
+        limits:
+          memory: 30M
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
   kafdrop:
     image: obsidiandynamics/kafdrop
     hostname: kafdrop
     container_name: kafdrop
     profiles:
-      - kafka
-      - full
-      - full-dev
+      - kafdrop
     ports:
       - 9000:9000
     environment:
       KAFKA_BROKERCONNECT: kafka1:9092
       JVM_OPTS: "-Xms32M -Xmx64M"
       SERVER_SERVLET_CONTEXTPATH: "/"
-    command: -schemaregistry.connect=http://localhost:8081
+    command: -schemaregistry.connect=http://schema-registry:8081
+    deploy:
+      resources:
+        limits:
+          memory: 300M
     depends_on:
       kafka1:
         condition: service_healthy

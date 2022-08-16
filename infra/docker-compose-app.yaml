@@ -1,0 +1,265 @@
+version: "3.9"
+
+x-app: &default-svc
+  restart: always
+  networks:
+    - stage-net
+x-log: &log-driver
+  logging:
+    options:
+      tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+x-labels: &default-lables
+  labels:
+    org.label-schema.group: "monitoring"
+
+x-pull: &pull
+    pull_policy: always
+
+services:
+
+  account:
+    image: exchangetypescript.jfrog.io/account-docker/account:${ACCOUNT_TAG:-latest}
+    hostname: account
+    container_name: account
+    profiles:
+      - account-app
+      - full
+    ports:
+      - ${ACCOUNT_SERVICE_PORT}:${ACCOUNT_SERVICE_PORT}
+    <<: [ *default-svc, *log-driver, *default-lables, *pull]
+    configs:
+      - source: account_env
+        target: /app/.env
+
+  products:
+    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
+    hostname: products
+    container_name: products
+    profiles:
+      - products-app
+      - full
+    ports:
+      - ${PRODUCTS_SERVICE_PORT}:${PRODUCTS_SERVICE_PORT}
+    <<: [ *default-svc, *log-driver, *default-lables, *pull]
+    configs:
+      - source: products_env
+        target: /app/.env
+
+  balance:
+    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
+    hostname: balance
+    container_name: balance
+    profiles:
+      - balance-app
+      - full
+    ports:
+      - ${BALANCE_SERVICE_PORT}:${BALANCE_SERVICE_PORT}
+    <<: [ *default-svc, *log-driver, *default-lables, *pull]
+    configs:
+      - source: balance_env
+        target: /app/.env
+
+  facade:
+    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
+    hostname: facade
+    container_name: facade
+    profiles:
+      - facade-app
+      - full
+    ports:
+      - ${FACADE_SERVICE_PORT}:${FACADE_SERVICE_PORT}
+    configs:
+      - source: facade_env
+        target: /app/.env
+    <<: [ *default-svc, *log-driver, *default-lables, *pull]
+
+  order:
+    image: exchangetypescript.jfrog.io/order-docker/order:${ORDER_TAG:-latest}
+    hostname: order
+    container_name: order
+    profiles:
+      - order-app
+      - full
+    ports:
+      - ${ORDER_SERVICE_PORT}:${ORDER_SERVICE_PORT}
+    <<: [ *default-svc, *log-driver, *default-lables, *pull]
+    configs:
+      - source: order_env
+        target: /app/.env
+
+  mongo-account:
+    image: mongo:5.0.9
+    hostname: mongo-account
+    container_name: mongo-account
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - account
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-account:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-account:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo-products:
+    image: mongo:5.0.9
+    hostname: mongo-products
+    container_name: mongo-products
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - products
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-products:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-products:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo-balance:
+    image: mongo:5.0.9
+    hostname: mongo-balance
+    container_name: mongo-balance
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - balance
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-balance:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-balance:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo-order:
+    image: mongo:5.0.9
+    hostname: mongo-order
+    container_name: mongo-order
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    profiles:
+      - mongo
+      - full
+      - order
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo-order:27017/test --quiet
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - db-order:/data/db
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongo_setup:
+    image: mongo:5.0.9
+    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/mongosetup.sh" ]
+    profiles:
+      - mongo
+      - full
+      - products
+      - balance
+      - account
+      - order
+    configs:
+      - source: mongo_config_setup
+        target: /docker-entrypoint-initdb.d/mongosetup.sh
+    networks:
+      - stage-net
+    <<: [*log-driver, *default-lables]
+
+  mongodb-balance:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-balance
+    container_name: mongodb-exporter-balance
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-balance:27017'
+    - '--compatible-mode'
+    profiles:
+      - balance
+      - full
+    depends_on:
+      - mongo_setup
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongodb-products:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-products
+    container_name: mongodb-exporter-products
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-products:27017'
+    - '--compatible-mode'
+    profiles:
+      - products
+      - full
+    depends_on:
+      - mongo_setup
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongodb-account:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-account
+    container_name: mongodb-exporter-account
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-account:27017'
+    - '--compatible-mode'
+    profiles:
+      - account
+      - full
+    depends_on:
+      - mongo_setup
+    <<: [*default-svc, *log-driver, *default-lables]
+
+  mongodb-order:
+    image: percona/mongodb_exporter:0.33
+    hostname: mongodb-exporter-order
+    container_name: mongodb-exporter-order
+    command:
+    - '--mongodb.uri=mongodb://mongodb_exporter:${MONGO_MONGODB_EXPORTER_PASSWORD}@mongo-order:27017'
+    - '--compatible-mode'
+    profiles:
+      - order
+      - full
+    depends_on:
+      - mongo_setup
+    <<: [*default-svc, *log-driver, *default-lables]
+
+configs:
+  mongo_config_setup:
+    file: ./mongodb/mongosetup.sh
+  facade_env:
+    file: ../facade/.env
+  balance_env:
+    file: ../balance/.env
+  products_env:
+    file: ../products/.env
+  account_env:
+    file: ../account/.env
+  order_env:
+    file: ../order/.env
+
+volumes:
+  db-products:
+  db-balance:
+  db-account:
+  db-order:
+
+networks:
+  stage-net:
+    name: stage-net
