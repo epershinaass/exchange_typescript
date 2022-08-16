@@ -11,6 +11,9 @@ export class Balance {
   @Prop({ type: mongoose.Types.ObjectId })
   userId: string;
 
+  @Prop()
+  frozen: number;
+
   @Prop({
     type: [
       {
