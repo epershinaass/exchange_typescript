@@ -4,15 +4,11 @@ export const KAFKA_CONFIG: KafkaOptions = {
   transport: Transport.KAFKA,
   options: {
     client: {
-      clientId: 'order', // order
-      brokers: ['kafka1:9092'], // localhost:29092
+      // clientId: 'order',
+      brokers: ['kafka1:9092'],
     },
     consumer: {
-      groupId: 'order-balance', // order-balance-consumer
-      // allowAutoTopicCreation: true,
+      groupId: 'balance-consumer',
     },
-    // subscribe: {
-    //   fromBeginning: true,
-    // },
   },
 };
