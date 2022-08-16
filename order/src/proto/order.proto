@@ -23,7 +23,8 @@ message OrderRequest {
   // int64 cost = 5;
   // OrderType order_type = 6;
   // bool is_full_size = 7; // сделка должна произойти разом
-  string message = 1;
+  string userId = 1;
+  uint64 price = 2;
 }
 
 message OrderResponse {

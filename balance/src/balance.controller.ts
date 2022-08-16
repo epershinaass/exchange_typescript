@@ -1,12 +1,14 @@
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import {
+  Client,
+  ClientKafka,
+  EventPattern,
   GrpcMethod,
-  MessagePattern,
-  Payload,
   RpcException,
 } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
+import { KAFKA_CONFIG } from './config/kafka.config';
 import { GetBalanceDto } from './dto/get-balance.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { getGrpcError } from './errors/balance.error';
@@ -17,10 +19,20 @@ const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 export class BalanceController {
   constructor(private balanceService: BalanceService) {}
 
-  @MessagePattern('freeze.balance')
-  freezeBalance(@Payload() order: any) {
-    console.log('balance is frozen, or not...: ' + JSON.stringify(order));
-    return 'balance is frozen!!!';
+  @Client(KAFKA_CONFIG)
+  private client: ClientKafka;
+
+  @EventPattern('order_created')
+  async handleOrderCreated(data: any) {
+    console.log(`orderCreated ${JSON.stringify(data)}`);
+    console.log('handleOrderCreated');
+    this.client.emit(
+      'balance_frozen',
+      `balance frozen with ${JSON.stringify(data)}`,
+    );
+    // .subscribe(() => {
+    //   console.log('balance frozen with: ' + JSON.stringify(data));
+    // });
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')

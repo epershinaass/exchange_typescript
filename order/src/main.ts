@@ -5,6 +5,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { join } from 'path';
+import { KAFKA_CONFIG } from './config/kafka.config';
 import { OrderModule } from './order.module';
 
 const GRPC_TRANSPORT_OPTIONS: GrpcOptions = {
@@ -18,6 +19,7 @@ const GRPC_TRANSPORT_OPTIONS: GrpcOptions = {
 
 async function bootstrap() {
   const app = await NestFactory.create(OrderModule);
+  app.connectMicroservice<MicroserviceOptions>(KAFKA_CONFIG);
   app.connectMicroservice<MicroserviceOptions>(GRPC_TRANSPORT_OPTIONS);
 
   await app.startAllMicroservices();
