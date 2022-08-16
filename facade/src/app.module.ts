@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CreateIdController } from './common/create-id/createId.controller';
 import { AccountModule } from './account/account.module';
 import { BalanceModule } from './balance/balance.module';
 import { ProductsModule } from './products/products.module';
@@ -11,6 +12,7 @@ import { ProductsModule } from './products/products.module';
     BalanceModule,
     ProductsModule,
   ],
+  controllers: [CreateIdController],
   exports: [ConfigModule],
   providers: [],
 })
