@@ -1,13 +1,13 @@
-name: Balance
+name: Order
 on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-    - "balance/**"
+    - "order/**"
     branches: ["main"]
   push:
     paths:
-    - "balance/**"
+    - "order/**"
     branches:
     - "main"
   workflow_dispatch:
@@ -23,8 +23,8 @@ jobs:
       docker-tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
     env:
       IMAGE_REGISTRY: exchangetypescript.jfrog.io
-      IMAGE_REPOSITORY: balance-docker
-      DOCKER_IMAGE: balance
+      IMAGE_REPOSITORY: order-docker
+      DOCKER_IMAGE: order
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
       uses: docker/build-push-action@v3
       id: buildx
       with:
-        context: ./balance
+        context: ./order
         file: /tmp/Dockerfile
         builder: ${{ steps.buildx.outputs.name }}
         push: true
@@ -96,16 +96,16 @@ jobs:
         GIT_URL: "https://github.com/epershinaass/exchange_typescript"
         KAFKA_URL: "kafka1:9092,kafka2:9092,kafka3:9092"
 
-        BALANCE_DB_URL: "mongo-balance"
+        ORDER_DB_URL: "mongo-order"
         SERVICE_DB_PORT: 27017
-        BALANCE_DB_USER: "balance"
+        ORDER_DB_USER: "order"
         SERVICE_URL: "0.0.0.0"
         BALANCE_SERVICE_PORT: 5000
         PRODUCTS_SERVICE_PORT: 5001
         FACADE_SERVICE_PORT: 3000
         ACCOUNT_SERVICE_PORT: 5002
         ORDER_SERVICE_PORT: 5003
-        BALANCE_TAG: ${{needs.build-images.outputs.docker-tag}}
+        ORDER_TAG: ${{needs.build-images.outputs.docker-tag}}
       steps:
         - name: executing remote ssh commands using ssh key
           uses: appleboy/ssh-action@master
@@ -113,7 +113,7 @@ jobs:
             host: ${{ secrets.SERVER1 }}
             username: ${{ secrets.SSH_USERNAME }}
             key: ${{ secrets.SSH_PRIVATE_KEY }}
-            envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,BALANCE_DB_URL,SERVICE_DB_PORT,BALANCE_DB_USER,SERVICE_URL,BALANCE_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME,FACADE_SERVICE_PORT,ACCOUNT_SERVICE_PORT,PRODUCTS_SERVICE_PORT,JFROG_URL,BALANCE_TAG,KAFKA_URL,ORDER_SERVICE_PORT
+            envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,ORDER_DB_URL,SERVICE_DB_PORT,ORDER_DB_USER,SERVICE_URL,BALANCE_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME,FACADE_SERVICE_PORT,ACCOUNT_SERVICE_PORT,PRODUCTS_SERVICE_PORT,JFROG_URL,ORDER_TAG,ORDER_SERVICE_PORT,KAFKA_URL
             script: |
               if [ -d $PROJECT_DIR ]; then
                 cd $PROJECT_DIR && git pull
@@ -121,7 +121,7 @@ jobs:
                 git clone $GIT_URL && cd $PROJECT_DIR
               fi
 
-              echo $BALANCE_TAG
+              echo $ORDER_TAG
               echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
               MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
               MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
@@ -131,37 +131,37 @@ jobs:
               JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
               JFROG_URL=$JFROG_URL
               COMPOSE_HTTP_TIMEOUT=500
-              SERVICE_DB_URL=$BALANCE_DB_URL
-              SERVICE_USER=$BALANCE_DB_USER
-              SERVICE_DB=$BALANCE_DB_USER
+              SERVICE_DB_URL=$ORDER_DB_URL
+              SERVICE_USER=$ORDER_DB_USER
+              SERVICE_DB=$ORDER_DB_USER
               FACADE_SERVICE_PORT=$FACADE_SERVICE_PORT
               ACCOUNT_SERVICE_PORT=$ACCOUNT_SERVICE_PORT
               PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
               BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
-              BALANCE_TAG=$BALANCE_TAG
-              ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT" > bl.env
+              ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT
+              ORDER_TAG=$ORDER_TAG" > or.env
 
 
-              echo "DB_URL=$BALANCE_DB_URL
+              echo "DB_URL=$ORDER_DB_URL
               DB_PASSWORD=$MONGO_SERVICE_PASSWORD
               DB_PORT=$SERVICE_DB_PORT
-              DB_USER=$BALANCE_DB_USER
-              DB_NAME=$BALANCE_DB_USER
+              DB_USER=$ORDER_DB_USER
+              DB_NAME=$ORDER_DB_USER
               SERVICE_URL=$SERVICE_URL
-              SERVICE_PORT=$BALANCE_SERVICE_PORT
-              KAFKA_URL=$KAFKA_URL" > ./balance/.env
+              SERVICE_PORT=$ORDER_SERVICE_PORT
+              KAFKA_URL=$KAFKA_URL" > ./order/.env
 
-              export $(cat bl.env | egrep -v "(^#.*|^$)" | xargs)
+              export $(cat or.env | egrep -v "(^#.*|^$)" | xargs)
               docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
-              docker ps -a --format "{{.Names}}" | grep $BALANCE_DB_URL
+              docker ps -a --format "{{.Names}}" | grep $ORDER_DB_URL
               status=$?
               if [ $status != 0 ]; then
                 echo "mongo not running"
                 envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
-                docker-compose --profile balance -f ./infra/docker-compose-app.yaml --env-file bl.env up -d
+                docker-compose --profile order -f ./infra/docker-compose-app.yaml --env-file or.env up -d
                 rm temp
               fi
-              docker-compose --profile balance-app -f ./infra/docker-compose-app.yaml --env-file bl.env up -d --force-recreate
-              rm bl.env
+              docker-compose --profile order-app -f ./infra/docker-compose-app.yaml --env-file or.env up -d --force-recreate
+              rm or.env
               git restore .
               docker logout
