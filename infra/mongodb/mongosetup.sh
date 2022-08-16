@@ -48,11 +48,58 @@ db.$SERVICE_DB.insertMany([
     "userId": "62ecda02aded95223f606777",
     "products": [
       {
-        "name": "teapot",
+        "productId": "62f205e225c56cb7b3157888",
         "quantity": 1,
         _id: ObjectId("62ecda02aded95223f606777")
       }
     ]
+  }
+]);
+db.catalogs.insertMany([
+  {
+    "name": "BTC",
+    "productId": "62f205e225c56cb7b3157888",
+    _id: ObjectId("62ecda02aded95223f606777")
+  },
+  {
+    "name": "ETH",
+    "productId": "62f205e225c56cb7b3157881",
+    _id: ObjectId("62ecda02aded95223f606711")
+  },
+  {
+    "name": "XMR",
+    "productId": "62f205e225c56cb7b3157882",
+    _id: ObjectId("62ecda02aded95223f606712")
+  },
+  {
+    "name": "USDT",
+    "productId": "62f205e225c56cb7b3157883",
+    _id: ObjectId("62ecda02aded95223f606713")
+  },
+  {
+    "name": "ADA",
+    "productId": "62f205e225c56cb7b3157884",
+    _id: ObjectId("62ecda02aded95223f606714")
+  },
+  {
+    "name": "ZEC",
+    "productId": "62f205e225c56cb7b3157885",
+    _id: ObjectId("62ecda02aded95223f606715")
+  },
+  {
+    "name": "DOT",
+    "productId": "62f205e225c56cb7b3157886",
+    _id: ObjectId("62ecda02aded95223f606716")
+  },
+  {
+    "name": "AVAX",
+    "productId": "62f205e225c56cb7b3157887",
+    _id: ObjectId("62ecda02aded95223f606717")
+  },
+  {
+    "name": "UNI",
+    "productId": "62f205e225c56cb7b3157811",
+    _id: ObjectId("62ecda02aded95223f606718")
   }
 ]);
 db.createUser({
