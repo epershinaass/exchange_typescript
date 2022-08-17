@@ -10,20 +10,19 @@ service OrderController {
   rpc GetOrders (GetOrdersRequest) returns (GetOrdersResponse); // for test
 }
 
-// enum OrderType {
-//   BUY = 0;
-//   SELL = 1;
-// }
+enum OrderType {
+  BUY = 0;
+  SELL = 1;
+}
 
 message OrderRequest {
-  // string order_id = 1;
-  // string user_id = 2;
-  // string product_id = 3;
-  // int32 quantity = 4;
-  // int64 cost = 5;
-  // OrderType order_type = 6;
-  // bool is_full_size = 7; // сделка должна произойти разом
-  string message = 1;
+  string order_id = 1;
+  string user_id = 2;
+  string product_id = 3;
+  uint64 quantity = 4;
+  uint64 cost = 5;
+  OrderType order_type = 6;
+  bool is_full_size = 7; // сделка должна произойти разом
 }
 
 message OrderResponse {

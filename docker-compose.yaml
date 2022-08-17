@@ -28,11 +28,11 @@ services:
       - 5003:5003
     volumes:
       - ./order/.env:/app/.env
-    depends_on:
-      kafka1:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   order-dev:
@@ -41,7 +41,7 @@ services:
     container_name: order-dev
     build:
       context: order
-      dockerfile: ../Dockerfile
+      dockerfile: ../Dockerfile-dev
     profiles:
       - mongo-dev
       - dev
@@ -52,11 +52,11 @@ services:
       - 5003:5003
     volumes:
       - ./order:/app/
-    depends_on:
-      kafka1:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
     <<: [*default-svc, *log-driver]
 
   products:
@@ -265,6 +265,7 @@ services:
       retries: 3
     environment:
       KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 5
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT

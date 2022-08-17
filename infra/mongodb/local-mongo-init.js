@@ -11,18 +11,21 @@ db.balances.insertMany([
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "qwe123",
                 refillSum: 25,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
 
@@ -30,6 +33,7 @@ db.balances.insertMany([
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             }
@@ -43,6 +47,7 @@ db.balances.insertMany([
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
@@ -50,6 +55,7 @@ db.balances.insertMany([
             {
                 transactionId: "qwe123",
                 refillSum: 25,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
@@ -57,6 +63,7 @@ db.balances.insertMany([
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
@@ -64,6 +71,7 @@ db.balances.insertMany([
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
             }
@@ -77,6 +85,7 @@ db.balances.insertMany([
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
@@ -84,6 +93,7 @@ db.balances.insertMany([
             {
                 transactionId: "qwe123",
                 refillSum: 25,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
@@ -91,6 +101,7 @@ db.balances.insertMany([
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
@@ -98,6 +109,7 @@ db.balances.insertMany([
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
+                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
             }
@@ -126,21 +138,59 @@ db.products.insertMany([
         "userId": "62ecda02aded95223f606777",
         "products": [
         {
-            "name": "magna",
-            "quantity": 946,
-            _id: ObjectId("62ecda02aded95223f606777")
-        },
-        {
-            "name": "labore Ut officia adipisicing",
-            "quantity": 1327456,
-            _id: ObjectId("62ecda02aded95223f606777")
-        },
-        {
-            "name": "non aliquip sint",
-            "quantity": 43,
+            "productId": "62f205e225c56cb7b3157888",
+            "quantity": 1,
             _id: ObjectId("62ecda02aded95223f606777")
         }
         ]
+    }
+]);
+
+db.catalogs.insertMany([
+    {
+        "name": "BTC",
+        "productId": "62f205e225c56cb7b3157888",
+        _id: ObjectId("62ecda02aded95223f606777")
+    },
+    {
+        "name": "ETH",
+        "productId": "62f205e225c56cb7b3157881",
+        _id: ObjectId("62ecda02aded95223f606711")
+    },
+    {
+        "name": "XMR",
+        "productId": "62f205e225c56cb7b3157882",
+        _id: ObjectId("62ecda02aded95223f606712")
+    },
+    {
+        "name": "USDT",
+        "productId": "62f205e225c56cb7b3157883",
+        _id: ObjectId("62ecda02aded95223f606713")
+    },
+    {
+        "name": "ADA",
+        "productId": "62f205e225c56cb7b3157884",
+        _id: ObjectId("62ecda02aded95223f606714")
+    },
+    {
+        "name": "ZEC",
+        "productId": "62f205e225c56cb7b3157885",
+        _id: ObjectId("62ecda02aded95223f606715")
+    },
+    {
+        "name": "DOT",
+        "productId": "62f205e225c56cb7b3157886",
+        _id: ObjectId("62ecda02aded95223f606716")
+    },
+    {
+        "name": "AVAX",
+        "productId": "62f205e225c56cb7b3157887",
+        _id: ObjectId("62ecda02aded95223f606717")
+    },
+    {
+        "name": "UNI",
+        "productId": "62f205e225c56cb7b3157811",
+        _id: ObjectId("62ecda02aded95223f606718")
     }
 ]);
 
@@ -197,14 +247,3 @@ db.createUser({
 /*****************************Init Database for other microservices****************************************************/
 /*...*/
 /**********************************************************************************************************************/
-db = db.getSiblingDB('order');
-db.createUser({
-    user: 'order',
-    pwd: 'order',
-    roles: [
-        {
-            role: 'readWrite',
-            db: 'order',
-        },
-    ],
-});

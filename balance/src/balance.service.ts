@@ -9,7 +9,7 @@ import { Balance, BalanceDocument } from './schemas/balance.schema';
 export class BalanceService {
   constructor(
     @InjectModel(Balance.name) private balanceModel: Model<BalanceDocument>,
-  ) { }
+  ) {}
 
   public async refillBalance(
     refillBalanceDto: RefillBalanceDto,
