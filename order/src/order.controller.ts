@@ -15,7 +15,7 @@ export class OrderController {
 
   @GrpcMethod('OrderController', 'CreateOrder')
   createOrder(createOrderRequest: OrderRequestDto) {
-    // сохранили в бд со статусом processing
+    // TODO: сохранили в бд со статусом processing
     this.client.emit('order_created', createOrderRequest);
     return { status: 0 };
   }
