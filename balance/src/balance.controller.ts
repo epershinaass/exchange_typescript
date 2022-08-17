@@ -10,7 +10,7 @@ import {
 import { BalanceService } from './balance.service';
 import { KAFKA_CONFIG } from './config/kafka.config';
 import { GetBalanceDto } from './dto/get-balance.dto';
-import { OrderRequestDto } from './dto/order-request.dto';
+import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { getGrpcError } from './errors/balance.error';
 
@@ -25,20 +25,23 @@ export class BalanceController {
 
   @EventPattern('order_created')
   async handleOrderCreated(orderRequestDto: OrderRequestDto) {
-    const sumForFreeze =
-      (orderRequestDto.cost as any).low * (orderRequestDto.quantity as any).low;
-    const isFrozen: boolean = await this.balanceService.freezeSum(
-      orderRequestDto.userId,
-      sumForFreeze,
-    );
+    if (orderRequestDto.orderType === OrderType.BUY) {
+      const sumForFreeze =
+        (orderRequestDto.cost as any).low *
+        (orderRequestDto.quantity as any).low;
+      const isFrozen: boolean = await this.balanceService.freezeSum(
+        orderRequestDto.userId,
+        sumForFreeze,
+      );
 
-    this.client.emit('balance_frozen', {
-      isFrozen: isFrozen,
-      order: orderRequestDto,
-    });
-    // .subscribe(() => {
-    //   console.log('balance frozen with: ' + JSON.stringify(data));
-    // });
+      this.client.emit('resources_frozen', {
+        isFrozen: isFrozen,
+        order: orderRequestDto,
+      });
+      // .subscribe(() => {
+      //   console.log('balance frozen with: ' + JSON.stringify(data));
+      // });
+    }
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')

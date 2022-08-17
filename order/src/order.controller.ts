@@ -28,8 +28,9 @@ export class OrderController {
     return { status: 0 };
   }
 
-  @EventPattern('balance_frozen')
+  @EventPattern('resources_frozen')
   handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
+    // приходят в кривом виде, монго не может привести к числу
     // this.orderService.createOrder(balanceFrozenDto.order);
     if (balanceFrozenDto.isFrozen === true) {
       // this.orderService.changeOrderStatus(balanceFrozenDto);

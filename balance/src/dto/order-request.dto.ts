@@ -4,6 +4,7 @@ export enum OrderType {
 }
 
 export class OrderRequestDto {
+  // constructor() {}
   orderId: string;
   userId: string;
   productId: string;

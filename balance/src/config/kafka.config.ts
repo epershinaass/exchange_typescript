@@ -7,7 +7,7 @@ export const KAFKA_CONFIG: KafkaOptions = {
       brokers: ['kafka1:9092'],
     },
     consumer: {
-      groupId: 'order-consumer',
+      groupId: 'order-balance-consumer',
     },
   },
 };
