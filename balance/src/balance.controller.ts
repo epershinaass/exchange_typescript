@@ -25,7 +25,6 @@ export class BalanceController {
 
   @EventPattern('order_created')
   async handleOrderCreated(orderRequestDto: OrderRequestDto) {
-    // проверяем хватает ли средств на балансе, если да, то морозим
     const sumForFreeze =
       (orderRequestDto.cost as any).low * (orderRequestDto.quantity as any).low;
     const isFrozen: boolean = await this.balanceService.freezeSum(
@@ -33,7 +32,6 @@ export class BalanceController {
       sumForFreeze,
     );
 
-    // отправляем статус вместе с телом заявки обратно в заказы
     this.client.emit('balance_frozen', {
       isFrozen: isFrozen,
       order: orderRequestDto,
