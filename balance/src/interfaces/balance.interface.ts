@@ -10,6 +10,7 @@ interface IGetBalance {
 
 interface IBalance {
   total: number;
+  frozen: number;
   transactions: ITransaction[];
 }
 

@@ -33,6 +33,23 @@ export class BalanceService {
       .exec();
   }
 
+  public async freezeSum(userId, sumForFreeze): Promise<boolean> {
+    console.log(sumForFreeze);
+    const balance = await this.getBalance(userId);
+    if (balance.total - (balance.frozen || 0) >= sumForFreeze) {
+      this.balanceModel
+        .findOneAndUpdate(
+          { userId },
+          {
+            $inc: { frozen: sumForFreeze },
+          },
+        )
+        .exec();
+      return true;
+    }
+    return false;
+  }
+
   public async getBalance(userId): Promise<IBalance> {
     const balance = await this.balanceModel.findOne({ userId: userId }).exec();
     if (!balance) {
