@@ -6,26 +6,24 @@ db = db.getSiblingDB('balance');
 db.balances.insertMany([
     {
         total: 2150,
+        frozen: 500,
         userId: "62e370f465eec4910c2ba2e1",
         transactions: [
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "qwe123",
                 refillSum: 25,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
 
@@ -33,7 +31,6 @@ db.balances.insertMany([
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             }
@@ -42,12 +39,12 @@ db.balances.insertMany([
     },
     {
         total: 3333,
+        frozen: 500,
         userId: "62e370f465eec4910c2ba2e2",
         transactions: [
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
@@ -55,7 +52,6 @@ db.balances.insertMany([
             {
                 transactionId: "qwe123",
                 refillSum: 25,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
@@ -63,7 +59,6 @@ db.balances.insertMany([
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
@@ -71,7 +66,6 @@ db.balances.insertMany([
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
             }
@@ -80,12 +74,12 @@ db.balances.insertMany([
     },
     {
         total: 4444,
+        frozen: 500,
         userId: "62e370f465eec4910c2ba2e3",
         transactions: [
             {
                 transactionId: "ipsum in do",
                 refillSum: 100,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
@@ -93,7 +87,6 @@ db.balances.insertMany([
             {
                 transactionId: "qwe123",
                 refillSum: 25,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
@@ -101,7 +94,6 @@ db.balances.insertMany([
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
                 refillSum: 2000,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
@@ -109,7 +101,6 @@ db.balances.insertMany([
             {
                 transactionId: "magna ipsum",
                 refillSum: 25,
-                frozen: true,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
             }
