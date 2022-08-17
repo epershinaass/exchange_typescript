@@ -10,6 +10,7 @@ import {
 import { BalanceService } from './balance.service';
 import { KAFKA_CONFIG } from './config/kafka.config';
 import { GetBalanceDto } from './dto/get-balance.dto';
+import { OrderRequestDto } from './dto/order-request.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { getGrpcError } from './errors/balance.error';
 
@@ -23,9 +24,10 @@ export class BalanceController {
   private client: ClientKafka;
 
   @EventPattern('order_created')
-  async handleOrderCreated(data: any) {
-    console.log(`orderCreated ${JSON.stringify(data)}`);
-    console.log('handleOrderCreated');
+  async handleOrderCreated(data: OrderRequestDto) {
+    // проверяем хватает ли средств на балансе, если да, то морозим
+    console.log(`handleOrderCreated ${JSON.stringify(data)}`);
+    // отправляем статус вместе с телом заявки обратно в заказы
     this.client.emit(
       'balance_frozen',
       `balance frozen with ${JSON.stringify(data)}`,
