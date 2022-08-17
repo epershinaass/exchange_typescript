@@ -24,14 +24,18 @@ export class BalanceController {
   private client: ClientKafka;
 
   @EventPattern('order_created')
-  async handleOrderCreated(data: OrderRequestDto) {
-    // проверяем хватает ли средств на балансе, если да, то морозим
-    console.log(`handleOrderCreated ${JSON.stringify(data)}`);
-    // отправляем статус вместе с телом заявки обратно в заказы
-    this.client.emit(
-      'balance_frozen',
-      `balance frozen with ${JSON.stringify(data)}`,
+  async handleOrderCreated(orderRequestDto: OrderRequestDto) {
+    const sumForFreeze =
+      (orderRequestDto.cost as any).low * (orderRequestDto.quantity as any).low;
+    const isFrozen: boolean = await this.balanceService.freezeSum(
+      orderRequestDto.userId,
+      sumForFreeze,
     );
+
+    this.client.emit('balance_frozen', {
+      isFrozen: isFrozen,
+      order: orderRequestDto,
+    });
     // .subscribe(() => {
     //   console.log('balance frozen with: ' + JSON.stringify(data));
     // });

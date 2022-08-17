@@ -4,11 +4,11 @@ export enum OrderType {
 }
 
 export class OrderRequestDto {
-  order_id: string;
-  user_id: string;
-  product_id: string;
+  orderId: string;
+  userId: string;
+  productId: string;
   quantity: number;
   cost: number;
-  order_type: OrderType;
-  is_full_size: boolean;
+  orderType: OrderType;
+  isFullSize: boolean;
 }

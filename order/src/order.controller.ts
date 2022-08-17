@@ -6,7 +6,8 @@ import {
   GrpcMethod,
 } from '@nestjs/microservices';
 import { KAFKA_CONFIG } from './config/kafka.config';
-import { OrderRequestDto } from './dto/order-request.dto';
+import { BalanceFrozenDto } from './dto/order-frozen.dto';
+import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { OrderService } from './order.service';
 
 @Controller()
@@ -18,18 +19,23 @@ export class OrderController {
 
   @GrpcMethod('OrderController', 'CreateOrder')
   async createOrder(createOrderRequest: OrderRequestDto) {
-    // сохранили в бд со статусом processing
+    // TODO: сохранили в бд со статусом processing
     await this.orderService.createOrder(createOrderRequest);
+    if (createOrderRequest.orderType === OrderType.BUY) {
     this.client.emit('order_created', createOrderRequest);
+    }
+    // else freezeProducts()
     return { status: 0 };
   }
 
   @EventPattern('balance_frozen')
-  handleBalanceFrozen(data: any) {
-    // проверяем заморозился ли баланс
-    // если нет, то ставим статус заявки canceled
-    // если да, то меняем статус заявки на done и сохраняем в стакан
-    console.log(data);
+  handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
+    if (balanceFrozenDto.isFrozen === true) {
+      console.log('save into MarketDepth');
+      console.log('Change status to DONE');
+    } else {
+      console.log('Change status to CANCELED');
+    }
   }
 
   @GrpcMethod('OrderController', 'GetOrders')
