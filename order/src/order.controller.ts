@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import {
   Client,
   ClientKafka,
@@ -20,7 +20,7 @@ export class OrderController {
   @GrpcMethod('OrderController', 'CreateOrder')
   async createOrder(createOrderRequest: OrderRequestDto) {
     // TODO: сохранили в бд со статусом processing
-    await this.orderService.createOrder(createOrderRequest);
+    this.orderService.createOrderStatus(createOrderRequest);
     if (createOrderRequest.orderType === OrderType.BUY) {
       this.client.emit('order_created', createOrderRequest);
     }
@@ -30,8 +30,9 @@ export class OrderController {
 
   @EventPattern('balance_frozen')
   handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
+    // this.orderService.createOrder(balanceFrozenDto.order);
     if (balanceFrozenDto.isFrozen === true) {
-      console.log('save into MarketDepth');
+      // this.orderService.changeOrderStatus(balanceFrozenDto);
       console.log('Change status to DONE');
     } else {
       console.log('Change status to CANCELED');
