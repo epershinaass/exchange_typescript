@@ -5,6 +5,7 @@ db.${SERVICE_DB}s.insertMany([
   {
     total: 100,
     userId: "62e370f465eec4910c2ba2e1",
+    frozen: 500,
     transactions: [
       {
         transactionId: "init",
