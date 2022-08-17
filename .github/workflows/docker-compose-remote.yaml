@@ -179,7 +179,7 @@ jobs:
             export $(cat .env | egrep -v "(^#.*|^$)" | xargs)
             envsubst<infra/prometheus/alertmanager-config.yml>temp && cat temp > infra/prometheus/alertmanager-config.yml
             envsubst<infra/prometheus/prometheus.yml>temp && cat temp > infra/prometheus/prometheus.yml
-            docker-compose --profile prometheus --profile monitoring -f ./infra/docker-compose.yaml --env-file .env up -d
+            docker-compose --profile prometheus --profile monitoring -f ./infra/docker-compose.yaml --env-file .env up -d --force-recreate
             rm .env
             git restore .
             git clean -dxf
