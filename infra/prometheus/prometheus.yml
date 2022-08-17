@@ -90,6 +90,7 @@ scrape_configs:
     scheme: http
     static_configs:
       - targets: ['minio:9000']
+ 
 alerting:
   alertmanagers:
   - scheme: http
