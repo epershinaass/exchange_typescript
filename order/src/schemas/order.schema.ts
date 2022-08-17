@@ -5,28 +5,26 @@ export type OrderDocument = Order & Document;
 
 @Schema()
 export class Order {
+  @Prop({ type: mongoose.Types.ObjectId })
+  orderId: string;
 
   @Prop({ type: mongoose.Types.ObjectId })
-  order_id: string
+  userId: string;
 
   @Prop({ type: mongoose.Types.ObjectId })
-  user_id: string
-
-  @Prop({ type: mongoose.Types.ObjectId })
-  product_id: string
+  productId: string;
 
   @Prop()
-  quantity: number
+  quantity: number;
 
   @Prop()
-  cost: number
+  cost: number;
 
   @Prop()
-  order_type: number
+  orderType: number;
 
   @Prop()
-  is_full_size: boolean
-
+  isFullSize: boolean;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

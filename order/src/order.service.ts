@@ -6,13 +6,11 @@ import { Order, OrderDocument } from './schemas/order.schema';
 
 @Injectable()
 export class OrderService {
-
   constructor(
-    @InjectModel(Order.name) private orderModel: Model<OrderDocument>
+    @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
   ) {}
 
-  public async createOrder(createOrderRequest: OrderRequestDto) {
-    const order = await this.orderModel.create(createOrderRequest);
-    return await order.save();
+  public createOrder(createOrderRequest: OrderRequestDto) {
+    return this.orderModel.create(createOrderRequest);
   }
 }

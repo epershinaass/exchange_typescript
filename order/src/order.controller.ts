@@ -12,7 +12,7 @@ import { OrderService } from './order.service';
 
 @Controller()
 export class OrderController {
-  constructor(private orderService: OrderService) { }
+  constructor(private orderService: OrderService) {}
 
   @Client(KAFKA_CONFIG)
   private client: ClientKafka;
@@ -22,7 +22,7 @@ export class OrderController {
     // TODO: сохранили в бд со статусом processing
     await this.orderService.createOrder(createOrderRequest);
     if (createOrderRequest.orderType === OrderType.BUY) {
-    this.client.emit('order_created', createOrderRequest);
+      this.client.emit('order_created', createOrderRequest);
     }
     // else freezeProducts()
     return { status: 0 };
