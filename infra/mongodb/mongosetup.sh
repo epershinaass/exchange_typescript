@@ -9,6 +9,7 @@ db.${SERVICE_DB}s.insertMany([
     transactions: [
       {
         transactionId: "init",
+        refillSum: 100,
         transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
         _id: ObjectId("62e370f465eec4910c2ba2e1")
       }
