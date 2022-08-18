@@ -37,7 +37,7 @@ export class ProductsService {
     return await product.save();
   }
 
-  public async getProducts(userId: IUserId): Promise<IUserProductsDocument> {
+  public async getProducts(userId: IUserId): Promise<any> {
     const userProducts = await this.productModel
       .findOne({ userId: userId.userId })
       .exec();
@@ -50,29 +50,37 @@ export class ProductsService {
 
   public async freezeProduct(orderRequestDto: OrderRequestDto) {
     const quantityForFreeze: bigint = BigInt(orderRequestDto.order.quantity);
-
     const frozenProductsId = orderRequestDto.order.productId;
-    const product = await this.getProducts({ userId: orderRequestDto.order.userId });
-    // const productsToBeFrozen = product.products.filter(
-    //   (frozenProductsId) => frozenProductsId === { productId: product.products.productId });
-    console.log(product)
-    return product;
-  //   if (product.products - balance.frozen >= sumForFreeze) {
-  //     this.balanceModel
-  //       .findOneAndUpdate(
-  //         { userId: orderRequestDto.order.userId },
-  //         {
-  //           // TODO: потеря точности!!!хранить как string?
-  //           $inc: { frozen: Number(sumForFreeze) },
-  //         },
-  //         {
-  //           new: true,
-  //         },
-  //       )
-  //       .exec();
-  //     return true;
-  //   }
-  //   return false;
-  // }
 
-}}
+    const product = await this.getProducts({ userId: orderRequestDto.order.userId });
+    const productToBeFrozen = product.products.find(products => products.productId === frozenProductsId);
+
+    if (productToBeFrozen) {
+      if (productToBeFrozen.quantity >= quantityForFreeze) {
+        if (
+          product.frozenProducts.find((products) => products.productId === frozenProductsId,))
+          {
+          // Добавляем с нуля
+          product.frozenProducts.push(
+            orderRequestDto.order.productId,
+            orderRequestDto.order.quantity,);
+          return true;
+        } else {
+          // Находим и обновляем
+          product.findOneAndUpdate({ userId: orderRequestDto.order.userId },
+              {
+                $inc: { 'frozenProducts.quantity': quantityForFreeze },
+              },
+              {
+                new: true,
+              },
+            )
+            .exec();
+          return true;
+        }
+      }
+      return false;
+    }
+    return false;
+  }
+}

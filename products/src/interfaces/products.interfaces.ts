@@ -20,4 +20,5 @@ export interface IGetProductsResponse {
 export interface IUserProductsDocument {
   userId: string;
   products: IProduct[];
+  frozenProducts: IProduct[];
 }

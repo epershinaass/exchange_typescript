@@ -31,7 +31,6 @@ export class ProductsController {
     if (orderRequestDto.order.orderType === OrderType.SELL) {
       console.log('yes it is for sell');
       const isFrozen = await this.productsService.freezeProduct(orderRequestDto);
-      console.log(isFrozen)
       const message = isFrozen ? '' : "Don't have enough free product";
       this.client.emit('resources_frozen', {
         isFrozen,
