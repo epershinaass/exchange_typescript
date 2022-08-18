@@ -18,6 +18,16 @@ export class Product {
       },
     ],
   })
+  frozenProducts: Object[]
+
+  @Prop({
+    type: [
+      {
+        quantity: { type: Number },
+        productId: { type: String },
+      },
+    ],
+  })
   products: IProduct[];
 }
 

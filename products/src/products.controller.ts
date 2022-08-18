@@ -30,13 +30,14 @@ export class ProductsController {
   async handleOrderCreated(orderRequestDto: OrderRequestDto) {
     if (orderRequestDto.order.orderType === OrderType.SELL) {
       console.log('yes it is for sell');
-      // const isFrozen = await this.balanceService.freezeSum(orderRequestDto);
-      // const message = isFrozen ? '' : "Don't have enough free money";
-      // this.client.emit('resources_frozen', {
-      //   isFrozen,
-      //   message,
-      //   ...orderRequestDto,
-      // });
+      const isFrozen = await this.productsService.freezeProduct(orderRequestDto);
+      console.log(isFrozen)
+      const message = isFrozen ? '' : "Don't have enough free product";
+      this.client.emit('resources_frozen', {
+        isFrozen,
+        message,
+        ...orderRequestDto,
+      });
       /*
        .subscribe(() => {
         console.log('balance frozen with: ' + JSON.stringify(data));

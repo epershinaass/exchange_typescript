@@ -10,6 +10,7 @@ import {
 } from './interfaces/products.interfaces';
 import { errCode } from './errors/products.error';
 import { Catalog, CatalogDocument } from './schemas/productsCollection.schema';
+import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 
 @Injectable()
 export class ProductsService {
@@ -45,4 +46,33 @@ export class ProductsService {
     }
     return userProducts;
   }
-}
+
+
+  public async freezeProduct(orderRequestDto: OrderRequestDto) {
+    const quantityForFreeze: bigint = BigInt(orderRequestDto.order.quantity);
+
+    const frozenProductsId = orderRequestDto.order.productId;
+    const product = await this.getProducts({ userId: orderRequestDto.order.userId });
+    // const productsToBeFrozen = product.products.filter(
+    //   (frozenProductsId) => frozenProductsId === { productId: product.products.productId });
+    console.log(product)
+    return product;
+  //   if (product.products - balance.frozen >= sumForFreeze) {
+  //     this.balanceModel
+  //       .findOneAndUpdate(
+  //         { userId: orderRequestDto.order.userId },
+  //         {
+  //           // TODO: потеря точности!!!хранить как string?
+  //           $inc: { frozen: Number(sumForFreeze) },
+  //         },
+  //         {
+  //           new: true,
+  //         },
+  //       )
+  //       .exec();
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+}}
