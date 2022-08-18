@@ -4,12 +4,15 @@ export enum OrderType {
 }
 
 export class OrderRequestDto {
-  // constructor() {}
-  orderId: string;
-  userId: string;
-  productId: string;
-  quantity: number;
-  cost: number;
-  orderType: OrderType;
-  isFullSize: boolean;
+  orderStatusId: string;
+  order: {
+    orderStatusId: string;
+    orderId: string;
+    userId: string;
+    productId: string;
+    quantity: number;
+    cost: number;
+    orderType: OrderType;
+    isFullSize: boolean;
+  };
 }

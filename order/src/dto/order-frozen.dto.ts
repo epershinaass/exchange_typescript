@@ -2,6 +2,7 @@ import { OrderType } from './order-request.dto';
 
 export class BalanceFrozenDto {
   isFrozen: boolean;
+  orderStatusId: string;
   order: {
     orderId: string;
     userId: string;

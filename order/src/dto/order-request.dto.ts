@@ -7,8 +7,8 @@ export class OrderRequestDto {
   orderId: string;
   userId: string;
   productId: string;
-  quantity: number;
-  cost: number;
+  quantity: any;
+  cost: any;
   orderType: OrderType;
   isFullSize: boolean;
 }
