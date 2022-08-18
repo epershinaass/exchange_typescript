@@ -15,7 +15,7 @@ operatorNamespace: rook-ceph
 configOverride: |
   [global]
   mon_warn_on_pool_no_redundancy = false
-  osd_pool_default_size = 2
+  osd_pool_default_size = 3
   bdev_flock_retry = 20
   bluefs_buffered_io = false
 
@@ -30,8 +30,8 @@ toolbox:
       cpu: "500m"
       memory: "1Gi"
     requests:
-      cpu: "100m"
-      memory: "128Mi"
+      cpu: "10m"
+      memory: "50Mi"
   # Set the priority class for the toolbox if desired
   # priorityClassName: class
 
@@ -50,7 +50,8 @@ monitoring:
   # externalMgrPrometheusPort: <port>
   # allow adding custom labels and annotations to the prometheus rule
   prometheusRule:
-    labels: {}
+    labels:
+      role: rook
     annotations: {}
 
 # If true, create & use PSP resources. Set this to the same value as the rook-ceph chart.
@@ -100,7 +101,7 @@ cephClusterSpec:
   mon:
     # Set the number of mons to be started. Generally recommended to be 3.
     # For highest availability, an odd number of mons should be specified.
-    count: 2
+    count: 3
     # The mons should be on unique nodes. For production, at least 3 nodes are recommended for this reason.
     # Mons should only be allowed on the same node for test environments where data loss is acceptable.
     allowMultiplePerNode: false
@@ -109,7 +110,7 @@ cephClusterSpec:
     # When higher availability of the mgr is needed, increase the count to 2.
     # In that case, one mgr will be active and one in standby. When Ceph updates which
     # mgr is active, Rook will update the mgr services to match the active mgr.
-    count: 2
+    count: 1
     allowMultiplePerNode: false
     modules:
       # Several modules should not need to be included in this list. The "dashboard" and "monitoring" modules
@@ -123,10 +124,10 @@ cephClusterSpec:
     # serve the dashboard under a subpath (useful when you are accessing the dashboard via a reverse proxy)
     # urlPrefix: /ceph-dashboard
     # serve the dashboard at the given port.
-    # port: 8443
+    port: 8443
     # Serve the dashboard using SSL (if using ingress to expose the dashboard and `ssl: true` you need to set
     # the corresponding "backend protocol" annotation(s) for your ingress controller of choice)
-    ssl: false
+    ssl: true
 
   # Network configuration, see: https://github.com/rook/rook/blob/master/Documentation/CRDs/ceph-cluster-crd.md#network-configuration-settings
   # network:
@@ -241,57 +242,57 @@ cephClusterSpec:
         cpu: "1000m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "50Mi"
     mon:
       limits:
         cpu: "1000m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "50Mi"
     osd:
       limits:
         cpu: "1000m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "1Gi"
+        cpu: "10m"
+        memory: "50Mi"
     prepareosd:
       limits:
         cpu: "1000m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "50Mi"
     mgr-sidecar:
       limits:
         cpu: "1000m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "50Mi"
     crashcollector:
       limits:
         cpu: "500m"
         memory: "60Mi"
       requests:
-        cpu: "100m"
-        memory: "60Mi"
+        cpu: "10m"
+        memory: "50Mi"
     logcollector:
       limits:
         cpu: "500m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "100Mi"
+        cpu: "10m"
+        memory: "50Mi"
     cleanup:
       limits:
         cpu: "1000m"
         memory: "1Gi"
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "50Mi"
 
   # The option to automatically remove OSDs that are out and are safe to destroy.
   removeOSDsIfOutAndSafeToRemove: false
@@ -369,16 +370,16 @@ cephClusterSpec:
         disabled: false
 
 ingress:
-  dashboard:
-    annotations:
+  dashboard: {}
+    # annotations:
     #   external-dns.alpha.kubernetes.io/hostname: dashboard.example.com
-      haproxy.com/path-rewrite: /ceph-dashboard/(.*) /\1
+      # haproxy.com/path-rewrite: /ceph-dashboard/(.*) /\1
       # nginx.ingress.kubernetes.io/rewrite-target: /ceph-dashboard/$2
     #   kubernetes.io/ingress.class: nginx
     # If the dashboard has ssl: true the following will make sure the NGINX Ingress controller can expose the dashboard correctly
-    host:
+    # host:
       # name: dashboard.example.com
-      path: /ceph-dashboard/
+      # path: /ceph-dashboard/
     # tls:
     # - hosts:
     #     - dashboard.example.com
@@ -393,7 +394,7 @@ cephBlockPools:
     spec:
       failureDomain: host
       replicated:
-        size: 2
+        size: 3
     storageClass:
       enabled: true
       name: ceph-block
@@ -439,12 +440,12 @@ cephFileSystems:
     spec:
       metadataPool:
         replicated:
-          size: 2
+          size: 3
           requireSafeReplicaSize: false
       dataPools:
         - failureDomain: host
           replicated:
-            size: 2
+            size: 3
             requireSafeReplicaSize: false
           # Optional and highly recommended, 'data0' by default, see https://github.com/rook/rook/blob/master/Documentation/CRDs/Shared-Filesystem/ceph-filesystem-crd.md#pools
       metadataServer:
@@ -455,8 +456,8 @@ cephFileSystems:
             cpu: "2000m"
             memory: "4Gi"
           requests:
-            cpu: "100m"
-            memory: "256Mi"
+            cpu: "10m"
+            memory: "50Mi"
         priorityClassName: system-cluster-critical
     storageClass:
       enabled: true
@@ -506,7 +507,7 @@ cephObjectStores:
       metadataPool:
         failureDomain: host
         replicated:
-          size: 2
+          size: 3
       dataPool:
         failureDomain: host
         erasureCoded:
@@ -520,8 +521,8 @@ cephObjectStores:
             cpu: "2000m"
             memory: "2Gi"
           requests:
-            cpu: "100m"
-            memory: "256Mi"
+            cpu: "10m"
+            memory: "50Mi"
         # securePort: 443
         # sslCertificateRef:
         instances: 1
