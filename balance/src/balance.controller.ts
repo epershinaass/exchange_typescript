@@ -27,7 +27,12 @@ export class BalanceController {
   async handleOrderCreated(orderRequestDto: OrderRequestDto) {
     if (orderRequestDto.order.orderType === OrderType.BUY) {
       const isFrozen = await this.balanceService.freezeSum(orderRequestDto);
-      this.client.emit('resources_frozen', { isFrozen, ...orderRequestDto });
+      const message = isFrozen ? '' : "Don't have enough free money";
+      this.client.emit('resources_frozen', {
+        isFrozen,
+        message,
+        ...orderRequestDto,
+      });
       // .subscribe(() => {
       //   console.log('balance frozen with: ' + JSON.stringify(data));
       // });
