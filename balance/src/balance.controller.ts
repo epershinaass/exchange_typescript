@@ -25,19 +25,9 @@ export class BalanceController {
 
   @EventPattern('order_created')
   async handleOrderCreated(orderRequestDto: OrderRequestDto) {
-    if (orderRequestDto.orderType === OrderType.BUY) {
-      const sumForFreeze =
-        (orderRequestDto.cost as any).low *
-        (orderRequestDto.quantity as any).low;
-      const isFrozen: boolean = await this.balanceService.freezeSum(
-        orderRequestDto.userId,
-        sumForFreeze,
-      );
-
-      this.client.emit('resources_frozen', {
-        isFrozen: isFrozen,
-        order: orderRequestDto,
-      });
+    if (orderRequestDto.order.orderType === OrderType.BUY) {
+      const isFrozen = await this.balanceService.freezeSum(orderRequestDto);
+      this.client.emit('resources_frozen', { isFrozen, ...orderRequestDto });
       // .subscribe(() => {
       //   console.log('balance frozen with: ' + JSON.stringify(data));
       // });

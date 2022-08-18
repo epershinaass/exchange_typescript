@@ -5,6 +5,7 @@ import {
   CreateOrderStatusDto,
   OrderStatusEnum,
 } from './dto/create-order-status.dto';
+import { CreateOrderDto } from './dto/create-order.dto';
 import {
   OrderStatus,
   OrderStatusDocument,
@@ -19,20 +20,23 @@ export class OrderService {
     private orderStatusModel: Model<OrderStatusDocument>,
   ) {}
 
-  public createOrder(createOrderRequest: CreateOrderStatusDto) {
+  public createOrder(createOrderRequest: CreateOrderDto) {
     return this.orderModel.create(createOrderRequest);
   }
 
-  public createOrderStatus(createOrderStatus: CreateOrderStatusDto) {
-    return this.orderStatusModel.create({
+  public async createOrderStatus(createOrderStatus: CreateOrderStatusDto) {
+    const doc = await this.orderStatusModel.create({
       status: OrderStatusEnum.PROCESSING,
       createdAt: new Date(),
       message: '',
       ...createOrderStatus,
     });
+    return doc.id;
   }
 
-  // public changeOrderStatus(createOrderRequest: OrderRequestDto) {
-  //   return this.orderModel.create(createOrderRequest);
-  // }
+  public async changeOrderStatus(orderStatusId, newStatus) {
+    await this.orderStatusModel.findByIdAndUpdate(orderStatusId, {
+      status: newStatus,
+    });
+  }
 }

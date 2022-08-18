@@ -6,6 +6,7 @@ import {
   GrpcMethod,
 } from '@nestjs/microservices';
 import { KAFKA_CONFIG } from './config/kafka.config';
+import { OrderStatusEnum } from './dto/create-order-status.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { OrderService } from './order.service';
@@ -18,25 +19,35 @@ export class OrderController {
   private client: ClientKafka;
 
   @GrpcMethod('OrderController', 'CreateOrder')
-  async createOrder(createOrderRequest: OrderRequestDto) {
-    // TODO: сохранили в бд со статусом processing
-    this.orderService.createOrderStatus(createOrderRequest);
-    if (createOrderRequest.orderType === OrderType.BUY) {
-      this.client.emit('order_created', createOrderRequest);
+  async createOrder(orderRequestDto: OrderRequestDto) {
+    const orderStatusId = await this.orderService.createOrderStatus(
+      orderRequestDto,
+    );
+    orderRequestDto.quantity = orderRequestDto.quantity.toString();
+    orderRequestDto.cost = orderRequestDto.cost.toString();
+    if (orderRequestDto.orderType === OrderType.BUY) {
+      this.client.emit('order_created', {
+        orderStatusId: orderStatusId,
+        order: orderRequestDto,
+      });
     }
-    // else freezeProducts()
+    // // else freezeProducts()
     return { status: 0 };
   }
 
   @EventPattern('resources_frozen')
   handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
-    // приходят в кривом виде, монго не может привести к числу
-    // this.orderService.createOrder(balanceFrozenDto.order);
     if (balanceFrozenDto.isFrozen === true) {
-      // this.orderService.changeOrderStatus(balanceFrozenDto);
-      console.log('Change status to DONE');
+      this.orderService.createOrder(balanceFrozenDto.order);
+      this.orderService.changeOrderStatus(
+        balanceFrozenDto.orderStatusId,
+        OrderStatusEnum.DONE,
+      );
     } else {
-      console.log('Change status to CANCELED');
+      this.orderService.changeOrderStatus(
+        balanceFrozenDto.orderStatusId,
+        OrderStatusEnum.CANCELED,
+      );
     }
   }
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { OrderRequestDto } from './dto/order-request.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { errCode } from './errors/balance.error';
 import { Balance, BalanceDocument } from './schemas/balance.schema';
@@ -33,15 +34,22 @@ export class BalanceService {
       .exec();
   }
 
-  public async freezeSum(userId, sumForFreeze): Promise<boolean> {
-    console.log(sumForFreeze);
-    const balance = await this.getBalance(userId);
-    if (balance.total - (balance.frozen || 0) >= sumForFreeze) {
+  public async freezeSum(orderRequestDto: OrderRequestDto): Promise<boolean> {
+    const sumForFreeze: bigint =
+      BigInt(orderRequestDto.order.cost) *
+      BigInt(orderRequestDto.order.quantity);
+
+    const balance = await this.getBalance(orderRequestDto.order.userId);
+    if (balance.total - balance.frozen >= sumForFreeze) {
       this.balanceModel
         .findOneAndUpdate(
-          { userId },
+          { userId: orderRequestDto.order.userId },
           {
-            $inc: { frozen: sumForFreeze },
+            // потеря точности?
+            $inc: { frozen: Number(sumForFreeze) },
+          },
+          {
+            new: true,
           },
         )
         .exec();
