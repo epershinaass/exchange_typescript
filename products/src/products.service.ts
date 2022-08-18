@@ -47,35 +47,46 @@ export class ProductsService {
     return userProducts;
   }
 
-
   public async freezeProduct(orderRequestDto: OrderRequestDto) {
-    const quantityForFreeze: bigint = BigInt(orderRequestDto.order.quantity);
+    const quantityForFreeze = BigInt(orderRequestDto.order.quantity);
     const frozenProductsId = orderRequestDto.order.productId;
 
-    const product = await this.getProducts({ userId: orderRequestDto.order.userId });
-    const productToBeFrozen = product.products.find(products => products.productId === frozenProductsId);
+    const product = await this.getProducts({
+      userId: orderRequestDto.order.userId,
+    });
+    const productToBeFrozen = product.products.find(
+      (products) => products.productId === frozenProductsId,
+    );
 
     if (productToBeFrozen) {
       if (productToBeFrozen.quantity >= quantityForFreeze) {
         if (
-          product.frozenProducts.find((products) => products.productId === frozenProductsId,))
-          {
-          // Добавляем с нуля
-          product.frozenProducts.push(
-            orderRequestDto.order.productId,
-            orderRequestDto.order.quantity,);
-          return true;
-        } else {
+          product.frozenProducts.find(
+            (products) => products.productId === frozenProductsId,
+          )
+        ) {
           // Находим и обновляем
-          product.findOneAndUpdate({ userId: orderRequestDto.order.userId },
+          const quantityTotalForFreeze =
+            product.frozenProducts.quantity + quantityForFreeze;
+          product
+            .findOneAndUpdate(
+              { userId: orderRequestDto.order.userId },
               {
-                $inc: { 'frozenProducts.quantity': quantityForFreeze },
+                $inc: { 'frozenProducts.quantity': quantityTotalForFreeze },
               },
               {
                 new: true,
               },
             )
             .exec();
+
+          return true;
+        } else {
+          // Добавляем с нуля
+          product.frozenProducts.push(
+            orderRequestDto.order.productId,
+            orderRequestDto.order.quantity,
+          );
           return true;
         }
       }
