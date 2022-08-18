@@ -2,7 +2,7 @@ import { Body, Controller, UseFilters } from '@nestjs/common';
 import { AccountService } from './account.service';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ServiceExceptionFilter } from './errors/account.error';
-import { AuthTokenDto, CredentialsDto, MessageDto } from './dto/account.dto';
+import { AuthResponseDto, AuthTokenDto, CredentialsDto, MessageDto } from './dto/account.dto';
 
 
 @Controller()
@@ -21,7 +21,7 @@ export class AccountController {
   }
 
   @GrpcMethod('AccountController', 'Verify')
-  async verify(@Body() auth: AuthTokenDto, metadata: any): Promise<MessageDto> {
+  async verify(@Body() auth: AuthTokenDto, metadata: any): Promise<AuthResponseDto> {
     return await this.accountService.verify(auth);
   }
 }

@@ -16,7 +16,7 @@ const db_path = () => {
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot((console.log(db_path()), db_path())),
+    MongooseModule.forRoot( db_path()),
     MongooseModule.forFeature([
       {
         name: Account.name,
@@ -25,7 +25,7 @@ const db_path = () => {
     ]),
     JwtModule.register({
       secret: process.env.ACC_SECRET_KEY,
-      signOptions: { expiresIn: '300s' },
+      signOptions: { expiresIn: process.env.ACC_TOKEN_EXIRE_IN },
     }),
   ],
   controllers: [AccountController],
