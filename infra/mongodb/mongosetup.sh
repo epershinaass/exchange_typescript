@@ -53,6 +53,13 @@ db.$SERVICE_DB.insertMany([
         "quantity": 1,
         _id: ObjectId("62ecda02aded95223f606777")
       }
+    ],
+    "frozenProducts": [
+      {
+        "productId": "62f205e225c56cb7b3157888",
+        "quantity": 1,
+        _id: ObjectId("62ecda02aded95223f606777")
+      }
     ]
   }
 ]);
