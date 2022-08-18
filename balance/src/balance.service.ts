@@ -45,7 +45,7 @@ export class BalanceService {
         .findOneAndUpdate(
           { userId: orderRequestDto.order.userId },
           {
-            // потеря точности?
+            // TODO: потеря точности!!!хранить как string?
             $inc: { frozen: Number(sumForFreeze) },
           },
           {

@@ -6,6 +6,8 @@ import {
   OrderStatusEnum,
 } from './dto/create-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { BalanceFrozenDto } from './dto/order-frozen.dto';
+import { OrderRequestDto } from './dto/order-request.dto';
 import {
   OrderStatus,
   OrderStatusDocument,
@@ -19,6 +21,14 @@ export class OrderService {
     @InjectModel(OrderStatus.name)
     private orderStatusModel: Model<OrderStatusDocument>,
   ) {}
+
+  public async isIdempotentOrder(orderRequestDto: OrderRequestDto) {
+    const doc = await this.orderStatusModel.findOne({
+      userId: orderRequestDto.userId,
+      orderId: orderRequestDto.orderId,
+    });
+    return doc ? false : true;
+  }
 
   public createOrder(createOrderRequest: CreateOrderDto) {
     return this.orderModel.create(createOrderRequest);
@@ -34,9 +44,16 @@ export class OrderService {
     return doc.id;
   }
 
-  public async changeOrderStatus(orderStatusId, newStatus) {
-    await this.orderStatusModel.findByIdAndUpdate(orderStatusId, {
-      status: newStatus,
-    });
+  public async changeOrderStatus(balanceFrozenDto: BalanceFrozenDto) {
+    const newStatus = balanceFrozenDto.isFrozen
+      ? OrderStatusEnum.DONE
+      : OrderStatusEnum.CANCELED;
+    await this.orderStatusModel.findByIdAndUpdate(
+      balanceFrozenDto.orderStatusId,
+      {
+        status: newStatus,
+        message: balanceFrozenDto.message,
+      },
+    );
   }
 }

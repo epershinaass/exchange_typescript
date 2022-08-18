@@ -6,7 +6,6 @@ import {
   GrpcMethod,
 } from '@nestjs/microservices';
 import { KAFKA_CONFIG } from './config/kafka.config';
-import { OrderStatusEnum } from './dto/create-order-status.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { OrderService } from './order.service';
@@ -20,18 +19,23 @@ export class OrderController {
 
   @GrpcMethod('OrderController', 'CreateOrder')
   async createOrder(orderRequestDto: OrderRequestDto) {
-    const orderStatusId = await this.orderService.createOrderStatus(
+    const isIdempotent = await this.orderService.isIdempotentOrder(
       orderRequestDto,
     );
-    orderRequestDto.quantity = orderRequestDto.quantity.toString();
-    orderRequestDto.cost = orderRequestDto.cost.toString();
-    if (orderRequestDto.orderType === OrderType.BUY) {
-      this.client.emit('order_created', {
-        orderStatusId: orderStatusId,
-        order: orderRequestDto,
-      });
+    if (isIdempotent) {
+      const orderStatusId = await this.orderService.createOrderStatus(
+        orderRequestDto,
+      );
+      orderRequestDto.quantity = orderRequestDto.quantity.toString();
+      orderRequestDto.cost = orderRequestDto.cost.toString();
+      if (orderRequestDto.orderType === OrderType.BUY) {
+        this.client.emit('order_created', {
+          orderStatusId: orderStatusId,
+          order: orderRequestDto,
+        });
+      }
+      // else freezeProducts()
     }
-    // // else freezeProducts()
     return { status: 0 };
   }
 
@@ -39,16 +43,8 @@ export class OrderController {
   handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
     if (balanceFrozenDto.isFrozen === true) {
       this.orderService.createOrder(balanceFrozenDto.order);
-      this.orderService.changeOrderStatus(
-        balanceFrozenDto.orderStatusId,
-        OrderStatusEnum.DONE,
-      );
-    } else {
-      this.orderService.changeOrderStatus(
-        balanceFrozenDto.orderStatusId,
-        OrderStatusEnum.CANCELED,
-      );
     }
+    this.orderService.changeOrderStatus(balanceFrozenDto);
   }
 
   @GrpcMethod('OrderController', 'GetOrders')
