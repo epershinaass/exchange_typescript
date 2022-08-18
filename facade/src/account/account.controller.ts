@@ -1,38 +1,41 @@
-import { Body, Controller, Inject, OnModuleInit } from '@nestjs/common';
+import { Body, Controller, Inject, OnModuleInit, UseGuards } from '@nestjs/common';
 import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CLIENT_OPTS } from './constants';
-import { CredentialsDto, AuthTokenDto, MessageDto } from './dto/account-dto';
+import { MyAuthGuard } from './auth.guard';
+import { CLIENT_OPTS, MSERVICE_CONTROLLER } from './constants';
+import { CredentialsDto, AuthTokenDto, MessageDto, AuthResponseDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
-import { ConfigService } from '@nestjs/config';
-const crypto = require('crypto');
-import { join } from 'path';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 
 @Controller()
 export class AccountController implements OnModuleInit {
-  constructor(@Inject(CLIENT_OPTS) private client: ClientGrpc, private configService: ConfigService) {}
+  constructor(@Inject(CLIENT_OPTS) private client: ClientGrpc) {}
 
   private accountService: IAccountGrpcService;
-  private salt: string = this.configService.get('ACC_PASSW_SALT');
   onModuleInit() {
-    this.accountService =
-      this.client.getService<IAccountGrpcService>('AccountController');
+    this.accountService = this.client.getService<IAccountGrpcService>(MSERVICE_CONTROLLER);
   }
 
-  @GrpcMethod('AccountController', 'SignIn')
+  @GrpcMethod()
   async signIn(@Body() creds: CredentialsDto): Promise<AuthTokenDto> {
-    creds.password = crypto.pbkdf2Sync(creds.password, this.salt, 1, 64, 'sha512').toString();
     return await firstValueFrom(this.accountService.signIn(creds));
   }
 
-  @GrpcMethod('AccountController', 'SignUp')
+  @GrpcMethod()
   async signUp(@Body() creds: CredentialsDto): Promise<MessageDto> {
     return await firstValueFrom(this.accountService.signUp(creds));
   }
 
-  @GrpcMethod('AccountController', 'Verify')
-  async verify(@Body() auth: AuthTokenDto): Promise<MessageDto> {
-    return await firstValueFrom(this.accountService.verify(auth));
+  //Now this method used to test guard mechanism
+  @GrpcMethod()
+  @UseGuards(JwtAuthGuard)
+  async verify(some, metadata: any): Promise<object> {
+    return;
+  }
+  @GrpcMethod()
+  @UseGuards(MyAuthGuard)
+  async verifyMy(some, metadata: any): Promise<object> {
+    return;
   }
 }

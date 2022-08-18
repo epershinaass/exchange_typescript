@@ -5,9 +5,13 @@ import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { NAME, CLIENT_OPTS } from './constants';
+import { AuthService } from './auth.service';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
+    PassportModule,
     ClientsModule.registerAsync([
       {
         name: CLIENT_OPTS,
@@ -26,5 +30,7 @@ import { NAME, CLIENT_OPTS } from './constants';
     ]),
   ],
   controllers: [AccountController],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
 export class AccountModule {}
