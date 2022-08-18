@@ -5,7 +5,10 @@ import {
   EventPattern,
   GrpcMethod,
 } from '@nestjs/microservices';
-import { KAFKA_CONFIG } from './config/kafka.config';
+import {
+  KAFKA_CONFIG_BALANCE,
+  KAFKA_CONFIG_PRODUCTS,
+} from './config/kafka.config';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { OrderService } from './order.service';
@@ -14,8 +17,11 @@ import { OrderService } from './order.service';
 export class OrderController {
   constructor(private orderService: OrderService) {}
 
-  @Client(KAFKA_CONFIG)
-  private client: ClientKafka;
+  @Client(KAFKA_CONFIG_BALANCE)
+  private clientBalance: ClientKafka;
+
+  @Client(KAFKA_CONFIG_PRODUCTS)
+  private clientProducts: ClientKafka;
 
   @GrpcMethod('OrderController', 'CreateOrder')
   async createOrder(orderRequestDto: OrderRequestDto) {
@@ -29,7 +35,12 @@ export class OrderController {
       orderRequestDto.quantity = orderRequestDto.quantity.toString();
       orderRequestDto.cost = orderRequestDto.cost.toString();
       if (orderRequestDto.orderType === OrderType.BUY) {
-        this.client.emit('order_created', {
+        this.clientBalance.emit('order_created', {
+          orderStatusId: orderStatusId,
+          order: orderRequestDto,
+        });
+      } else {
+        this.clientProducts.emit('order_created', {
           orderStatusId: orderStatusId,
           order: orderRequestDto,
         });
