@@ -26,7 +26,7 @@ create_private_key() {
 
 create_csr(){
     echo "Creating CSR"
-    openssl req -new -key "${TARGET_FOLDER}/key.pem" -out "${TARGET_FOLDER}/request.csr" -subj "/CN={$USER}/O={$GROUP}"
+    openssl req -new -key "${TARGET_FOLDER}/key.pem" -out "${TARGET_FOLDER}/request.csr" -subj "/CN=$USER/O=$GROUP"
     echo "done"
 }
 
