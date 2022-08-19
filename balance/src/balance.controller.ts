@@ -33,9 +33,6 @@ export class BalanceController {
         message,
         ...orderRequestDto,
       });
-      // .subscribe(() => {
-      //   console.log('balance frozen with: ' + JSON.stringify(data));
-      // });
     }
   }
 

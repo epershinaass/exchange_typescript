@@ -40,11 +40,8 @@ export class OrderController {
   @EventPattern('resources_frozen')
   async handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
     if (balanceFrozenDto.isFrozen === true) {
-      console.log('create order ' + balanceFrozenDto.order);
       this.orderService.createOrder(balanceFrozenDto.order);
     }
-    console.log('change status ' + balanceFrozenDto.orderStatusId);
-
     this.orderService.changeOrderStatus(balanceFrozenDto);
   }
 

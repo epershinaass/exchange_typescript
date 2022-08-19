@@ -30,15 +30,6 @@ export class OrderService {
     return doc ? false : true;
   }
 
-  public async isCreatedOrder(orderId: string) {
-    const a = await this.orderModel.findOne({ orderId: orderId });
-    console.log(JSON.stringify(a));
-    if (a) {
-      return true;
-    }
-    return false;
-  }
-
   public createOrder(createOrderRequest: CreateOrderDto) {
     return this.orderModel.create(createOrderRequest);
   }
