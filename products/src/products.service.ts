@@ -47,68 +47,85 @@ export class ProductsService {
     return userProducts;
   }
 
-  public async freezeProduct(orderRequestDto: OrderRequestDto) {
-    const quantityForFreeze = BigInt(orderRequestDto.order.quantity);
-    const frozenProductsId = orderRequestDto.order.productId;
+  public async addFreezeProduct(userId, productId, quantityForFreeze) {
+    return await this.productModel
+      .findOneAndUpdate(
+        {
+          $and: [
+            { userId },
+            {
+              'frozenProducts.productId': productId,
+            },
+          ],
+        },
+        {
+          $inc: {
+            'frozenProducts.$.quantity': Number(quantityForFreeze),
+          },
+        },
+        {
+          new: true,
+        },
+      )
+      .exec();
+  }
 
-    const product = await this.getProducts({
+  public async newFreezeProduct(userId, productId, quantityForFreeze) {
+    return await this.productModel
+      .findOneAndUpdate(
+        { userId },
+        {
+          $push: {
+            frozenProducts: {
+              productId,
+              quantity: quantityForFreeze,
+            },
+          },
+        },
+        {
+          new: true,
+        },
+      )
+      .exec();
+  }
+
+  public async freezeProduct(orderRequestDto: OrderRequestDto) {
+    const userProducts = await this.getProducts({
       userId: orderRequestDto.order.userId,
     });
-    const productToBeFrozen = product.products.find(
-      (products) => products.productId === frozenProductsId,
-    );
 
-    if (productToBeFrozen) {
-      if (productToBeFrozen.quantity >= quantityForFreeze) {
-        if (
-          product.frozenProducts.find(
-            (products) => products.productId === frozenProductsId,
-          )
-        ) {
-          // Находим и обновляем
-          const quantityTotalForFreeze: bigint =
-            BigInt(product.frozenProducts.quantity) + quantityForFreeze;
-          this.productModel
-            .findOneAndUpdate(
-              { userId: orderRequestDto.order.userId },
-              {
-                $inc: { 'frozenProducts.quantity': quantityTotalForFreeze },
-              },
-              {
-                new: true,
-              },
-            )
-            .exec();
+    const productForFreezeQuantity =
+      userProducts.products.find(
+        (products) => products.productId === orderRequestDto.order.productId,
+      )?.quantity || 0;
 
-          return true;
+    const userFrozenProductsQuantity =
+      userProducts.frozenProducts.find(
+        (products) => products.productId === orderRequestDto.order.productId,
+      )?.quantity || 0;
+
+    if (productForFreezeQuantity) {
+      const canWeFreeze =
+        BigInt(productForFreezeQuantity) - BigInt(userFrozenProductsQuantity) >=
+        BigInt(orderRequestDto.order.quantity);
+
+      if (canWeFreeze) {
+        if (userFrozenProductsQuantity > 0) {
+          this.addFreezeProduct(
+            orderRequestDto.order.userId,
+            orderRequestDto.order.productId,
+            orderRequestDto.order.quantity,
+          );
         } else {
-          // Добавляем с нуля
-          // product.frozenProducts.push(
-          //   orderRequestDto.order.productId,
-          //   orderRequestDto.order.quantity,
-          // );
-
-          this.productModel
-            .findOneAndUpdate(
-              { userId: orderRequestDto.order.userId },
-              {
-                $push: {
-                  frozenProducts: {
-                    productId: orderRequestDto.order.productId,
-                    quantity: orderRequestDto.order.quantity,
-                  },
-                },
-              },
-              {
-                new: true,
-              },
-            )
-            .exec();
-          return true;
+          this.newFreezeProduct(
+            orderRequestDto.order.userId,
+            orderRequestDto.order.productId,
+            orderRequestDto.order.quantity,
+          );
         }
+        return true;
       }
       return false;
     }
-    return false;
   }
 }
