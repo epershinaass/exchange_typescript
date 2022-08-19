@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: longhorn-ingress
+  namespace: longhorn-system
+  labels:
+    name: longhorn-ingress
+  annotations:
+    haproxy.com/auth-realm: Authentication Required
+    haproxy.com/auth-type: basic-auth
+    haproxy.com/auth-secret: longhorn-system/haproxy-credentials
+    haproxy.com/path-rewrite: /longhorn/(.*) /\1
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: /longhorn/
+        backend:
+          service:
+            name: longhorn-frontend
+            port:
+              number: 80
