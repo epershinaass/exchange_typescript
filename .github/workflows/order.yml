@@ -22,7 +22,7 @@ jobs:
     outputs:
       docker-tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
     env:
-      IMAGE_REGISTRY: exchangetypescript.jfrog.io
+      IMAGE_REGISTRY: ${{ secrets.REGISTRY }}
       IMAGE_REPOSITORY: order-docker
       DOCKER_IMAGE: order
     steps:
@@ -35,7 +35,7 @@ jobs:
     - name: Login to JFrog 🐸
       uses: docker/login-action@v1
       with:
-        registry: exchangetypescript.jfrog.io
+        registry: ${{ env.IMAGE_REGISTRY }}
         username: ${{ secrets.JFROG_USERNAME_BUILD_USERNAME }}
         password: ${{ secrets.JFROG_USERNAME_BUILD_ACCESS_TOKEN }}
 
@@ -90,7 +90,7 @@ jobs:
         MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
         JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
         JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
-        JFROG_URL: exchangetypescript.jfrog.io
+        JFROG_URL: ${{ secrets.REGISTRY }} # exchangetypescript.jfrog.io
 
         PROJECT_DIR: "exchange_typescript"
         GIT_URL: "https://github.com/epershinaass/exchange_typescript"
