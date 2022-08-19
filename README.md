@@ -33,6 +33,8 @@ docker-compose up -d
 docker-compose --profile profile_name1 --profile profile_name2 up -d
 
 Profiles avail:
+- profile-only: facade
+- profile-dev-only: facade-dev
 - balance: balance + mongo
 - balance-dev: balance-dev + mongo
 - account: account + mongo
@@ -70,7 +72,7 @@ docker-compose build service_name
 - Kafdrop(UI for kafka): 9000
 - Kowl(UI for kafka): 9001
 - Grafana: 3001
-- Mongodb: 27017
+- Mongodb: 28000
 ```
 
 #### URls
