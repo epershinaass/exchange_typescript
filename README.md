@@ -72,7 +72,7 @@ docker-compose build service_name
 - Kafdrop(UI for kafka): 9000
 - Kowl(UI for kafka): 9001
 - Grafana: 3001
-- Mongodb: 2800
+- Mongodb: 28000
 ```
 
 #### URls
