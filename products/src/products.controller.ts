@@ -29,7 +29,6 @@ export class ProductsController {
   @EventPattern('order_created')
   async handleOrderCreated(orderRequestDto: OrderRequestDto) {
     if (orderRequestDto.order.orderType === OrderType.SELL) {
-      console.log('yes it is for sell');
       const isFrozen = await this.productsService.freezeProduct(
         orderRequestDto,
       );
