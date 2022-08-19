@@ -66,9 +66,9 @@ export class ProductsService {
           )
         ) {
           // Находим и обновляем
-          const quantityTotalForFreeze =
-            product.frozenProducts.quantity + quantityForFreeze;
-          product
+          const quantityTotalForFreeze: bigint =
+            BigInt(product.frozenProducts.quantity) + quantityForFreeze;
+          this.productModel
             .findOneAndUpdate(
               { userId: orderRequestDto.order.userId },
               {
@@ -83,10 +83,27 @@ export class ProductsService {
           return true;
         } else {
           // Добавляем с нуля
-          product.frozenProducts.push(
-            orderRequestDto.order.productId,
-            orderRequestDto.order.quantity,
-          );
+          // product.frozenProducts.push(
+          //   orderRequestDto.order.productId,
+          //   orderRequestDto.order.quantity,
+          // );
+
+          this.productModel
+            .findOneAndUpdate(
+              { userId: orderRequestDto.order.userId },
+              {
+                $push: {
+                  frozenProducts: {
+                    productId: orderRequestDto.order.productId,
+                    quantity: orderRequestDto.order.quantity,
+                  },
+                },
+              },
+              {
+                new: true,
+              },
+            )
+            .exec();
           return true;
         }
       }
