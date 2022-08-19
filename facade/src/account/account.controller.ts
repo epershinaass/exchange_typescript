@@ -1,11 +1,13 @@
 import { Body, Controller, Inject, OnModuleInit, UseGuards } from '@nestjs/common';
 import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
+import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import { MyAuthGuard } from './auth.guard';
 import { CLIENT_OPTS, MSERVICE_CONTROLLER } from './constants';
 import { CredentialsDto, AuthTokenDto, MessageDto, AuthResponseDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 import { JwtAuthGuard } from './jwt-auth.guard';
+//import { JwtAuthGuard } from './jwt-auth.guard';
 
 
 @Controller()

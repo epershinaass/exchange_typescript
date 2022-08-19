@@ -8,10 +8,11 @@ import { NAME, CLIENT_OPTS } from './constants';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     ClientsModule.registerAsync([
       {
         name: CLIENT_OPTS,
@@ -31,6 +32,6 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   controllers: [AccountController],
   providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AccountModule {}

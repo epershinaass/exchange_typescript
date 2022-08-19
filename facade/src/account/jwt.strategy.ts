@@ -7,8 +7,8 @@ import { AuthService } from './auth.service';
 
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private authService: AuthService, private configService: ConfigService) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
@@ -20,6 +20,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return { sub:payload.sub, username: payload.username };
     //const token = new AuthTokenDto(bearer[1]);
     //return this.authService.validate(new AuthTokenDto(token));
-    //{ sub:userId, name:username };
+    //{ sub:userId, name:username };;
   }
 }
