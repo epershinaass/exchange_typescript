@@ -39,23 +39,31 @@ export class OrderController {
           orderStatusId: orderStatusId,
           order: orderRequestDto,
         });
-      } else {
+        console.log('is for buy');
+      } else if (orderRequestDto.orderType === OrderType.SELL) {
+        console.log('is for sell');
         this.clientProducts.emit('order_created', {
           orderStatusId: orderStatusId,
           order: orderRequestDto,
         });
       }
-      // else freezeProducts()
     }
     return { status: 0 };
   }
 
   @EventPattern('resources_frozen')
-  handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
-    if (balanceFrozenDto.isFrozen === true) {
-      this.orderService.createOrder(balanceFrozenDto.order);
+  async handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
+    if (
+      !(await this.orderService.isCreatedOrder(balanceFrozenDto.order.orderId))
+    ) {
+      if (balanceFrozenDto.isFrozen === true) {
+        console.log('create order ' + balanceFrozenDto.order);
+        this.orderService.createOrder(balanceFrozenDto.order);
+      }
+      console.log('change status ' + balanceFrozenDto.orderStatusId);
+
+      this.orderService.changeOrderStatus(balanceFrozenDto);
     }
-    this.orderService.changeOrderStatus(balanceFrozenDto);
   }
 
   @GrpcMethod('OrderController', 'GetOrders')
