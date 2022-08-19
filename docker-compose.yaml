@@ -184,6 +184,7 @@ services:
       dockerfile: ./Dockerfile
     profiles:
       - facade
+      - facade-only
       - test
       - full
     volumes:
@@ -201,6 +202,7 @@ services:
       dockerfile: ./Dockerfile-dev
     profiles:
       - facade-dev
+      - facade-dev-only
       - dev
       - full-dev
     volumes:
