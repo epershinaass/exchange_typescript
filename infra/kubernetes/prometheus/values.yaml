@@ -543,14 +543,14 @@ alertmanager:
     ## Storage is the definition of how storage will be used by the Alertmanager instances.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/storage.md
     ##
-    storage:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: longhorn
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 5Gi
+    storage: {}
+      # volumeClaimTemplate:
+      #   spec:
+      #     storageClassName: longhorn
+      #     accessModes: ["ReadWriteOnce"]
+      #     resources:
+      #       requests:
+      #         storage: 5Gi
     #     selector: {}
 
 
@@ -745,7 +745,9 @@ grafana:
 
     ## Annotations for Grafana Ingress
     ##
-    annotations: {}
+    annotations:
+      haproxy.com/rate-limit-requests: "20"
+      haproxy.com/rate-limit-status-code: "429"
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
 
@@ -2143,6 +2145,8 @@ prometheus:
     # ingressClassName: nginx
 
     annotations:
+      haproxy.com/rate-limit-requests: "15"
+      haproxy.com/rate-limit-status-code: "429"
       haproxy.com/auth-realm: Authentication Required
       haproxy.com/auth-type: basic-auth
       haproxy.com/auth-secret: monitoring/haproxy-credentials
@@ -2609,7 +2613,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 5Gi
+              storage: 10Gi
     #    selector: {}
 
     ## Using tmpfs volume
@@ -3247,14 +3251,14 @@ thanosRuler:
     ## Storage is the definition of how storage will be used by the ThanosRuler instances.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/storage.md
     ##
-    storage:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: longhorn
-          accessModes: ["ReadWriteOnce"]
-          resources:
-            requests:
-              storage: 5Gi
+    storage: {}
+      # volumeClaimTemplate:
+      #   spec:
+      #     storageClassName: longhorn
+      #     accessModes: ["ReadWriteOnce"]
+      #     resources:
+      #       requests:
+      #         storage: 5Gi
     #   selector: {}
 
     ## AlertmanagerConfig define configuration for connecting to alertmanager.
