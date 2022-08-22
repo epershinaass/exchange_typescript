@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { Client, ClientKafka } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { KAFKA_CONFIG } from './config/kafka.config';
 import {
   CreateOrderStatusDto,
   OrderStatusEnum,
 } from './dto/create-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { freezeOrderDto } from './dto/freeze-order.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { Deal, DealDocument } from './schemas/deal.schema';
@@ -24,6 +25,9 @@ export class OrderService {
     private orderStatusModel: Model<OrderStatusDocument>,
     @InjectModel(Deal.name) private dealModel: Model<DealDocument>,
   ) {}
+
+  @Client(KAFKA_CONFIG)
+  private client: ClientKafka;
 
   public async isIdempotentOrder(orderRequestDto: OrderRequestDto) {
     const doc = await this.orderStatusModel.findOne({
@@ -72,7 +76,7 @@ export class OrderService {
     this.freezeOrder(orderForSell);
     this.freezeOrder(orderForBuy);
     console.log('create deal');
-    this.dealModel.create({
+    await this.dealModel.create({
       startTime: new Date(),
       balanceTaken: false,
       productTaken: false,
@@ -81,7 +85,10 @@ export class OrderService {
       sellOrder: orderForSell.id,
       buyOrder: orderForBuy.id,
     });
-    // kafka messages
+    this.client.emit('take_balance', '');
+    this.client.emit('take_products', '');
+    this.client.emit('give_products', '');
+    this.client.emit('give_balance', '');
   }
 
   public async findOrdersForDeal(newOrder) {

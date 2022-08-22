@@ -36,6 +36,18 @@ export class BalanceController {
     }
   }
 
+  @EventPattern('take_balance')
+  async handleTakeBalance() {
+    console.log('take balance');
+    this.client.emit('taken_balance', '');
+  }
+
+  @EventPattern('give_balance')
+  async handleGiveBalance() {
+    console.log('give balance');
+    this.client.emit('given_balance', '');
+  }
+
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceDto: RefillBalanceDto, metadata: any) {
     if (!checkForObjectId.test(refillBalanceDto.userId)) {

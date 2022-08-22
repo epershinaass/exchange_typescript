@@ -15,7 +15,7 @@ export class OrderController {
   constructor(private orderService: OrderService) {}
 
   @Client(KAFKA_CONFIG)
-  private clientProducts: ClientKafka;
+  private client: ClientKafka;
 
   @GrpcMethod('OrderController', 'CreateOrder')
   async createOrder(orderRequestDto: OrderRequestDto) {
@@ -29,7 +29,7 @@ export class OrderController {
 
       orderRequestDto.quantity = orderRequestDto.quantity.toString();
       orderRequestDto.cost = orderRequestDto.cost.toString();
-      this.clientProducts.emit('order_created', {
+      this.client.emit('order_created', {
         orderStatusId: orderStatusId,
         order: orderRequestDto,
       });
@@ -42,9 +42,29 @@ export class OrderController {
     if (balanceFrozenDto.isFrozen === true) {
       const order = await this.orderService.createOrder(balanceFrozenDto.order);
       // console.log('order: ' + orderId);
-      this.orderService.findOrdersForDeal(order);
+      await this.orderService.findOrdersForDeal(order);
     }
     this.orderService.changeOrderStatus(balanceFrozenDto);
+  }
+
+  @EventPattern('taken_balance')
+  async handleTakeBalance() {
+    console.log('balance taken');
+  }
+
+  @EventPattern('taken_products')
+  async handleTakeProducts() {
+    console.log('balance taken');
+  }
+
+  @EventPattern('given_products')
+  async handleGiveProducts() {
+    console.log('balance taken');
+  }
+
+  @EventPattern('given_balance')
+  async handleGiveBalance() {
+    console.log('balance taken');
   }
 
   @GrpcMethod('OrderController', 'GetOrders')

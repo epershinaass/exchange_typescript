@@ -41,6 +41,18 @@ export class ProductsController {
     }
   }
 
+  @EventPattern('take_products')
+  async handleTakeProducts() {
+    console.log('take products');
+    this.client.emit('taken_products', '');
+  }
+
+  @EventPattern('give_products')
+  async handleGiveProducts() {
+    console.log('give products');
+    this.client.emit('given_products', '');
+  }
+
   @GrpcMethod('ProductsController', 'AddProduct')
   async addProduct(addProductRequest: IAddProductRequest): Promise<object> {
     if (!checkForObjectId.test(String(addProductRequest.userId))) {
