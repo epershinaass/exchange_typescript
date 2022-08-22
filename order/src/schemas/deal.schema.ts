@@ -1,11 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Date, Document } from 'mongoose';
+import { Document } from 'mongoose';
 
 export type DealDocument = Deal & Document;
 
 @Schema()
 export class Deal {
-
   @Prop()
   startTime: Date;
 
@@ -13,7 +12,7 @@ export class Deal {
   balanceTaken: boolean;
 
   @Prop()
-  productsTaken: boolean;
+  productTaken: boolean;
 
   @Prop()
   productGiven: boolean;
@@ -26,7 +25,6 @@ export class Deal {
 
   @Prop()
   buyOrder: string;
-
 }
 
 export const DealSchema = SchemaFactory.createForClass(Deal);
