@@ -80,7 +80,6 @@ message CreateIdResult {
   string new_id = 1;
 }
 
-// ===AccountController===
 
 service AccountController {
   rpc SignIn (CredentialsRequest) returns (AuthResponse);
@@ -97,7 +96,7 @@ message AuthRequest {
   string token = 1;
 }
 
-//Same as AuthRequest
+// Same as AuthRequest
 message AuthResponse {
   string token = 1;
 }
@@ -106,3 +105,34 @@ message MessageResponse {
   string message = 1;
 }
 
+
+service OrderController {
+  rpc CreateOrder (OrderRequest) returns (OrderResponse);
+  rpc GetOrders (GetOrdersRequest) returns (GetOrdersResponse);
+}
+
+enum OrderType {
+  BUY = 0;
+  SELL = 1;
+}
+
+message OrderRequest {
+  string order_id = 1;
+  string user_id = 2;
+  string product_id = 3;
+  uint64 quantity = 4;
+  uint64 cost = 5;
+  OrderType order_type = 6;
+  bool is_full_size = 7; // сделка должна произойти разом
+}
+
+message OrderResponse {
+  int32 status = 1;
+}
+
+// for test
+message GetOrdersResponse {
+  repeated OrderRequest orders = 1;
+}
+
+message GetOrdersRequest {}
