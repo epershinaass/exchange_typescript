@@ -69,7 +69,7 @@ jobs:
       env:
         KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
       run: |
-        sed -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./balance/src/config/kafka.config.ts
+        sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./balance/src/config/kafka.config.ts
 
     - name: Build and push
       uses: docker/build-push-action@v3
@@ -100,7 +100,7 @@ jobs:
 
         PROJECT_DIR: "exchange_typescript"
         GIT_URL: "https://github.com/epershinaass/exchange_typescript"
-        KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
+        KAFKA_URL: "kafka1:9092,kafka2:9092,kafka3:9092"
 
         BALANCE_DB_URL: "mongo-balance"
         SERVICE_DB_PORT: 27017
