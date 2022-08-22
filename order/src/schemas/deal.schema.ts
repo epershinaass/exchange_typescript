@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Date, Document } from 'mongoose';
 
-export type OrderDocument = CompleteOrder & Document;
+export type DealDocument = Deal & Document;
 
 @Schema()
-export class CompleteOrder {
+export class Deal {
 
   @Prop()
   startTime: Date;
@@ -29,4 +29,4 @@ export class CompleteOrder {
 
 }
 
-export const CompleteOrderSchema = SchemaFactory.createForClass(CompleteOrder);
+export const DealSchema = SchemaFactory.createForClass(Deal);
