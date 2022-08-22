@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Date, Document } from 'mongoose';
+import { Document } from 'mongoose';
 
 export type DealDocument = Deal & Document;
 
@@ -7,13 +7,13 @@ export type DealDocument = Deal & Document;
 export class Deal {
 
   @Prop()
-  startTime: Date;
+  startTime: string;
 
   @Prop()
   balanceTaken: boolean;
 
   @Prop()
-  productsTaken: boolean;
+  productTaken: boolean;
 
   @Prop()
   productGiven: boolean;
