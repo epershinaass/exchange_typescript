@@ -65,6 +65,12 @@ jobs:
         name: dockerfile-artifact
         path: /tmp
 
+    - name: Changee kafka url
+      env:
+        KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
+      run: |
+        sed -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./order/src/config/kafka.config.ts
+
     - name: Build and push
       uses: docker/build-push-action@v3
       id: buildx
@@ -94,7 +100,7 @@ jobs:
 
         PROJECT_DIR: "exchange_typescript"
         GIT_URL: "https://github.com/epershinaass/exchange_typescript"
-        KAFKA_URL: "kafka1:9092,kafka2:9092,kafka3:9092"
+        KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
 
         ORDER_DB_URL: "mongo-order"
         SERVICE_DB_PORT: 27017
@@ -139,7 +145,8 @@ jobs:
               PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
               BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
               ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT
-              ORDER_TAG=$ORDER_TAG" > or.env
+              ORDER_TAG=$ORDER_TAG
+              KAFKA_URL=$KAFKA_URL" > or.env
 
 
               echo "DB_URL=$ORDER_DB_URL
