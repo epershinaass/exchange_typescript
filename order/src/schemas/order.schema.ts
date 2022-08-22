@@ -5,6 +5,10 @@ export type OrderDocument = Order & Document;
 
 @Schema()
 export class Order {
+
+  @Prop({ default: false })
+  isFrozen: boolean;
+
   @Prop({ type: mongoose.Types.ObjectId })
   orderId: string;
 
