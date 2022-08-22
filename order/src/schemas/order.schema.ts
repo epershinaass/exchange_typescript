@@ -7,7 +7,7 @@ export type OrderDocument = Order & Document;
 export class Order {
 
   @Prop({ default: false })
-  isFreeze: boolean;
+  isFrozen: boolean;
 
   @Prop({ type: mongoose.Types.ObjectId })
   orderId: string;
