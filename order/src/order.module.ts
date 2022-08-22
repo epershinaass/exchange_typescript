@@ -1,3 +1,4 @@
+import { Deal, DealSchema } from './schemas/deal.schema';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -17,6 +18,7 @@ import { OrderStatus, OrderStatusSchema } from './schemas/order-status.schema';
     MongooseModule.forFeature([
       { name: Order.name, schema: OrderSchema },
       { name: OrderStatus.name, schema: OrderStatusSchema },
+      { name: Deal.name, schema: DealSchema },
     ]),
   ],
   controllers: [OrderController],
