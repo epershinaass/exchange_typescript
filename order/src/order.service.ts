@@ -6,8 +6,10 @@ import {
   OrderStatusEnum,
 } from './dto/create-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { freezeOrderDto } from './dto/freeze-order.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
+import { Deal, DealDocument } from './schemas/deal.schema';
 import {
   OrderStatus,
   OrderStatusDocument,
@@ -20,6 +22,7 @@ export class OrderService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(OrderStatus.name)
     private orderStatusModel: Model<OrderStatusDocument>,
+    @InjectModel(Deal.name) private dealModel: Model<DealDocument>,
   ) {}
 
   public async isIdempotentOrder(orderRequestDto: OrderRequestDto) {
@@ -57,12 +60,31 @@ export class OrderService {
     );
   }
 
-  public async startDeal(orderForBuy: any, orderForSell: any) {
-    // TODO:
-    console.log('start deal');
+  public async freezeOrder(freezeOrderDto) {
+    console.log(freezeOrderDto);
+    this.orderModel
+      .findByIdAndUpdate(freezeOrderDto.id, { isFrozen: true }, { new: true })
+      .exec();
   }
 
-  public async findOrdersForDeal(newOrder: OrderRequestDto) {
+  public async startDeal(orderForBuy: any, orderForSell: any) {
+    // TODO:
+    this.freezeOrder(orderForSell);
+    this.freezeOrder(orderForBuy);
+    console.log('create deal');
+    this.dealModel.create({
+      startTime: new Date(),
+      balanceTaken: false,
+      productTaken: false,
+      productGiven: false,
+      balanceGiven: false,
+      sellOrder: orderForSell.id,
+      buyOrder: orderForBuy.id,
+    });
+    // kafka messages
+  }
+
+  public async findOrdersForDeal(newOrder) {
     let ordersForDeal = [];
     if (newOrder.orderType === OrderType.BUY) {
       // сделка на покупку разом
@@ -73,12 +95,12 @@ export class OrderService {
           cost: { $lte: newOrder.cost },
           quantity: { $gte: newOrder.quantity },
           userId: { $ne: newOrder.userId },
+          isFrozen: false,
         });
         ordersForDeal.sort((a, b) => a.cost - b.cost);
-        console.log('orders for deal: ' + ordersForDeal);
+        // console.log('orders for deal: ' + ordersForDeal);
         for (const orderForSell of ordersForDeal) {
-          console.log('order for sell: ' + orderForSell);
-          console.log('order for buy: ' + JSON.stringify(newOrder));
+          // console.log('order for sell: ' + orderForSell);
           if (
             (orderForSell.isFullSize &&
               Number(newOrder.quantity) === orderForSell.quantity) ||
@@ -100,6 +122,7 @@ export class OrderService {
           cost: { $gte: newOrder.cost },
           quantity: { $gte: newOrder.quantity },
           userId: { $ne: newOrder.userId },
+          isFrozen: false,
         });
         ordersForDeal.sort((a, b) => a.cost - b.cost);
         for (const orderForBuy of ordersForDeal) {
