@@ -3,7 +3,7 @@ import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
 import { lastValueFrom, Observable } from 'rxjs';
 import { IOrderService } from './interfaces/grpc.interface';
 import { CLIENT_OPTS } from './constatns/constants';
-import { OrderRequestDto, OrderResponseDto } from './dto/order-request.dto';
+import { OrderRequestDto, OrderResponseDto } from './dto/order.dto';
 
 @Controller()
 export class OrderController implements OnModuleInit {
@@ -12,12 +12,14 @@ export class OrderController implements OnModuleInit {
   private orderService: IOrderService;
 
   onModuleInit() {
-    this.orderService = this.client.getService<IOrderService>('OrderController');
+    this.orderService =
+      this.client.getService<IOrderService>('OrderController');
   }
 
   @GrpcMethod()
   async createOrder(@Body() order: OrderRequestDto) {
-    const status: Observable<OrderResponseDto> = this.orderService.createOrder(order);
+    const status: Observable<OrderResponseDto> =
+      this.orderService.createOrder(order);
     return await lastValueFrom(status);
   }
 

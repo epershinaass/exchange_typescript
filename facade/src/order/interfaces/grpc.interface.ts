@@ -1,5 +1,4 @@
 import { Observable } from 'rxjs';
-import { OrderRequestDto } from '../dto/order.dto';
 
 export interface IOrderService {
   createOrder(order: IOrderRequest): Observable<IOrderResponse>;
@@ -28,5 +27,5 @@ export enum OrderStatus {
 }
 
 export interface IOrderResponse {
-  status: OrderStatus
+  status: OrderStatus;
 }

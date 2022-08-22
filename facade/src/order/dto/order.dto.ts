@@ -1,5 +1,9 @@
-import { IOrderRequest, IOrderResponse, OrderStatus, OrderType } from "../interfaces/grpc.interface";
-
+import {
+  IOrderRequest,
+  IOrderResponse,
+  OrderStatus,
+  OrderType,
+} from '../interfaces/grpc.interface';
 
 export class OrderRequestDto implements IOrderRequest {
   orderId: string;
