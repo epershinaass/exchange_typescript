@@ -41,6 +41,7 @@ export class OrderController {
   async handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
     if (balanceFrozenDto.isFrozen === true) {
       this.orderService.createOrder(balanceFrozenDto.order);
+      this.orderService.findOrdersForDeal(balanceFrozenDto.order);
     }
     this.orderService.changeOrderStatus(balanceFrozenDto);
   }
