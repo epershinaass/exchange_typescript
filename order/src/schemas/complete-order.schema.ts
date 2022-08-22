@@ -6,26 +6,26 @@ export type OrderDocument = CompleteOrder & Document;
 @Schema()
 export class CompleteOrder {
 
-  @Prop({ type: mongoose.Types.ObjectId })
-  userBuyerId: string;
-
-  @Prop({ type: mongoose.Types.ObjectId })
-  userSellerId: string;
-
-  @Prop({ type: mongoose.Types.ObjectId })
-  productId: string;
+  @Prop()
+  startTime: Date;
 
   @Prop()
-  quantity: number;
+  balanceTaken: boolean;
 
   @Prop()
-  cost: number;
+  productsTaken: boolean;
 
   @Prop()
-  isFullSize: boolean;
+  productGiven: boolean;
 
   @Prop()
-  date: Date;
+  balanceGiven: boolean;
+
+  @Prop()
+  sellOrder: string;
+
+  @Prop()
+  buyOrder: string;
 
 }
 
