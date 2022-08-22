@@ -1,19 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Date, Document } from 'mongoose';
 
-export type OrderDocument = Order & Document;
+export type OrderDocument = CompleteOrder & Document;
 
 @Schema()
-export class Order {
-
-  @Prop({ default: false })
-  isFreeze: boolean;
+export class CompleteOrder {
 
   @Prop({ type: mongoose.Types.ObjectId })
-  orderId: string;
+  userBuyerId: string;
 
   @Prop({ type: mongoose.Types.ObjectId })
-  userId: string;
+  userSellerId: string;
 
   @Prop({ type: mongoose.Types.ObjectId })
   productId: string;
@@ -25,10 +22,11 @@ export class Order {
   cost: number;
 
   @Prop()
-  orderType: number;
+  isFullSize: boolean;
 
   @Prop()
-  isFullSize: boolean;
+  date: Date;
+
 }
 
-export const OrderSchema = SchemaFactory.createForClass(Order);
+export const CompleteOrderSchema = SchemaFactory.createForClass(CompleteOrder);
