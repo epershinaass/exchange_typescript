@@ -65,6 +65,12 @@ jobs:
         name: dockerfile-artifact
         path: /tmp
 
+    - name: Changee kafka url
+      env:
+        KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
+      run: |
+        sed -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./products/src/config/kafka.config.ts
+
     - name: Build and push
       uses: docker/build-push-action@v3
       id: buildx
@@ -94,6 +100,7 @@ jobs:
 
       PROJECT_DIR: "exchange_typescript"
       GIT_URL: "https://github.com/epershinaass/exchange_typescript"
+      KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
 
       PRODUCTS_DB_URL: "mongo-products"
       SERVICE_DB_PORT: 27017
@@ -112,7 +119,7 @@ jobs:
           host: ${{ secrets.SERVER1 }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,SERVICE_DB_PORT,SERVICE_URL,BALANCE_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME,FACADE_SERVICE_PORT,ACCOUNT_SERVICE_PORT,PRODUCTS_SERVICE_PORT,JFROG_URL,PRODUCTS_TAG,PRODUCTS_DB_URL,PRODUCTS_DB_USER,PRODUCTS_DB_USER,ORDER_SERVICE_PORT
+          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,SERVICE_DB_PORT,SERVICE_URL,BALANCE_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME,FACADE_SERVICE_PORT,ACCOUNT_SERVICE_PORT,PRODUCTS_SERVICE_PORT,JFROG_URL,PRODUCTS_TAG,PRODUCTS_DB_URL,PRODUCTS_DB_USER,PRODUCTS_DB_USER,ORDER_SERVICE_PORT,KAFKA_URL
           script: |
             if [ -d $PROJECT_DIR ]; then
               cd $PROJECT_DIR && git pull
@@ -138,7 +145,8 @@ jobs:
             ACCOUNT_SERVICE_PORT=$ACCOUNT_SERVICE_PORT
             PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
             PRODUCTS_TAG=$PRODUCTS_TAG
-            ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT" > pr.env
+            ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT
+            KAFKA_URL=$KAFKA_URL" > pr.env
 
             echo "DB_URL=$PRODUCTS_DB_URL
             DB_PASSWORD=$MONGO_SERVICE_PASSWORD
