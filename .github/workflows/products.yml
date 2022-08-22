@@ -69,7 +69,7 @@ jobs:
       env:
         KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
       run: |
-        sed -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./products/src/config/kafka.config.ts
+        sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./products/src/config/kafka.config.ts
 
     - name: Build and push
       uses: docker/build-push-action@v3
