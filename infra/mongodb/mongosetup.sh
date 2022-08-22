@@ -174,6 +174,19 @@ EOF
 order () {
 mongosh --host "$SERVICE_DB_URL":27017 -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" <<EOF
 db = db.getSiblingDB('$SERVICE_DB');
+db.${SERVICE_DB}s.insertMany([
+  {
+    _id: ObjectId("63036ea40d5405a603a10799"),
+    "isFrozen": false,
+    "orderId": "630364440d5405a603a10726",
+    "userId": "62ecda02aded95223f606777",
+    "productId": "62f205e225c56cb7b3157811",
+    "quantity": 1,
+    "cost": 765,
+    "orderType": 1,
+    "isFullSize": true,
+  }
+]);
 db.createUser({
   user: '$SERVICE_USER',
   pwd: '$SERVICE_PASSWORD',
