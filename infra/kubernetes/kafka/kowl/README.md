@@ -4,7 +4,7 @@ This repository contains helm charts for all CloudHut products. As of now there'
 
 ## Installing the helm chart
 
-```
+``` shell
 helm repo add cloudhut https://raw.githubusercontent.com/cloudhut/charts/master/archives
 helm repo update
 helm install -f values.yaml kowl cloudhut/kowl
@@ -85,7 +85,8 @@ helm install -f values.yaml kowl cloudhut/kowl
 
 Further documentation can be found in the [examples](./examples).
 
-#### Usage of the tpl Function
+### Usage of the tpl Function
+
 The tpl function allows us to pass string values from values.yaml through the templating engine. It is used for the following values:
 
 * extraEnv
