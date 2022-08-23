@@ -59,7 +59,7 @@ jobs:
         name: dockerfile-artifact
         path: /tmp
 
-    - name: Changee kafka url
+    - name: Change kafka url
       if: ${{ (inputs.service != 'facade') || (inputs.service != 'account') }}
       env:
         KAFKA_URL: "'kafka-cluster-kafka-brokers.kafka:9092'"

@@ -65,7 +65,7 @@ jobs:
         name: dockerfile-artifact
         path: /tmp
 
-    - name: Changee kafka url
+    - name: Change kafka url
       env:
         KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
       run: |
