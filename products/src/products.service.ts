@@ -1,16 +1,12 @@
-import { Product } from './schemas/product.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ProductDocument } from './schemas/product.schema';
-import {
-  IAddProductRequest,
-  IUserId,
-  IUserProductsDocument,
-} from './interfaces/products.interfaces';
+import { MoveResourcesDto } from './dto/move-resources.dto';
+import { OrderRequestDto } from './dto/order-request.dto';
 import { errCode } from './errors/products.error';
+import { IAddProductRequest, IUserId } from './interfaces/products.interfaces';
+import { Product, ProductDocument } from './schemas/product.schema';
 import { Catalog, CatalogDocument } from './schemas/productsCollection.schema';
-import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 
 @Injectable()
 export class ProductsService {
@@ -25,15 +21,25 @@ export class ProductsService {
     const product = await this.productModel.findOne({
       userId: addProductRequest.userId,
     });
+    if (!product) {
+      throw errCode.NOT_FOUND;
+    }
     const catalog = await this.catalogModel.findOne({
       productId: addProductRequest.product.productId,
     });
-    if (!product) {
-      throw errCode.NOT_FOUND;
-    } else if (!catalog) {
+    if (!catalog) {
       throw errCode.NOT_FOUND;
     }
-    product.products.push(addProductRequest.product);
+    const oldProductIdx = product.products.findIndex(
+      (el) => el.productId === addProductRequest.product.productId,
+    );
+    if (oldProductIdx === -1) {
+      product.products.push(addProductRequest.product);
+    } else {
+      product.products[oldProductIdx].quantity += Number(
+        addProductRequest.product.quantity,
+      );
+    }
     return await product.save();
   }
 
