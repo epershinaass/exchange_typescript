@@ -38,9 +38,18 @@ export class BalanceService {
   public async decreaseBalance(
     moveResourcesDto: MoveResourcesDto,
   ): Promise<boolean> {
-    // операция атомарна, перезаписи документа не будет
-    // transaction_id генерируется на фасаде и проверяется в контроллере
-    const cost = -moveResourcesDto.orderForBuy.cost * 1.01;
+    const persentForSell = BigInt(
+      Math.ceil(
+        (Number(moveResourcesDto.orderForSell.cost) / 100) *
+          Number(moveResourcesDto.orderForSell.quantity),
+      ),
+    );
+
+    const cost =
+      BigInt(moveResourcesDto.orderForSell.cost) *
+        BigInt(moveResourcesDto.orderForSell.quantity) +
+      persentForSell;
+
     const percent = BigInt(
       Math.ceil(
         (Number(moveResourcesDto.orderForBuy.cost) / 100) *
@@ -53,19 +62,19 @@ export class BalanceService {
         BigInt(moveResourcesDto.orderForBuy.quantity) +
       percent;
 
-    if (sumForFreeze || percent === undefined || null) {
-      return false;
-    }
+    // console.log(cost);
+    // console.log(sumForFreeze);
 
-    this.balanceModel
+    await this.balanceModel
       .findOneAndUpdate(
         { userId: moveResourcesDto.orderForBuy.userId },
         {
-          $inc: { total: cost, frozen: -sumForFreeze },
+          // TODO: не отнимает frozen
+          $inc: { frozen: -Number(sumForFreeze), total: -Number(cost) },
           $push: {
             transactions: {
               transactionId: moveResourcesDto.orderForBuy.orderId,
-              refillSum: cost,
+              refillSum: -Number(cost),
               transactionTime: new Date(),
             },
           },

@@ -76,7 +76,7 @@ export class OrderService {
     this.freezeOrder(orderForSell);
     this.freezeOrder(orderForBuy);
     console.log('create deal');
-    await this.dealModel.create({
+    const deal = await this.dealModel.create({
       startTime: new Date(),
       balanceTaken: false,
       productTaken: false,
@@ -85,7 +85,11 @@ export class OrderService {
       sellOrder: orderForSell.id,
       buyOrder: orderForBuy.id,
     });
-    this.client.emit('move_recources', { orderForBuy, orderForSell });
+    this.client.emit('move_recources', {
+      dealId: deal.id,
+      orderForBuy,
+      orderForSell,
+    });
   }
 
   public async findOrdersForDeal(newOrder) {

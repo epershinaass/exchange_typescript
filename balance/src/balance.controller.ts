@@ -39,9 +39,17 @@ export class BalanceController {
 
   @EventPattern('move_recources')
   async handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
-    await this.balanceService.decreaseBalance(moveResourcesDto);
-    await this.balanceService.increaseBalance(moveResourcesDto);
-    this.client.emit('balance_moved', '');
+    const balanceTaken = await this.balanceService.decreaseBalance(
+      moveResourcesDto,
+    );
+    const balanceGiven = await this.balanceService.increaseBalance(
+      moveResourcesDto,
+    );
+    this.client.emit('balance_moved', {
+      dealId: moveResourcesDto.dealId,
+      balanceTaken,
+      balanceGiven,
+    });
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')

@@ -8,6 +8,7 @@ import {
 import { KAFKA_CONFIG } from './config/kafka.config';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto } from './dto/order-request.dto';
+import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
 import { OrderService } from './order.service';
 
 @Controller()
@@ -41,20 +42,21 @@ export class OrderController {
   async handleBalanceFrozen(balanceFrozenDto: BalanceFrozenDto) {
     if (balanceFrozenDto.isFrozen === true) {
       const order = await this.orderService.createOrder(balanceFrozenDto.order);
-      // console.log('order: ' + orderId);
       await this.orderService.findOrdersForDeal(order);
     }
     this.orderService.changeOrderStatus(balanceFrozenDto);
   }
 
   @EventPattern('balance_moved')
-  async handleBalanceMoved() {
-    console.log('balance moved' + new Date());
+  async handleBalanceMoved(balanceMoved: BalanceMovedDto) {
+    console.log('balance moved ' + new Date());
+    console.log(balanceMoved);
   }
 
   @EventPattern('products_moved')
-  async handleProductsMoved() {
-    console.log('products moved' + new Date());
+  async handleProductsMoved(produtsMoved: ProductsMovedDto) {
+    console.log('products moved ' + new Date());
+    console.log(produtsMoved);
   }
 
   @GrpcMethod('OrderController', 'GetOrders')

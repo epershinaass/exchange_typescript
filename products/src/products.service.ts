@@ -110,9 +110,11 @@ export class ProductsService {
       order.orderForSell.quantity;
 
     products.save();
+    return true;
   }
 
   public async giveProducts(order: MoveResourcesDto) {
+    // try catch
     this.addProduct({
       userId: order.orderForBuy.userId,
       product: {
@@ -120,6 +122,7 @@ export class ProductsService {
         productId: order.orderForSell.productId,
       },
     });
+    return true;
   }
 
   public async freezeProduct(orderRequestDto: OrderRequestDto) {

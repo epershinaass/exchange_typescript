@@ -43,12 +43,20 @@ export class ProductsController {
   }
 
   @EventPattern('move_recources')
-  handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
-    this.productsService.takeFrozenProducts(moveResourcesDto);
+  async handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
+    const productTaken = await this.productsService.takeFrozenProducts(
+      moveResourcesDto,
+    );
     console.log('products taken ' + new Date());
-    this.productsService.giveProducts(moveResourcesDto);
+    const productGiven = await this.productsService.giveProducts(
+      moveResourcesDto,
+    );
     console.log('products given ' + new Date());
-    this.client.emit('products_moved', '');
+    this.client.emit('products_moved', {
+      dealId: moveResourcesDto.dealId,
+      productTaken,
+      productGiven,
+    });
   }
 
   @GrpcMethod('ProductsController', 'AddProduct')

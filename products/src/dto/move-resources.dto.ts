@@ -1,6 +1,7 @@
 import { OrderType } from './order-request.dto';
 
 export class MoveResourcesDto {
+  dealId: string;
   orderForBuy: {
     isFrozen: boolean;
     orderId: string;
