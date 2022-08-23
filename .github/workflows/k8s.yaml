@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 10
     env:
       IMAGE_REGISTRY: ${{ secrets.REGISTRY }} # epershinaass2.jfrog.io
+      KUBECONFIG: .kube/config
+      KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }} # cat ~/.kube/config | base64 -w 0
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -74,7 +76,7 @@ jobs:
         images: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build and push
+    - name: Build and push facade
       uses: docker/build-push-action@v3
       if: inputs.service == 'facade'
       id: buildx-facade
@@ -101,3 +103,19 @@ jobs:
         cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s,mode=max
         tags: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
         labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Create kubeconfig
+      run: |
+        mkdir -p .kube
+        echo "${{ env.KUBECONFIG_FILE }}" > $KUBECONFIG
+
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1.7.1
+      with:
+        kubectl: 1.24.4
+        kustomize: 4.5.7
+        command: |
+          echo "Run conftest"
+          [[ ${{ inputs.service }} == 'facade' ]] && PORT=3000 || PORT=5000
+          IMAGE_TAG=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }} PORTNAME=${{ inputs.service }}-port NAME=${{ inputs.service }} SECRET_NAME=${{ inputs.service }}-env  kubectl kustomize infra/kubernetes/app
+
