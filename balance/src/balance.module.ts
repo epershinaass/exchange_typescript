@@ -1,3 +1,4 @@
+// import { Deal, DealSchema } from './../../order/src/schemas/deal.schema';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BalanceController } from './balance.controller';
@@ -18,6 +19,10 @@ import { ConfigModule } from '@nestjs/config';
         name: Balance.name,
         schema: BalanceSchema,
       },
+      // {
+      //   name: Deal.name,
+      //   schema: DealSchema,
+      // },
     ]),
   ],
   controllers: [BalanceController],

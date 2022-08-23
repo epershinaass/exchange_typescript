@@ -40,7 +40,8 @@ export class BalanceController {
   @EventPattern('move_recources')
   handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
     console.log(moveResourcesDto.orderForSell);
-    decreaseBalance(moveResourcesDto)
+    this.balanceService.decreaseBalance(moveResourcesDto);
+    this.balanceService.increaseBalance(moveResourcesDto);
     console.log(moveResourcesDto.orderForBuy);
     console.log('balance given ' + new Date());
     this.client.emit('balance_moved', '');
