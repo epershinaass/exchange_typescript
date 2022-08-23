@@ -41,16 +41,11 @@ export class ProductsController {
     }
   }
 
-  @EventPattern('take_products')
-  async handleTakeProducts() {
+  @EventPattern('move_recources')
+  handleTakeProducts() {
     console.log('take products');
-    this.client.emit('taken_products', '');
-  }
-
-  @EventPattern('give_products')
-  async handleGiveProducts() {
     console.log('give products');
-    this.client.emit('given_products', '');
+    this.client.emit('move_products', '');
   }
 
   @GrpcMethod('ProductsController', 'AddProduct')

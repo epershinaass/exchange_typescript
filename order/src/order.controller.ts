@@ -47,24 +47,14 @@ export class OrderController {
     this.orderService.changeOrderStatus(balanceFrozenDto);
   }
 
-  @EventPattern('taken_balance')
+  @EventPattern('move_balance')
   async handleTakeBalance() {
-    console.log('balance taken');
+    console.log('balance moved');
   }
 
-  @EventPattern('taken_products')
+  @EventPattern('move_products')
   async handleTakeProducts() {
-    console.log('balance taken');
-  }
-
-  @EventPattern('given_products')
-  async handleGiveProducts() {
-    console.log('balance taken');
-  }
-
-  @EventPattern('given_balance')
-  async handleGiveBalance() {
-    console.log('balance taken');
+    console.log('products moved');
   }
 
   @GrpcMethod('OrderController', 'GetOrders')

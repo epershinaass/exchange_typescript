@@ -36,16 +36,11 @@ export class BalanceController {
     }
   }
 
-  @EventPattern('take_balance')
-  async handleTakeBalance() {
+  @EventPattern('move_recources')
+  handleTakeProducts() {
     console.log('take balance');
-    this.client.emit('taken_balance', '');
-  }
-
-  @EventPattern('give_balance')
-  async handleGiveBalance() {
     console.log('give balance');
-    this.client.emit('given_balance', '');
+    this.client.emit('move_balance', '');
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')

@@ -85,10 +85,7 @@ export class OrderService {
       sellOrder: orderForSell.id,
       buyOrder: orderForBuy.id,
     });
-    this.client.emit('take_balance', '');
-    this.client.emit('take_products', '');
-    this.client.emit('give_products', '');
-    this.client.emit('give_balance', '');
+    this.client.emit('move_recources', '');
   }
 
   public async findOrdersForDeal(newOrder) {
