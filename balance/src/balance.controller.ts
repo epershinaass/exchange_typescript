@@ -38,12 +38,9 @@ export class BalanceController {
   }
 
   @EventPattern('move_recources')
-  handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
-    console.log(moveResourcesDto.orderForSell);
-    this.balanceService.decreaseBalance(moveResourcesDto);
-    this.balanceService.increaseBalance(moveResourcesDto);
-    console.log(moveResourcesDto.orderForBuy);
-    console.log('balance given ' + new Date());
+  async handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
+    await this.balanceService.decreaseBalance(moveResourcesDto);
+    await this.balanceService.increaseBalance(moveResourcesDto);
     this.client.emit('balance_moved', '');
   }
 
@@ -86,11 +83,3 @@ export class BalanceController {
     }
   }
 }
-function zeroingFrozenBalance(moveResourcesDto: MoveResourcesDto) {
-  throw new Error('Function not implemented.');
-}
-
-function decreaseBalance(moveResourcesDto: MoveResourcesDto) {
-  throw new Error('Function not implemented.');
-}
-

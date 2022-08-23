@@ -6,13 +6,11 @@ import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { MoveResourcesDto } from './dto/move-resources.dto';
 import { errCode } from './errors/balance.error';
 import { Balance, BalanceDocument } from './schemas/balance.schema';
-// import { Deal, DealDocument } from '../../order/src/schemas/deal.schema';
 
 @Injectable()
 export class BalanceService {
   constructor(
     @InjectModel(Balance.name) private balanceModel: Model<BalanceDocument>,
-    // @InjectModel(Deal.name) private dealModel: Model<DealDocument>,
   ) {}
 
   public async refillBalance(
@@ -38,8 +36,8 @@ export class BalanceService {
   }
 
   public async decreaseBalance(
-    moveResourcesDto: MoveResourcesDto
-  ): Promise<Boolean> {
+    moveResourcesDto: MoveResourcesDto,
+  ): Promise<boolean> {
     // операция атомарна, перезаписи документа не будет
     // transaction_id генерируется на фасаде и проверяется в контроллере
     const cost = -moveResourcesDto.orderForBuy.cost * 1.01;
@@ -55,9 +53,9 @@ export class BalanceService {
         BigInt(moveResourcesDto.orderForBuy.quantity) +
       percent;
 
-        if (sumForFreeze || percent === undefined || null) {
-          return false;
-        };
+    if (sumForFreeze || percent === undefined || null) {
+      return false;
+    }
 
     this.balanceModel
       .findOneAndUpdate(
@@ -77,18 +75,20 @@ export class BalanceService {
     return true;
   }
 
-
   public async increaseBalance(
-    moveResourcesDto: MoveResourcesDto
-  ): Promise<Boolean> {
+    moveResourcesDto: MoveResourcesDto,
+  ): Promise<boolean> {
     // операция атомарна, перезаписи документа не будет
     // transaction_id генерируется на фасаде и проверяется в контроллере
-
     this.balanceModel
       .findOneAndUpdate(
         { userId: moveResourcesDto.orderForSell.userId },
         {
-          $inc: { total: moveResourcesDto.orderForBuy.cost * moveResourcesDto.orderForBuy.quantity },
+          $inc: {
+            total:
+              moveResourcesDto.orderForBuy.cost *
+              moveResourcesDto.orderForBuy.quantity,
+          },
           $push: {
             transactions: {
               transactionId: moveResourcesDto.orderForSell.orderId,
