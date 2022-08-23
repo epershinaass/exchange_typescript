@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: products
+  name: deploy-name
   namespace: application
 spec:
   replicas: 1
@@ -12,17 +12,17 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: products
+      app: deploy-name
   template:
     metadata:
       labels:
-        app: products
+        app: deploy-name
     spec:
       securityContext:
         fsGroup: 1000
       containers:
-      - name: products
-        image: epershinaass2.jfrog.io/products-docker/products:pr-154
+      - name: deploy-name
+        image: deploy-name
         resources:
           requests:
             cpu: 20m
@@ -32,7 +32,7 @@ spec:
             cpu: 500m
         ports:
         - containerPort: 5000
-          name: pr-port
+          name: deploy-port
         volumeMounts:
         - name:  config
           mountPath: "/app/.env"
@@ -43,24 +43,5 @@ spec:
       volumes:
       - name:  config
         secret:
-          secretName: products-env
+          secretName: deploy-name-env
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: products
-  namespace: application
-spec:
-  selector:
-    app: products
-  clusterIP: None
-  sessionAffinity: None
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 10800
-  ports:
-  - name: pr-svc-port
-    protocol: TCP
-    port: 5001
-    targetPort: pr-port
-
