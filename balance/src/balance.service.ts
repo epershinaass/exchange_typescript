@@ -58,9 +58,17 @@ export class BalanceService {
   }
 
   public async freezeSum(orderRequestDto: OrderRequestDto): Promise<boolean> {
+    const percent = BigInt(
+      Math.ceil(
+        (Number(orderRequestDto.order.cost) / 100) *
+          Number(orderRequestDto.order.quantity),
+      ),
+    );
+
     const sumForFreeze: bigint =
       BigInt(orderRequestDto.order.cost) *
-      BigInt(orderRequestDto.order.quantity);
+        BigInt(orderRequestDto.order.quantity) +
+      percent;
 
     const balance = await this.getBalance(orderRequestDto.order.userId);
     if (balance.total - balance.frozen >= sumForFreeze) {
