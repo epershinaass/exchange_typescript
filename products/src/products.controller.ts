@@ -16,6 +16,7 @@ import { getGrpcError } from './errors/products.error';
 import { status } from '@grpc/grpc-js';
 import { KAFKA_CONFIG } from './config/kafka.config';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
+import { MoveResourcesDto } from './dto/move-resources.dto';
 
 const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 
@@ -42,10 +43,12 @@ export class ProductsController {
   }
 
   @EventPattern('move_recources')
-  handleTakeProducts() {
-    console.log('take products');
-    console.log('give products');
-    this.client.emit('move_products', '');
+  handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
+    console.log(moveResourcesDto.orderForSell);
+    console.log('products taken ' + new Date());
+    console.log(moveResourcesDto.orderForBuy);
+    console.log('products given ' + new Date());
+    this.client.emit('products_moved', '');
   }
 
   @GrpcMethod('ProductsController', 'AddProduct')

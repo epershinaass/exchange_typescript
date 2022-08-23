@@ -10,6 +10,7 @@ import {
 import { BalanceService } from './balance.service';
 import { KAFKA_CONFIG } from './config/kafka.config';
 import { GetBalanceDto } from './dto/get-balance.dto';
+import { MoveResourcesDto } from './dto/move-resources.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { getGrpcError } from './errors/balance.error';
@@ -37,10 +38,12 @@ export class BalanceController {
   }
 
   @EventPattern('move_recources')
-  handleTakeProducts() {
-    console.log('take balance');
-    console.log('give balance');
-    this.client.emit('move_balance', '');
+  handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
+    console.log(moveResourcesDto.orderForSell);
+    console.log('balance taken ' + new Date());
+    console.log(moveResourcesDto.orderForBuy);
+    console.log('balance given ' + new Date());
+    this.client.emit('balance_moved', '');
   }
 
   @GrpcMethod('BalanceController', 'RefillBalance')
