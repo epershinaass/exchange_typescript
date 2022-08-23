@@ -17,7 +17,7 @@ export class Product {
       },
     ],
   })
-  frozenProducts: Object[];
+  frozenProducts: IProduct[];
 
   @Prop({
     type: [

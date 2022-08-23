@@ -94,35 +94,30 @@ export class ProductsService {
   }
 
   public async takeFrozenProducts(order: MoveResourcesDto) {
-    this.productModel
-      .findOneAndUpdate(
-        {
-          $and: [
-            { userId: order.orderForSell.userId },
-            {
-              'frozenProducts.productId': order.orderForSell.productId,
-            },
-          ],
-        },
-        {
-          $inc: {
-            'frozenProducts.$.quantity': -order.orderForSell,
-            quantity: -order.orderForSell,
-          },
-        },
-        {
-          new: true,
-        },
-      )
-      .exec();
+    const products = await this.productModel.findOne({
+      userId: order.orderForSell.userId,
+    });
+
+    const productIdx = products.products.findIndex(
+      (el) => el.productId === order.orderForSell.productId,
+    );
+    products.products[productIdx].quantity -= order.orderForSell.quantity;
+
+    const productFrozenIdx = products.frozenProducts.findIndex(
+      (el) => el.productId === order.orderForSell.productId,
+    );
+    products.frozenProducts[productFrozenIdx].quantity -=
+      order.orderForSell.quantity;
+
+    products.save();
   }
 
   public async giveProducts(order: MoveResourcesDto) {
     this.addProduct({
       userId: order.orderForBuy.userId,
       product: {
-        quantity: order.orderForSell.quantity,
-        productId: order.orderForSell.orderId,
+        quantity: Number(order.orderForSell.quantity),
+        productId: order.orderForSell.productId,
       },
     });
   }
