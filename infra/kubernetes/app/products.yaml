@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products
+  namespace: application
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: products
+  template:
+    metadata:
+      labels:
+        app: products
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: products
+        image: epershinaass2.jfrog.io/products-docker/products:pr-154
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            memory: 200Mi
+            cpu: 500m
+        ports:
+        - containerPort: 5000
+          name: pr-port
+        volumeMounts:
+        - name:  config
+          mountPath: "/app/.env"
+          subPath: .env
+          readOnly: true
+      imagePullSecrets:
+      - name: jfrogregistrykey
+      volumes:
+      - name:  config
+        secret:
+          secretName: products-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: products
+  namespace: application
+spec:
+  selector:
+    app: products
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: pr-svc-port
+    protocol: TCP
+    port: 5001
+    targetPort: pr-port
+

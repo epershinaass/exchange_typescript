@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  namespace: application
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: order
+        image: epershinaass2.jfrog.io/order-docker/order:pr-154
+        resources:
+          requests:
+            cpu: 20m
+            memory: 50Mi
+          limits:
+            memory: 200Mi
+            cpu: 500m
+        ports:
+        - containerPort: 5000
+          name: or-port
+        volumeMounts:
+        - name:  config
+          mountPath: "/app/.env"
+          subPath: .env
+          readOnly: true
+      imagePullSecrets:
+      - name: jfrogregistrykey
+      volumes:
+      - name:  config
+        secret:
+          secretName: order-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+  namespace: application
+spec:
+  selector:
+    app: order
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: ac-svc-port
+    protocol: TCP
+    port: 5003
+    targetPort: or-port
+
