@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OrderRequestDto } from './dto/order-request.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
+import { DecreaseBalanceDto } from './dto/decrease-balance.dto';
 import { errCode } from './errors/balance.error';
 import { Balance, BalanceDocument } from './schemas/balance.schema';
 
@@ -26,6 +27,28 @@ export class BalanceService {
             transactions: {
               transactionId: refillBalanceDto.transactionId,
               refillSum: refillBalanceDto.refillSum,
+              transactionTime: new Date(),
+            },
+          },
+        },
+      )
+      .exec();
+  }
+
+  public async decreaseBalance(
+    decreaseBalanceDto: DecreaseBalanceDto,
+  ): Promise<IBalance> {
+    // операция атомарна, перезаписи документа не будет
+    // transaction_id генерируется на фасаде и проверяется в контроллере
+    return this.balanceModel
+      .findOneAndUpdate(
+        { userId: decreaseBalanceDto.userId },
+        {
+          $inc: { total: -decreaseBalanceDto.sum },
+          $push: {
+            transactions: {
+              transactionId: decreaseBalanceDto.transactionId,
+              refillSum: decreaseBalanceDto.sum,
               transactionTime: new Date(),
             },
           },
