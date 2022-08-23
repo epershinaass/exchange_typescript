@@ -44,9 +44,9 @@ export class ProductsController {
 
   @EventPattern('move_recources')
   handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
-    console.log(moveResourcesDto.orderForSell);
+    this.productsService.takeFrozenProducts(moveResourcesDto);
     console.log('products taken ' + new Date());
-    console.log(moveResourcesDto.orderForBuy);
+    this.productsService.giveProducts(moveResourcesDto);
     console.log('products given ' + new Date());
     this.client.emit('products_moved', '');
   }
@@ -72,7 +72,7 @@ export class ProductsController {
     if (!checkForObjectId.test(userId.userId)) {
       throw new RpcException(getGrpcError(status.INVALID_ARGUMENT));
     }
-    const userProducts = await this.productsService.getProducts(userId);
+    const userProducts = await this.productsService.getProducts(userId.userId);
     return { products: userProducts.products };
   }
 }

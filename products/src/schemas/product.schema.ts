@@ -6,9 +6,8 @@ export type ProductDocument = Product & Document;
 
 @Schema()
 export class Product {
-
   @Prop({ type: mongoose.Types.ObjectId })
-  userId: string
+  userId: string;
 
   @Prop({
     type: [
@@ -18,7 +17,7 @@ export class Product {
       },
     ],
   })
-  frozenProducts: Object[]
+  frozenProducts: Object[];
 
   @Prop({
     type: [

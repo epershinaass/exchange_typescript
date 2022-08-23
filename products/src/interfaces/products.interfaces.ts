@@ -9,7 +9,7 @@ export interface IUserId {
 }
 
 export interface IAddProductRequest {
-  userId: IUserId;
+  userId: string;
   product: IProduct;
 }
 

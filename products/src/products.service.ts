@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { MoveResourcesDto } from './dto/move-resources.dto';
 import { OrderRequestDto } from './dto/order-request.dto';
 import { errCode } from './errors/products.error';
-import { IAddProductRequest, IUserId } from './interfaces/products.interfaces';
+import { IAddProductRequest } from './interfaces/products.interfaces';
 import { Product, ProductDocument } from './schemas/product.schema';
 import { Catalog, CatalogDocument } from './schemas/productsCollection.schema';
 
@@ -43,10 +43,8 @@ export class ProductsService {
     return await product.save();
   }
 
-  public async getProducts(userId: IUserId): Promise<any> {
-    const userProducts = await this.productModel
-      .findOne({ userId: userId.userId })
-      .exec();
+  public async getProducts(userId: string): Promise<any> {
+    const userProducts = await this.productModel.findOne({ userId }).exec();
     if (!userProducts) {
       throw errCode.NOT_FOUND;
     }
@@ -95,10 +93,42 @@ export class ProductsService {
       .exec();
   }
 
-  public async freezeProduct(orderRequestDto: OrderRequestDto) {
-    const userProducts = await this.getProducts({
-      userId: orderRequestDto.order.userId,
+  public async takeFrozenProducts(order: MoveResourcesDto) {
+    this.productModel
+      .findOneAndUpdate(
+        {
+          $and: [
+            { userId: order.orderForSell.userId },
+            {
+              'frozenProducts.productId': order.orderForSell.productId,
+            },
+          ],
+        },
+        {
+          $inc: {
+            'frozenProducts.$.quantity': -order.orderForSell,
+            quantity: -order.orderForSell,
+          },
+        },
+        {
+          new: true,
+        },
+      )
+      .exec();
+  }
+
+  public async giveProducts(order: MoveResourcesDto) {
+    this.addProduct({
+      userId: order.orderForBuy.userId,
+      product: {
+        quantity: order.orderForSell.quantity,
+        productId: order.orderForSell.orderId,
+      },
     });
+  }
+
+  public async freezeProduct(orderRequestDto: OrderRequestDto) {
+    const userProducts = await this.getProducts(orderRequestDto.order.userId);
 
     const productForFreezeQuantity =
       userProducts.products.find(
