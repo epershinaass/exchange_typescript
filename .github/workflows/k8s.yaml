@@ -52,7 +52,7 @@ jobs:
         path: Dockerfile
         retention-days: 1
 
-    - name: Download artifact from previous workflow
+    - name: Download artifact from previous step
       if: inputs.service != 'facade'
       uses: actions/download-artifact@v3
       with:
@@ -66,3 +66,38 @@ jobs:
       run: |
         sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./${{ inputs.service }}/src/config/kafka.config.ts
         grep -e brokers ./${{ inputs.service }}/src/config/kafka.config.ts
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      if: inputs.service == 'facade'
+      id: buildx-facade
+      with:
+        context: ${{ inputs.service }}
+        file: ./Dockerfile
+        builder: ${{ steps.buildx-facade.outputs.name }}
+        push: true
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s,mode=max
+        tags: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      if: inputs.service != 'facade'
+      id: buildx
+      with:
+        context: ${{ inputs.service }}
+        file: /tmp/Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        push: true
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s,mode=max
+        tags: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
+        labels: ${{ steps.meta.outputs.labels }}
