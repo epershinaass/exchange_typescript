@@ -65,3 +65,4 @@ jobs:
         KAFKA_URL: "'kafka-cluster-kafka-brokers.kafka:9092'"
       run: |
         sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./${{ inputs.service }}/src/config/kafka.config.ts
+        grep -e brokers ./${{ inputs.service }}/src/config/kafka.config.ts
