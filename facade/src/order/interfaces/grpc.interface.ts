@@ -2,7 +2,9 @@ import { Observable } from 'rxjs';
 
 export interface IOrderService {
   createOrder(order: IOrderRequest): Observable<IOrderResponse>;
-  getOrders(): void;
+  getDoneDeals(
+    GetDoneDealsRequest: IGetDoneDealsRequest,
+  ): Observable<IGetDoneDealsResponse>;
 }
 
 export enum OrderType {
@@ -28,4 +30,20 @@ export enum OrderStatus {
 
 export interface IOrderResponse {
   status: OrderStatus;
+}
+
+export interface IGetDoneDealsRequest {
+  userId: string;
+}
+export interface IDoneDeal {
+  date: string;
+  sellerUserId: string;
+  buyerUserId: string;
+  productId: string;
+  quantity: number;
+  cost: number;
+}
+
+export interface IGetDoneDealsResponse {
+  deals: IDoneDeal[];
 }

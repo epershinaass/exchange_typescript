@@ -4,6 +4,10 @@ import { lastValueFrom, Observable } from 'rxjs';
 import { IOrderService } from './interfaces/grpc.interface';
 import { CLIENT_OPTS } from './constatns/constants';
 import { OrderRequestDto, OrderResponseDto } from './dto/order.dto';
+import {
+  GetDoneDealsRequestDto as GetDoneDealsRequestDto,
+  GetDoneDealsResponseDto,
+} from './dto/get-done-deal.dto';
 
 @Controller()
 export class OrderController implements OnModuleInit {
@@ -16,15 +20,24 @@ export class OrderController implements OnModuleInit {
       this.client.getService<IOrderService>('OrderController');
   }
 
-  @GrpcMethod()
+  @GrpcMethod('OrderController', 'CreateOrder')
   async createOrder(@Body() order: OrderRequestDto) {
     const status: Observable<OrderResponseDto> =
       this.orderService.createOrder(order);
     return await lastValueFrom(status);
   }
 
-  @GrpcMethod()
-  async getBalance() {
-    this.orderService.getOrders();
+  @GrpcMethod('OrderController', 'GetDoneDeals')
+  async getDoneDeals(@Body() doneDealsRequest: GetDoneDealsRequestDto) {
+    const deals: Observable<GetDoneDealsResponseDto> =
+      this.orderService.getDoneDeals(doneDealsRequest);
+    return await lastValueFrom(deals);
   }
+
+  // @GrpcMethod()
+  // async getDoneDeals(@Body() order: OrderRequestDto) {
+  //   const status: Observable<OrderResponseDto> =
+  //     this.orderService.createOrder(order);
+  //   return await lastValueFrom(status);
+  // }
 }
