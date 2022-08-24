@@ -124,4 +124,5 @@ jobs:
           NAME=${{ inputs.service }}
           SECRET_NAME=${{ inputs.service }}-env
           echo $IMAGE_TAG $PORTNAME $PORT $NAME $SECRET_NAME
-          kubectl apply -k infra/kubernetes/app
+          cd infra/kubernetes/app
+          kubectl apply -k .
