@@ -110,13 +110,14 @@ jobs:
         echo "${{ env.KUBECONFIG_FILE }}" > $KUBECONFIG
 
     - name: Run Kubernetes tools
+      env:
+        IMAGE_TAG: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
+        PORTNAME: ${{ inputs.service }}-port
+        NAME: ${{ inputs.service }}
+        SECRET_NAME: ${{ inputs.service }}-env
       run: |
         echo "Run conftest"
         kustomize version
-        [[ ${{ inputs.service }} == 'facade' ]] && PORT=3000 || PORT=5000
-        IMAGE_TAG=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
-        PORTNAME=${{ inputs.service }}-port
-        NAME=${{ inputs.service }}
-        SECRET_NAME=${{ inputs.service }}-env
+        [[ ${{ inputs.service }} == 'facade' ]] && export PORT=3000 || export PORT=5000
         kustomize build infra/kubernetes/app
         kubectl apply -k infra/kubernetes/app
