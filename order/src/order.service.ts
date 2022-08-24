@@ -139,10 +139,8 @@ export class OrderService {
     const buyer = await this.orderModel.findById(deal.buyOrder);
 
     const cost = seller.cost;
-
     const quantity =
       buyer.quantity >= seller.quantity ? seller.quantity : buyer.quantity;
-
     const productId = seller.productId;
 
     this.doneDealModel.create({
@@ -153,10 +151,6 @@ export class OrderService {
       quantity,
       cost,
     });
-
-    console.log(deal.sellOrder);
-    console.log(deal.buyOrder);
-    console.log(deal.id);
 
     await this.orderModel.findByIdAndDelete(deal.sellOrder);
     await this.orderModel.findByIdAndDelete(deal.buyOrder);
