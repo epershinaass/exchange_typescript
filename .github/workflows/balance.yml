@@ -22,7 +22,7 @@ jobs:
     outputs:
       docker-tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
     env:
-      IMAGE_REGISTRY: exchangetypescript.jfrog.io
+      IMAGE_REGISTRY: ${{ secrets.REGISTRY }} # exchangetypescript.jfrog.io
       IMAGE_REPOSITORY: balance-docker
       DOCKER_IMAGE: balance
     steps:
@@ -35,7 +35,7 @@ jobs:
     - name: Login to JFrog 🐸
       uses: docker/login-action@v1
       with:
-        registry: exchangetypescript.jfrog.io
+        registry: ${{ env.IMAGE_REGISTRY }}
         username: ${{ secrets.JFROG_USERNAME_BUILD_USERNAME }}
         password: ${{ secrets.JFROG_USERNAME_BUILD_ACCESS_TOKEN }}
 
@@ -65,6 +65,12 @@ jobs:
         name: dockerfile-artifact
         path: /tmp
 
+    - name: Changee kafka url
+      env:
+        KAFKA_URL: "'kafka1:9092','kafka2:9092','kafka3:9092'"
+      run: |
+        sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./balance/src/config/kafka.config.ts
+
     - name: Build and push
       uses: docker/build-push-action@v3
       id: buildx
@@ -90,7 +96,7 @@ jobs:
         MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
         JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
         JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
-        JFROG_URL: exchangetypescript.jfrog.io
+        JFROG_URL: ${{ secrets.REGISTRY }} # exchangetypescript.jfrog.io
 
         PROJECT_DIR: "exchange_typescript"
         GIT_URL: "https://github.com/epershinaass/exchange_typescript"
@@ -139,7 +145,8 @@ jobs:
               PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
               BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
               BALANCE_TAG=$BALANCE_TAG
-              ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT" > bl.env
+              ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT
+              KAFKA_URL=$KAFKA_URL" > bl.env
 
 
               echo "DB_URL=$BALANCE_DB_URL

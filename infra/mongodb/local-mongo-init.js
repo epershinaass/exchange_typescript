@@ -11,22 +11,26 @@ db.balances.insertMany([
         transactions: [
             {
                 transactionId: "ipsum in do",
+                refillSum: 100,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "qwe123",
+                refillSum: 25,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
+                refillSum: 2000,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
 
             },
             {
                 transactionId: "magna ipsum",
+                refillSum: 25,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e1")
             }
@@ -40,24 +44,28 @@ db.balances.insertMany([
         transactions: [
             {
                 transactionId: "ipsum in do",
+                refillSum: 100,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },
             {
                 transactionId: "qwe123",
-                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+                refillSum: 25,
+>                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
+                refillSum: 2000,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },
             {
                 transactionId: "magna ipsum",
+                refillSum: 25,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
             }
@@ -71,24 +79,28 @@ db.balances.insertMany([
         transactions: [
             {
                 transactionId: "ipsum in do",
+                refillSum: 100,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
             },
             {
                 transactionId: "qwe123",
+                refillSum: 25,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
             },
             {
                 transactionId: "tempor ullamco laboris laborum culpa",
+                refillSum: 2000,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
 
             },
             {
                 transactionId: "magna ipsum",
+                refillSum: 25,
                 transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e3")
             }

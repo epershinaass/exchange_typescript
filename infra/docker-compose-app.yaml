@@ -18,7 +18,7 @@ x-pull: &pull
 services:
 
   account:
-    image: exchangetypescript.jfrog.io/account-docker/account:${ACCOUNT_TAG:-latest}
+    image: ${JFROG_URL}/account-docker/account:${ACCOUNT_TAG:-latest}
     hostname: account
     container_name: account
     profiles:
@@ -32,7 +32,7 @@ services:
         target: /app/.env
 
   products:
-    image: exchangetypescript.jfrog.io/products-docker/products:${PRODUCTS_TAG:-latest}
+    image: ${JFROG_URL}/products-docker/products:${PRODUCTS_TAG:-latest}
     hostname: products
     container_name: products
     profiles:
@@ -46,7 +46,7 @@ services:
         target: /app/.env
 
   balance:
-    image: exchangetypescript.jfrog.io/balance-docker/balance:${BALANCE_TAG:-latest}
+    image: ${JFROG_URL}/balance-docker/balance:${BALANCE_TAG:-latest}
     hostname: balance
     container_name: balance
     profiles:
@@ -60,7 +60,7 @@ services:
         target: /app/.env
 
   facade:
-    image: exchangetypescript.jfrog.io/facade-docker/facade:${FACADE_TAG:-latest}
+    image: ${JFROG_URL}/facade-docker/facade:${FACADE_TAG:-latest}
     hostname: facade
     container_name: facade
     profiles:
@@ -74,7 +74,7 @@ services:
     <<: [ *default-svc, *log-driver, *default-lables, *pull]
 
   order:
-    image: exchangetypescript.jfrog.io/order-docker/order:${ORDER_TAG:-latest}
+    image: ${JFROG_URL}/order-docker/order:${ORDER_TAG:-latest}
     hostname: order
     container_name: order
     profiles:
