@@ -6,9 +6,18 @@ export type ProductDocument = Product & Document;
 
 @Schema()
 export class Product {
-
   @Prop({ type: mongoose.Types.ObjectId })
-  userId: string
+  userId: string;
+
+  @Prop({
+    type: [
+      {
+        quantity: { type: Number },
+        productId: { type: String },
+      },
+    ],
+  })
+  frozenProducts: IProduct[];
 
   @Prop({
     type: [

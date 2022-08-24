@@ -9,7 +9,7 @@ export interface IUserId {
 }
 
 export interface IAddProductRequest {
-  userId: IUserId;
+  userId: string;
   product: IProduct;
 }
 
@@ -20,4 +20,5 @@ export interface IGetProductsResponse {
 export interface IUserProductsDocument {
   userId: string;
   products: IProduct[];
+  frozenProducts: IProduct[];
 }

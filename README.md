@@ -39,6 +39,8 @@ Profiles avail:
 - balance-dev: balance-dev + mongo
 - account: account + mongo
 - account-dev: account-dev + mongo
+- order: order + mongo
+- order-dev: order-dev + mongo
 - products: products + mongo
 - products-dev: products-dev + mongo
 - mongo: mongo + balance + products + account
@@ -66,6 +68,7 @@ docker-compose build service_name
 - Balance: 5000
 - Products: 5001
 - Account: 5002
+- Order: 5003
 - Facade: 3000
 - Kafka: 29092
 - Schema registry (kafka): 8081

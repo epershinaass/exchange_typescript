@@ -3,7 +3,6 @@ import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AccountModule } from './account.module';
 
-
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
@@ -19,6 +18,5 @@ async function bootstrap() {
     microserviceOptions,
   );
   await app.listen();
-  console.log('Account service is started');
 }
 bootstrap();

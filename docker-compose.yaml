@@ -11,6 +11,54 @@ x-log: &log-driver
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  order:
+    image: ourrepo/order:${ORDER_VERSION:-0.1.0}
+    hostname: order
+    container_name: order
+    build:
+      context: order
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - order
+      - facade
+      - full
+    ports:
+      - 5003:5003
+    volumes:
+      - ./order/.env:/app/.env
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
+  order-dev:
+    image: ourrepo/order:${ORDER_VERSION:-0.1.0}
+    hostname: order-dev
+    container_name: order-dev
+    build:
+      context: order
+      dockerfile: ../Dockerfile-dev
+    profiles:
+      - mongo-dev
+      - dev
+      - order-dev
+      - facade-dev
+      - full-dev
+    ports:
+      - 5003:5003
+    volumes:
+      - ./order:/app/
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
   products:
     image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
     hostname: products
@@ -180,6 +228,8 @@ services:
     profiles:
       - mongo
       - mongo-dev
+      - order
+      - order-dev
       - facade
       - facade-dev
       - dev
@@ -217,6 +267,7 @@ services:
       retries: 3
     environment:
       KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 10
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT

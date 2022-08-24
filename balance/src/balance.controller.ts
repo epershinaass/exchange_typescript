@@ -1,8 +1,17 @@
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import {
+  Client,
+  ClientKafka,
+  EventPattern,
+  GrpcMethod,
+  RpcException,
+} from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
+import { KAFKA_CONFIG } from './config/kafka.config';
 import { GetBalanceDto } from './dto/get-balance.dto';
+import { MoveResourcesDto } from './dto/move-resources.dto';
+import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { RefillBalanceDto } from './dto/refill-balance.dto';
 import { getGrpcError } from './errors/balance.error';
 
@@ -10,7 +19,38 @@ const checkForObjectId = /^(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i;
 
 @Controller()
 export class BalanceController {
-  constructor(private balanceService: BalanceService) { }
+  constructor(private balanceService: BalanceService) {}
+
+  @Client(KAFKA_CONFIG)
+  private client: ClientKafka;
+
+  @EventPattern('order_created')
+  async handleOrderCreated(orderRequestDto: OrderRequestDto) {
+    if (orderRequestDto.order.orderType === OrderType.BUY) {
+      const isFrozen = await this.balanceService.freezeSum(orderRequestDto);
+      const message = isFrozen ? '' : "Don't have enough free money";
+      this.client.emit('resources_frozen', {
+        isFrozen,
+        message,
+        ...orderRequestDto,
+      });
+    }
+  }
+
+  @EventPattern('move_recources')
+  async handleTakeProducts(moveResourcesDto: MoveResourcesDto) {
+    const balanceTaken = await this.balanceService.decreaseBalance(
+      moveResourcesDto,
+    );
+    const balanceGiven = await this.balanceService.increaseBalance(
+      moveResourcesDto,
+    );
+    this.client.emit('balance_moved', {
+      dealId: moveResourcesDto.dealId,
+      balanceTaken,
+      balanceGiven,
+    });
+  }
 
   @GrpcMethod('BalanceController', 'RefillBalance')
   async refillBalance(refillBalanceDto: RefillBalanceDto, metadata: any) {

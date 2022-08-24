@@ -7,9 +7,12 @@ import { ConfigModule } from '@nestjs/config';
 import { Catalog, CatalogSchema } from './schemas/productsCollection.schema';
 
 const db_path = () => {
-  const user = process.env.DB_USER!=='' ?`${process.env.DB_USER}:${process.env.DB_PASSWORD}@` : '';
-  return `mongodb://${user}${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`
-}
+  const user =
+    process.env.DB_USER !== ''
+      ? `${process.env.DB_USER}:${process.env.DB_PASSWORD}@`
+      : '';
+  return `mongodb://${user}${process.env.DB_URL}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+};
 
 @Module({
   imports: [
@@ -17,7 +20,10 @@ const db_path = () => {
       envFilePath: '.env',
     }),
     MongooseModule.forRoot((console.log(db_path()), db_path())),
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }, { name: Catalog.name, schema: CatalogSchema }]),
+    MongooseModule.forFeature([
+      { name: Product.name, schema: ProductSchema },
+      { name: Catalog.name, schema: CatalogSchema },
+    ]),
   ],
   controllers: [ProductsController],
   providers: [ProductsService],
