@@ -4,12 +4,9 @@ import { AddProductsDto, GetProductDto } from './dto/add-products.dto';
 import { IProductsService } from './interfaces/grpc.interface';
 import { CLIENT_OPTS } from './constants';
 
-
 @Controller()
 export class ProductsController implements OnModuleInit {
-  constructor(
-    @Inject(CLIENT_OPTS) private client: ClientGrpc,
-  ) {}
+  constructor(@Inject(CLIENT_OPTS) private client: ClientGrpc) {}
 
   private productService: IProductsService;
 
