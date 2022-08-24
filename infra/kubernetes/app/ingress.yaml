@@ -6,8 +6,7 @@ metadata:
   labels:
     name: facade-ingress
   annotations:
-    haproxy.com/rate-limit-requests: "15"
-    haproxy.com/rate-limit-status-code: "429"
+    haproxy.org/server-proto: "h2"
 spec:
   rules:
   - http:
