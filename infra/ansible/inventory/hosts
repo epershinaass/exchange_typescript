@@ -5,6 +5,9 @@ server2 ansible_host=91.206.15.220
 server1
 server2
 
+[docker]
+server1
+
 [prod]
 
 [servers:children]
