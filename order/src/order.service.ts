@@ -10,6 +10,7 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
+import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
 import { Deal, DealDocument } from './schemas/deal.schema';
 import {
   OrderStatus,
@@ -90,6 +91,51 @@ export class OrderService {
       orderForBuy,
       orderForSell,
     });
+  }
+
+  public async changeBalanceDealStatus(balanceMoved: BalanceMovedDto) {
+    const deal = await this.dealModel.findByIdAndUpdate(
+      balanceMoved.dealId,
+      {
+        balanceGiven: balanceMoved.balanceGiven,
+        balanceTaken: balanceMoved.balanceTaken,
+      },
+      {
+        new: true,
+      },
+    );
+    this.checkDealIsDone(deal);
+  }
+
+  public async changeProductsDealStatus(productsMoved: ProductsMovedDto) {
+    const deal = await this.dealModel.findByIdAndUpdate(
+      productsMoved.dealId,
+      {
+        productGiven: productsMoved.productGiven,
+        productTaken: productsMoved.productTaken,
+      },
+      {
+        new: true,
+      },
+    );
+    this.checkDealIsDone(deal);
+  }
+
+  public async checkDealIsDone(deal) {
+    if (
+      deal.balanceTaken &&
+      deal.balanceGiven &&
+      deal.productGiven &&
+      deal.productTaken
+    ) {
+      this.finishDeal(deal);
+    }
+  }
+
+  public async finishDeal(deal) {
+    console.log('deal is done! ' + deal);
+    // delete old orders
+    // add new deal to donedeals
   }
 
   public async findOrdersForDeal(newOrder) {

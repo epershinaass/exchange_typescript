@@ -49,14 +49,12 @@ export class OrderController {
 
   @EventPattern('balance_moved')
   async handleBalanceMoved(balanceMoved: BalanceMovedDto) {
-    console.log('balance moved ' + new Date());
-    console.log(balanceMoved);
+    this.orderService.changeBalanceDealStatus(balanceMoved);
   }
 
   @EventPattern('products_moved')
   async handleProductsMoved(produtsMoved: ProductsMovedDto) {
-    console.log('products moved ' + new Date());
-    console.log(produtsMoved);
+    this.orderService.changeProductsDealStatus(produtsMoved);
   }
 
   @GrpcMethod('OrderController', 'GetOrders')
