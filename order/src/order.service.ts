@@ -9,6 +9,7 @@ import {
 } from './dto/create-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { GetDoneDealsRequestDto } from './dto/get-done-deal.dto';
+import { GetOrdersStatusesRequestDto } from './dto/get-orders-statuses.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
@@ -57,6 +58,15 @@ export class OrderService {
       ],
     });
     return { deals };
+  }
+
+  public async getOrdersStatuses(
+    getOrdersStatusesRequest: GetOrdersStatusesRequestDto,
+  ) {
+    const orders = await this.orderStatusModel.find({
+      userId: getOrdersStatusesRequest.userId,
+    });
+    return { orders };
   }
 
   public async createOrderStatus(createOrderStatus: CreateOrderStatusDto) {

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/microservices';
 import { KAFKA_CONFIG } from './config/kafka.config';
 import { GetDoneDealsRequestDto } from './dto/get-done-deal.dto';
+import { GetOrdersStatusesRequestDto } from './dto/get-orders-statuses.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto } from './dto/order-request.dto';
 import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
@@ -61,5 +62,10 @@ export class OrderController {
   @GrpcMethod('OrderController', 'GetDoneDeals')
   async getDoneDeals(orderRequestDto: GetDoneDealsRequestDto) {
     return await this.orderService.getDoneDeals(orderRequestDto);
+  }
+
+  @GrpcMethod('OrderController', 'GetOrdersStatuses')
+  async getOrdersStatuses(getOrdersStatuses: GetOrdersStatusesRequestDto) {
+    return await this.orderService.getOrdersStatuses(getOrdersStatuses);
   }
 }

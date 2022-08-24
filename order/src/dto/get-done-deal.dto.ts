@@ -1,5 +1,5 @@
 export class GetDoneDealsResponseDto {
-  deals: DoneDeal;
+  deals: DoneDeal[];
 }
 
 export class DoneDeal {
