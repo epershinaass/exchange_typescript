@@ -1,18 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 
-export type OrderDocument = Order & Document;
+export type DoneDealDocument = DoneDeal & Document;
 
 @Schema()
-export class Order {
-  @Prop({ default: false })
-  isFrozen: boolean;
+export class DoneDeal {
+  @Prop()
+  date: Date;
 
   @Prop({ type: mongoose.Types.ObjectId })
-  orderId: string;
+  sellerUserId: string;
 
   @Prop({ type: mongoose.Types.ObjectId })
-  userId: string;
+  buyerUserId: string;
 
   @Prop({ type: mongoose.Types.ObjectId })
   productId: string;
@@ -22,12 +22,6 @@ export class Order {
 
   @Prop()
   cost: number;
-
-  @Prop()
-  orderType: number;
-
-  @Prop()
-  isFullSize: boolean;
 }
 
-export const OrderSchema = SchemaFactory.createForClass(Order);
+export const DoneDealSchema = SchemaFactory.createForClass(DoneDeal);

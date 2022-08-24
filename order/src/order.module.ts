@@ -6,6 +6,7 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { Order, OrderSchema } from './schemas/order.schema';
 import { OrderStatus, OrderStatusSchema } from './schemas/order-status.schema';
+import { DoneDeal, DoneDealSchema } from './schemas/done-deal.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OrderStatus, OrderStatusSchema } from './schemas/order-status.schema';
       { name: Order.name, schema: OrderSchema },
       { name: OrderStatus.name, schema: OrderStatusSchema },
       { name: Deal.name, schema: DealSchema },
+      { name: DoneDeal.name, schema: DoneDealSchema },
     ]),
   ],
   controllers: [OrderController],
