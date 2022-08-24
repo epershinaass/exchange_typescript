@@ -62,14 +62,10 @@ export class BalanceService {
         BigInt(moveResourcesDto.orderForBuy.quantity) +
       percent;
 
-    // console.log(cost);
-    // console.log(sumForFreeze);
-
     await this.balanceModel
       .findOneAndUpdate(
         { userId: moveResourcesDto.orderForBuy.userId },
         {
-          // TODO: не отнимает frozen
           $inc: { frozen: -Number(sumForFreeze), total: -Number(cost) },
           $push: {
             transactions: {
@@ -87,8 +83,6 @@ export class BalanceService {
   public async increaseBalance(
     moveResourcesDto: MoveResourcesDto,
   ): Promise<boolean> {
-    // операция атомарна, перезаписи документа не будет
-    // transaction_id генерируется на фасаде и проверяется в контроллере
     this.balanceModel
       .findOneAndUpdate(
         { userId: moveResourcesDto.orderForSell.userId },
