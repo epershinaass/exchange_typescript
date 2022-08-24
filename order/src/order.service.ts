@@ -8,6 +8,7 @@ import {
   OrderStatusEnum,
 } from './dto/create-order-status.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { GetDoneDealsRequestDto } from './dto/get-done-deal.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
@@ -42,6 +43,20 @@ export class OrderService {
 
   public createOrder(createOrderRequest: CreateOrderDto) {
     return this.orderModel.create(createOrderRequest);
+  }
+
+  public async getDoneDeals(getDoneDealsRequest: GetDoneDealsRequestDto) {
+    const deals = await this.doneDealModel.find({
+      $or: [
+        {
+          sellerUserId: getDoneDealsRequest.userId,
+        },
+        {
+          buyerUserId: getDoneDealsRequest.userId,
+        },
+      ],
+    });
+    return { deals };
   }
 
   public async createOrderStatus(createOrderStatus: CreateOrderStatusDto) {

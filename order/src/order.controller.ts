@@ -6,6 +6,7 @@ import {
   GrpcMethod,
 } from '@nestjs/microservices';
 import { KAFKA_CONFIG } from './config/kafka.config';
+import { GetDoneDealsRequestDto } from './dto/get-done-deal.dto';
 import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto } from './dto/order-request.dto';
 import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
@@ -57,8 +58,8 @@ export class OrderController {
     this.orderService.changeProductsDealStatus(produtsMoved);
   }
 
-  @GrpcMethod('OrderController', 'GetOrders')
-  async getOrders() {
-    console.log('getOrders');
+  @GrpcMethod('OrderController', 'GetDoneDeals')
+  async getDoneDeals(orderRequestDto: GetDoneDealsRequestDto) {
+    return await this.orderService.getDoneDeals(orderRequestDto);
   }
 }
