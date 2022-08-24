@@ -23,7 +23,7 @@ on:
         type: string
 
 jobs:
-  build-image:
+  build-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
