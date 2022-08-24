@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: facade-ingress
+  namespace: application
+  labels:
+    name: facade-ingress
+  annotations:
+    haproxy.com/rate-limit-requests: "15"
+    haproxy.com/rate-limit-status-code: "429"
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: facade
+            port:
+              name: fs-svc-port
