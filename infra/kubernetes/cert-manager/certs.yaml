@@ -25,11 +25,35 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: ca-issuer
+  name: intermediate-issuer
   namespace: haproxy-controller
 spec:
   ca:
     secretName: root-secret
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: intermediate-ca
+  namespace: haproxy-controller
+spec:
+  isCA: true
+  commonName: IntermediateCA
+  secretName: intermediate-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: intermediate-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: cert-issuer
+  namespace: haproxy-controller
+spec:
+  ca:
+    secretName: intermediate-secret
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -50,4 +74,4 @@ spec:
     - "91.206.15.220"
   secretName: ha-cert-tls
   issuerRef:
-    name: ca-issuer
+    name: cert-issuer

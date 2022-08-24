@@ -8,6 +8,7 @@ metadata:
   annotations:
     haproxy.com/rate-limit-requests: "15"
     haproxy.com/rate-limit-status-code: "429"
+    haproxy.com/ssl-redirect: "true"
     haproxy.com/auth-realm: Authentication Required
     haproxy.com/auth-type: basic-auth
     haproxy.com/auth-secret: longhorn-system/haproxy-credentials
