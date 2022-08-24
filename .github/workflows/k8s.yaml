@@ -116,13 +116,5 @@ jobs:
         kustomize: 4.5.7
         command: |
           echo "Run conftest"
-          pwd
-          ls
           [[ ${{ inputs.service }} == 'facade' ]] && PORT=3000 || PORT=5000
-          IMAGE_TAG=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
-          PORTNAME=${{ inputs.service }}-port
-          NAME=${{ inputs.service }}
-          SECRET_NAME=${{ inputs.service }}-env
-          echo $IMAGE_TAG $PORTNAME $PORT $NAME $SECRET_NAME
-          cd infra/kubernetes/app
-          kubectl apply -k .
+          IMAGE_TAG=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }} PORTNAME=${{ inputs.service }}-port NAME=${{ inputs.service }} SECRET_NAME=${{ inputs.service }}-env  kubectl apply -k infra/kubernetes/app
