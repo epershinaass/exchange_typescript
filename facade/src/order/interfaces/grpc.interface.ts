@@ -2,6 +2,9 @@ import { Observable } from 'rxjs';
 
 export interface IOrderService {
   createOrder(order: IOrderRequest): Observable<IOrderResponse>;
+  getOrdersStatuses(
+    getOrdersStatusesRequest: IGetOrdersStatusesRequest,
+  ): Observable<IGetOrdersStatusesResponse>;
   getDoneDeals(
     GetDoneDealsRequest: IGetDoneDealsRequest,
   ): Observable<IGetDoneDealsResponse>;
@@ -46,4 +49,25 @@ export interface IDoneDeal {
 
 export interface IGetDoneDealsResponse {
   deals: IDoneDeal[];
+}
+
+export interface IGetOrdersStatusesRequest {
+  userId: string;
+}
+export interface IOrderStatus {
+  id: string;
+  status: string;
+  createdAt: string;
+  message: string;
+  orderId: string;
+  userId: string;
+  productId: string;
+  quantity: number;
+  cost: number;
+  orderType: OrderType;
+  isFullSize: boolean;
+}
+
+export interface IGetOrdersStatusesResponse {
+  orders: IOrderStatus[];
 }

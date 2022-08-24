@@ -8,6 +8,10 @@ import {
   GetDoneDealsRequestDto as GetDoneDealsRequestDto,
   GetDoneDealsResponseDto,
 } from './dto/get-done-deal.dto';
+import {
+  GetOrdersStatusesRequestDto,
+  GetOrdersStatusesResponseDto,
+} from './dto/get-orders-statuses.dto';
 
 @Controller()
 export class OrderController implements OnModuleInit {
@@ -34,10 +38,12 @@ export class OrderController implements OnModuleInit {
     return await lastValueFrom(deals);
   }
 
-  // @GrpcMethod()
-  // async getDoneDeals(@Body() order: OrderRequestDto) {
-  //   const status: Observable<OrderResponseDto> =
-  //     this.orderService.createOrder(order);
-  //   return await lastValueFrom(status);
-  // }
+  @GrpcMethod('OrderController', 'GetOrdersStatuses')
+  async getOrdersStatuses(
+    @Body() getOrdersStatusesRequest: GetOrdersStatusesRequestDto,
+  ) {
+    const orders: Observable<GetOrdersStatusesResponseDto> =
+      this.orderService.getOrdersStatuses(getOrdersStatusesRequest);
+    return await lastValueFrom(orders);
+  }
 }
