@@ -12,6 +12,7 @@ import { BalanceFrozenDto } from './dto/order-frozen.dto';
 import { OrderRequestDto, OrderType } from './dto/order-request.dto';
 import { BalanceMovedDto, ProductsMovedDto } from './dto/resources-moved.dto';
 import { Deal, DealDocument } from './schemas/deal.schema';
+import { DoneDeal, DoneDealDocument } from './schemas/done-deal.schema';
 import {
   OrderStatus,
   OrderStatusDocument,
@@ -25,6 +26,7 @@ export class OrderService {
     @InjectModel(OrderStatus.name)
     private orderStatusModel: Model<OrderStatusDocument>,
     @InjectModel(Deal.name) private dealModel: Model<DealDocument>,
+    @InjectModel(DoneDeal.name) private doneDealModel: Model<DoneDealDocument>,
   ) {}
 
   @Client(KAFKA_CONFIG)
@@ -133,9 +135,32 @@ export class OrderService {
   }
 
   public async finishDeal(deal) {
-    console.log('deal is done! ' + deal);
-    // delete old orders
-    // add new deal to donedeals
+    const seller = await this.orderModel.findById(deal.sellOrder);
+    const buyer = await this.orderModel.findById(deal.buyOrder);
+
+    const cost = seller.cost;
+
+    const quantity =
+      buyer.quantity >= seller.quantity ? seller.quantity : buyer.quantity;
+
+    const productId = seller.productId;
+
+    this.doneDealModel.create({
+      date: new Date(),
+      sellerUserId: seller.userId,
+      buyerUserId: buyer.userId,
+      productId,
+      quantity,
+      cost,
+    });
+
+    console.log(deal.sellOrder);
+    console.log(deal.buyOrder);
+    console.log(deal.id);
+
+    await this.orderModel.findByIdAndDelete(deal.sellOrder);
+    await this.orderModel.findByIdAndDelete(deal.buyOrder);
+    await this.dealModel.findByIdAndDelete(deal.id);
   }
 
   public async findOrdersForDeal(newOrder) {
