@@ -52,7 +52,7 @@ db.balances.insertMany([
             {
                 transactionId: "62e370f465eec4910c2ba211",
                 refillSum: 25,
-                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
+>                transactionTime: ISODate("2022-08-11T08:41:50.397Z"),
                 _id: ObjectId("62e370f465eec4910c2ba2e2")
 
             },

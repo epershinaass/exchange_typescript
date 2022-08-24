@@ -185,7 +185,7 @@ services:
     <<: [*log-driver, *default-lables]
 
   mongodb-balance:
-    image: percona/mongodb_exporter:0.33
+    image: percona/mongodb_exporter:0.30
     hostname: mongodb-exporter-balance
     container_name: mongodb-exporter-balance
     command:
@@ -199,7 +199,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-products:
-    image: percona/mongodb_exporter:0.33
+    image: percona/mongodb_exporter:0.30
     hostname: mongodb-exporter-products
     container_name: mongodb-exporter-products
     command:
@@ -213,7 +213,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-account:
-    image: percona/mongodb_exporter:0.33
+    image: percona/mongodb_exporter:0.30
     hostname: mongodb-exporter-account
     container_name: mongodb-exporter-account
     command:
@@ -227,7 +227,7 @@ services:
     <<: [*default-svc, *log-driver, *default-lables]
 
   mongodb-order:
-    image: percona/mongodb_exporter:0.33
+    image: percona/mongodb_exporter:0.30
     hostname: mongodb-exporter-order
     container_name: mongodb-exporter-order
     command:

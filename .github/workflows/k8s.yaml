@@ -1,0 +1,120 @@
+name: K8s
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Define branch name'
+        required: true
+        default: 'main'
+        type: string
+      service:
+        description: 'Service to build'
+        required: true
+        type: choice
+        options:
+        - facade
+        - balance
+        - account
+        - products
+        - order
+      docker_tag:
+        description: 'Docker tag'
+        required: true
+        type: string
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      IMAGE_REGISTRY: ${{ secrets.REGISTRY }} # epershinaass2.jfrog.io
+      KUBECONFIG: .kube/config
+      KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }} # cat ~/.kube/config | base64 -w 0
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.branch }}
+
+    - name: Set up Docker Buildx 🐋
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to JFrog 🐸
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ secrets.JFROG_USERNAME_BUILD_USERNAME }}
+        password: ${{ secrets.JFROG_USERNAME_BUILD_ACCESS_TOKEN }}
+
+    - name: Upload Dockerfile as artifact
+      if: inputs.service != 'facade'
+      uses: actions/upload-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: Dockerfile
+        retention-days: 1
+
+    - name: Download artifact from previous step
+      if: inputs.service != 'facade'
+      uses: actions/download-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: /tmp
+
+    - name: Change kafka url
+      if: ${{ (inputs.service != 'facade') || (inputs.service != 'account') }}
+      env:
+        KAFKA_URL: "'kafka-cluster-kafka-brokers.kafka:9092'"
+      run: |
+        sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./${{ inputs.service }}/src/config/kafka.config.ts
+        grep -e brokers ./${{ inputs.service }}/src/config/kafka.config.ts
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push facade
+      uses: docker/build-push-action@v3
+      if: inputs.service == 'facade'
+      id: buildx-facade
+      with:
+        context: ${{ inputs.service }}
+        file: ./Dockerfile
+        builder: ${{ steps.buildx-facade.outputs.name }}
+        push: true
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s,mode=max
+        tags: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      if: inputs.service != 'facade'
+      id: buildx
+      with:
+        context: ${{ inputs.service }}
+        file: /tmp/Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        push: true
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:buildcache-k8s,mode=max
+        tags: ${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Create kubeconfig
+      run: |
+        mkdir -p .kube
+        echo "${{ env.KUBECONFIG_FILE }}" > $KUBECONFIG
+
+    - name: Run Kubernetes tools
+      uses: stefanprodan/kube-tools@v1.7.1
+      with:
+        kubectl: 1.24.4
+        kustomize: 4.5.7
+        command: |
+          echo "Run conftest"
+          [[ ${{ inputs.service }} == 'facade' ]] && PORT=3000 || PORT=5000
+          IMAGE_TAG=${{ env.IMAGE_REGISTRY }}/${{ inputs.service }}-docker/${{ inputs.service }}:k8s-${{ inputs.docker_tag }} PORTNAME=${{ inputs.service }}-port NAME=${{ inputs.service }} SECRET_NAME=${{ inputs.service }}-env  kubectl apply -k infra/kubernetes/app
