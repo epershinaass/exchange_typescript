@@ -82,9 +82,16 @@ message CreateIdResult {
 
 
 service AccountController {
-  rpc SignIn (CredentialsRequest) returns (AuthResponse);
+  rpc SignIn (CredentialsRequest) returns (AuthResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   rpc SignUp (CredentialsRequest) returns (MessageResponse);
-  rpc Verify (AuthRequest) returns (MessageResponse);
+  rpc Verify (EmptyRequest) returns (EmptyResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc VerifyMy (EmptyRequest) returns (EmptyResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message CredentialsRequest {
@@ -96,7 +103,7 @@ message AuthRequest {
   string token = 1;
 }
 
-// Same as AuthRequest
+//Same as AuthRequest
 message AuthResponse {
   string token = 1;
 }
@@ -104,6 +111,9 @@ message AuthResponse {
 message MessageResponse {
   string message = 1;
 }
+
+message EmptyRequest {}
+message EmptyResponse {}
 
 
 service OrderController {
@@ -175,4 +185,3 @@ message GetDoneDealsRequest {
 message GetDoneDealsResponse {
   repeated DoneDeal deals = 1;
 }
-

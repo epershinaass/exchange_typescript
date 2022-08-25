@@ -3,9 +3,13 @@ syntax = "proto3";
 package account;
 
 service AccountController {
-  rpc SignIn (CredentialsRequest) returns (AuthResponse);
+  rpc SignIn (CredentialsRequest) returns (AuthResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   rpc SignUp (CredentialsRequest) returns (MessageResponse);
-  rpc Verify (AuthRequest) returns (MessageResponse);
+  rpc Verify (AuthRequest) returns (AuthVerifyResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message CredentialsRequest {
@@ -24,4 +28,9 @@ message AuthResponse {
 
 message MessageResponse {
   string message = 1;
+}
+
+message AuthVerifyResponse {
+  string sub = 1;
+  string username = 2;
 }

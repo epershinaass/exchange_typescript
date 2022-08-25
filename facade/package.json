@@ -25,9 +25,13 @@
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^8.0.0",
+    "@nestjs/jwt": "^9.0.0",
     "@nestjs/microservices": "^9.0.5",
+    "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "grpc": "^1.24.11",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"

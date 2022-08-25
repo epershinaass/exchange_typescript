@@ -18,5 +18,6 @@ async function bootstrap() {
     microserviceOptions,
   );
   await app.listen();
+  console.log('Account service is started');
 }
 bootstrap();

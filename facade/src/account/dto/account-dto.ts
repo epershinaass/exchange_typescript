@@ -1,5 +1,9 @@
-import { IAuthToken, ICredentials, IMessage } from "../interface/account-grpc-interface";
-
+import {
+  IAuthResponse,
+  IAuthToken,
+  ICredentials,
+  IMessage,
+} from '../interface/account-grpc-interface';
 
 export class AuthTokenDto implements IAuthToken {
   constructor(token: string) {
@@ -22,4 +26,13 @@ export class MessageDto implements IMessage {
     this.message = message;
   }
   message: string;
+}
+
+export class AuthResponseDto implements IAuthResponse {
+  constructor(sub: string, username: string) {
+    this.sub = sub;
+    this.username = username;
+  }
+  sub: string;
+  username: string;
 }
