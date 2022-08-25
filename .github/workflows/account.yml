@@ -155,6 +155,8 @@ jobs:
             ACC_DB_PASSWORD=$MONGO_SERVICE_PASSWORD
             ACC_SECRET_KEY=$ACCOUNT_SECRET_KEY
             ACC_PASSW_SALT=$ACCOUNT_SALT
+            ACC_PASSW_ROLLS=10000
+            ACC_TOKEN_EXIRE_IN=3000s
             " > ./account/.env
 
             export $(cat acc.env | egrep -v "(^#.*|^$)" | xargs)
