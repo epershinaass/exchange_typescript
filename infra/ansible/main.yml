@@ -7,7 +7,7 @@
     - role: ansible-role-users
 
 - name: install docker ce
-  hosts: servers
+  hosts: docker
   tags: ["install", "configure", "postinstall", "docker_install", "docker_configure", "docker_postinstall"]
   vars:
     docker_compose_no_pip: true

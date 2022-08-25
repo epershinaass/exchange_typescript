@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: balance
+  namespace: application
+spec:
+  selector:
+    app: balance
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: bl-svc-port
+    protocol: TCP
+    port: 5000
+    targetPort: balance-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account
+  namespace: application
+spec:
+  selector:
+    app: account
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: ac-svc-port
+    protocol: TCP
+    port: 5002
+    targetPort: account-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: facade
+  namespace: application
+spec:
+  selector:
+    app: facade
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: fs-svc-port
+    protocol: TCP
+    port: 3000
+    targetPort: facade-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+  namespace: application
+spec:
+  selector:
+    app: order
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: ac-svc-port
+    protocol: TCP
+    port: 5003
+    targetPort: order-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: products
+  namespace: application
+spec:
+  selector:
+    app: products
+  clusterIP: None
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: pr-svc-port
+    protocol: TCP
+    port: 5001
+    targetPort: products-port
+

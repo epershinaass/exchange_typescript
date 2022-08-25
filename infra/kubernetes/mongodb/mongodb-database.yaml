@@ -1,0 +1,122 @@
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongodb-database
+  namespace: mongodb-operator
+spec:
+  members: 3
+  type: ReplicaSet
+  version: "4.2.6"
+  prometheus:
+    # Metrics endpoint HTTP Basic Auth username
+    username: prometheus-username
+
+    # Metrics endpoint HTTP Basic Auth password
+    passwordSecretRef:
+      name: metrics-endpoint-password
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: admin
+      db: admin
+      passwordSecretRef: # a reference to the secret that will be used to generate the user's password
+        name: admin-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+      scramCredentialsSecretName: admin-scram
+    - name: account
+      db: account
+      passwordSecretRef:
+        name: account-password
+      roles:
+        - name: readWrite
+          db: account
+      scramCredentialsSecretName: account-scram
+    - name: order
+      db: order
+      passwordSecretRef:
+        name: order-password
+      roles:
+        - name: readWrite
+          db: order
+      scramCredentialsSecretName: order-scram
+    - name: balance
+      db: balance
+      passwordSecretRef:
+        name: balance-password
+      roles:
+        - name: readWrite
+          db: balance
+      scramCredentialsSecretName: balance-scram
+    - name: products
+      db: products
+      passwordSecretRef:
+        name: products-password
+      roles:
+        - name: readWrite
+          db: products
+      scramCredentialsSecretName: products-scram
+    - name: devs
+      db: devs
+      passwordSecretRef:
+        name: devs
+      roles:
+        - name: readWrite
+          db: products
+        - name: readWrite
+          db: balance
+        - name: readWrite
+          db: order
+      scramCredentialsSecretName: devs-scram
+  additionalMongodConfig:
+    storage.wiredTiger.engineConfig.journalCompressor: zlib
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+
+  # This needs to match `spec.ServiceMonitorSelector.matchLabels` from your
+  # `prometheuses.monitoring.coreos.com` resouce.
+  labels:
+    name: monogodb-account-prometheus-servicemonitor
+
+  name: mongodb-database
+  namespace: mongodb-operator
+spec:
+  endpoints:
+
+  # Configuring a Prometheus Endpoint with basic Auth.
+  # `prom-secret` is a Secret containing a `username` and `password` entries.
+  - basicAuth:
+      password:
+        key: password
+        name: metrics-endpoint-password
+      username:
+        key: username
+        name: metrics-endpoint-password
+
+    # This port matches what we created in our MongoDB Service.
+    port: prometheus
+
+    # If using HTTPS enabled endpoint, change scheme to https
+    scheme: http
+
+    # Configure different TLS related settings. For more information, see:
+    # https://github.com/prometheus-operator/prometheus-operator/blob/main/pkg/apis/monitoring/v1/types.go#L909
+    # tlsConfig:
+    #    insecureSkipVerify: true
+
+  # What namespace to watch
+  namespaceSelector:
+    matchNames:
+    - mongodb-operator
+
+  # Service labels to match
+  selector:
+    matchLabels:
+      app: mongodb-database-svc

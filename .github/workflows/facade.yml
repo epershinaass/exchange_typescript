@@ -1,0 +1,139 @@
+name: Facade
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+    - "facade/**"
+    branches: ["main"]
+  push:
+    paths:
+    - "facade/**"
+    - "!facade/Dockerfile"
+    branches:
+    - "main"
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      docker-tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+    env:
+      IMAGE_REGISTRY: ${{ secrets.REGISTRY }} # exchangetypescript.jfrog.io
+      IMAGE_REPOSITORY: facade-docker
+      DOCKER_IMAGE: facade
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx 🐋
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to JFrog 🐸
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ secrets.JFROG_USERNAME_BUILD_USERNAME }}
+        password: ${{ secrets.JFROG_USERNAME_BUILD_ACCESS_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        tags: |
+          type=edge
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=sha
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      id: buildx
+      with:
+        context: ./facade
+        file: ./Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        push: true
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache-facade
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache-facade,mode=max
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    needs: build-images
+    env:
+      JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
+      JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
+      JFROG_URL: ${{ secrets.REGISTRY }}
+
+      PROJECT_DIR: "exchange_typescript"
+      GIT_URL: "https://github.com/epershinaass/exchange_typescript"
+
+      SERVICE_URL: "0.0.0.0"
+      FACADE_SERVICE_PORT: 3000
+      BALANCE_URL: "balance"
+      BALANCE_SERVICE_PORT: 5000
+      PRODUCTS_URL: "products"
+      PRODUCTS_SERVICE_PORT: 5001
+      ACCOUNT_URL: "account"
+      ACCOUNT_SERVICE_PORT: 5002
+      ORDER_URL: "order"
+      ORDER_SERVICE_PORT: 5003
+      FACADE_TAG: ${{needs.build-images.outputs.docker-tag}}
+
+    steps:
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,SERVICE_URL,FACADE_SERVICE_PORT,BALANCE_URL,BALANCE_SERVICE_PORT,PRODUCTS_URL,PRODUCTS_SERVICE_PORT,ACCOUNT_SERVICE_PORT,ACCOUNT_URL,JFROG_URL,FACADE_TAG,ORDER_SERVICE_PORT,ORDER_URL
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo $FACADE_TAG
+            echo "JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
+            JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
+            JFROG_URL=$JFROG_URL
+            FACADE_SERVICE_PORT=$FACADE_SERVICE_PORT
+            ACCOUNT_SERVICE_PORT=$ACCOUNT_SERVICE_PORT
+            PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
+            BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
+            COMPOSE_HTTP_TIMEOUT=500
+            FACADE_TAG=$FACADE_TAG
+            ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT" > fs.env
+
+            echo "
+            BALANCE_PORT=$BALANCE_SERVICE_PORT
+            BALANCE_URL=$BALANCE_URL
+            ACCOUNT_URL=$ACCOUNT_URL
+            ACCOUNT_PORT=$ACCOUNT_SERVICE_PORT
+            SERVICE_URL=$SERVICE_URL
+            SERVICE_PORT=$FACADE_SERVICE_PORT
+            PRODUCTS_URL=$PRODUCTS_URL
+            PRODUCTS_PORT=$PRODUCTS_SERVICE_PORT
+            ORDER_PORT=$ORDER_SERVICE_PORT
+            ORDER_URL=$ORDER_URL
+            " > ./facade/.env
+
+            export $(cat fs.env | egrep -v "(^#.*|^$)" | xargs)
+            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
+            docker-compose --profile facade-app -f ./infra/docker-compose-app.yaml --env-file fs.env up -d --force-recreate
+            rm fs.env
+            git restore .
+            docker logout

@@ -23,4 +23,4 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [BalanceController],
   providers: [BalanceService],
 })
-export class BalanceModule { }
+export class BalanceModule {}
