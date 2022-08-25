@@ -57,6 +57,11 @@ replacements:
           - spec.selector.matchLabels.app
           - spec.template.metadata.labels.app
           - spec.template.spec.containers.[name=deploy-name].name
+      - select:
+          kind: HorizontalPodAutoscaler
+        fieldPaths:
+          - metadata.name
+          - spec.scaleTargetRef.name
 
   - source:
       kind: ConfigMap
