@@ -13,7 +13,6 @@ import { AuthTokenDto, CredentialsDto, MessageDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Public } from './public';
-//import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller()
 export class AccountController implements OnModuleInit {
