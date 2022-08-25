@@ -7,6 +7,7 @@ import { CLIENT_OPTS, MSERVICE_CONTROLLER } from './constants';
 import { CredentialsDto, AuthTokenDto, MessageDto, AuthResponseDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { Public } from './public';
 //import { JwtAuthGuard } from './jwt-auth.guard';
 
 
@@ -19,11 +20,13 @@ export class AccountController implements OnModuleInit {
     this.accountService = this.client.getService<IAccountGrpcService>(MSERVICE_CONTROLLER);
   }
 
+  @Public()
   @GrpcMethod()
   async signIn(@Body() creds: CredentialsDto): Promise<AuthTokenDto> {
     return await firstValueFrom(this.accountService.signIn(creds));
   }
 
+  @Public()
   @GrpcMethod()
   async signUp(@Body() creds: CredentialsDto): Promise<MessageDto> {
     return await firstValueFrom(this.accountService.signUp(creds));

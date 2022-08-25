@@ -178,7 +178,7 @@ message DoneDeal {
   uint64 cost = 6;
 }
 
-message GetOrderStatusesRequest {
+message GetDoneDealsRequest {
   string user_id = 1;
 }
 
