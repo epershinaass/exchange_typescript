@@ -71,6 +71,8 @@ spec:
           db: balance
         - name: readWrite
           db: order
+        - name: readWrite
+          db: account
       scramCredentialsSecretName: devs-scram
   additionalMongodConfig:
     storage.wiredTiger.engineConfig.journalCompressor: zlib
