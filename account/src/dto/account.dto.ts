@@ -1,5 +1,9 @@
-import { IAuthResponse, IAuthToken, ICredentials, IMessage } from "../interfaces/account.interface";
-
+import {
+  IAuthResponse,
+  IAuthToken,
+  ICredentials,
+  IMessage,
+} from '../interfaces/account.interface';
 
 export class AuthTokenDto implements IAuthToken {
   constructor(token: string) {

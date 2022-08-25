@@ -1,8 +1,7 @@
 import { status } from '@grpc/grpc-js';
+import { Catch, RpcExceptionFilter } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { Catch, RpcExceptionFilter } from "@nestjs/common";
-import { Observable, of, throwError } from 'rxjs';
-
+import { Observable, throwError } from 'rxjs';
 
 export enum codes {
   UNKNOWN = status.UNKNOWN,
@@ -19,10 +18,9 @@ export enum messages {
   USER_CREATED = 'user created',
 }
 
-
 export class ServiceError extends Error {
   constructor(code: codes) {
-    super()
+    super();
     this.code = code;
   }
   code: codes;

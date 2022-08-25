@@ -3,7 +3,6 @@ import { Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AccountModule } from './account.module';
 
-
 const microserviceOptions = {
   transport: Transport.GRPC,
   options: {
