@@ -62,7 +62,7 @@ jobs:
         path: /tmp
 
     - name: Change kafka url
-      if: ${{ (inputs.service != 'facade') || (inputs.service != 'account') }}
+      if: ${{ (inputs.service != 'facade') && (inputs.service != 'account') }}
       env:
         KAFKA_URL: "'kafka-cluster-kafka-brokers.kafka:9092'"
       run: |
