@@ -1,0 +1,79 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+configMapGenerator:
+  - name: kustomize-configmap
+    namespace: application
+    envs:
+      - kustomize.env
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: kustomize-configmap
+      fieldPath: data.IMAGE_TAG
+    targets:
+      - select:
+          # In each Deployment resource …
+          kind: Deployment
+        fieldPaths:
+          # … match the image of container `` …
+          - spec.template.spec.containers.[name=deploy-name].image
+
+  - source:
+      kind: ConfigMap
+      name: kustomize-configmap
+      fieldPath: data.PORT
+    targets:
+      - select:
+          # In each Deployment resource …
+          kind: Deployment
+        fieldPaths:
+          # … match the image of container `` …
+          - spec.template.spec.containers.[name=deploy-name].ports.[name=deploy-port].containerPort
+
+  - source:
+      kind: ConfigMap
+      name: kustomize-configmap
+      fieldPath: data.PORTNAME
+    targets:
+      - select:
+          # In each Deployment resource …
+          kind: Deployment
+        fieldPaths:
+          # … match the image of container `` …
+          - spec.template.spec.containers.[name=deploy-name].ports.[name=deploy-port].name
+
+  - source:
+      kind: ConfigMap
+      name: kustomize-configmap
+      fieldPath: data.NAME
+    targets:
+      - select:
+          # In each Deployment resource …
+          kind: Deployment
+        fieldPaths:
+          # … match the image of container `` …
+          - metadata.name
+          - spec.selector.matchLabels.app
+          - spec.template.metadata.labels.app
+          - spec.template.spec.containers.[name=deploy-name].name
+      - select:
+          kind: HorizontalPodAutoscaler
+        fieldPaths:
+          - metadata.name
+          - spec.scaleTargetRef.name
+
+  - source:
+      kind: ConfigMap
+      name: kustomize-configmap
+      fieldPath: data.SECRET_NAME
+    targets:
+      - select:
+          # In each Deployment resource …
+          kind: Deployment
+        fieldPaths:
+          # … match the image of container `` …
+          - spec.template.spec.volumes.[name=config].secret.secretName
+
+resources:
+  - deploy.yaml

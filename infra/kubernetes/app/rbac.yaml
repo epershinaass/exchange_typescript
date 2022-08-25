@@ -1,0 +1,65 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: application
+  name: role:app-deploy
+rules:
+- apiGroups:
+  - "apps"
+  resources:
+  - "deployments"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+  - "update"
+  - "patch"
+- apiGroups:
+  - "" # indicates the core API group
+  resources:
+  - "configmaps"
+  - "secrets"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+  - "update"
+  - "patch"
+- apiGroups:
+  - ""
+  resources:
+  - "pods"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+- apiGroups:
+  - "autoscaling"
+  resources:
+  - "horizontalpodautoscalers"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+  - "update"
+  - "patch"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: application
+  name: rolebinding:app-deploy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: role:app-deploy
+subjects:
+- kind: Group
+  name: app-deploy
+  namespace: application

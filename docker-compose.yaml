@@ -11,6 +11,54 @@ x-log: &log-driver
       tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
 
 services:
+  order:
+    image: ourrepo/order:${ORDER_VERSION:-0.1.0}
+    hostname: order
+    container_name: order
+    build:
+      context: order
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - order
+      - facade
+      - full
+    ports:
+      - 5003:5003
+    volumes:
+      - ./order/.env:/app/.env
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
+  order-dev:
+    image: ourrepo/order:${ORDER_VERSION:-0.1.0}
+    hostname: order-dev
+    container_name: order-dev
+    build:
+      context: order
+      dockerfile: ../Dockerfile-dev
+    profiles:
+      - mongo-dev
+      - dev
+      - order-dev
+      - facade-dev
+      - full-dev
+    ports:
+      - 5003:5003
+    volumes:
+      - ./order:/app/
+    # depends_on:
+    #   kafka1:
+    #     condition: service_healthy
+    #   schema-registry:
+    #     condition: service_healthy
+    <<: [*default-svc, *log-driver]
+
   products:
     image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
     hostname: products
@@ -30,6 +78,7 @@ services:
       - ./products/.env:/app/.env
     <<: [*default-svc, *log-driver]
 
+
   products-dev:
     image: ourrepo/products:${PRODUCTS_VERSION:-0.1.0}
     hostname: products-dev
@@ -47,6 +96,45 @@ services:
       - 5001:5001
     volumes:
       - ./products:/app/
+    <<: [*default-svc, *log-driver]
+
+  account:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account
+    container_name: account
+    build:
+      context: account
+      dockerfile: ../Dockerfile
+    profiles:
+      - mongo
+      - test
+      - account
+      - facade
+      - full
+    ports:
+      - 5002:5002
+    volumes:
+      - ./account/.env:/app/.env
+    <<: [*default-svc, *log-driver]
+
+  account-dev:
+    image: ourrepo/account:${ACCOUNT_VERSION:-0.1.0}
+    hostname: account-dev
+    container_name: account-dev
+    build:
+      context: account
+      dockerfile: ../Dockerfile-dev
+    profiles:
+
+      - account-dev
+      - facade-dev
+      - dev
+      - mongo-dev
+      - full-dev
+    ports:
+      - 5002:5002
+    volumes:
+      - ./account/:/app/
     <<: [*default-svc, *log-driver]
 
   balance:
@@ -96,6 +184,7 @@ services:
       dockerfile: ./Dockerfile
     profiles:
       - facade
+      - facade-only
       - test
       - full
     volumes:
@@ -113,6 +202,7 @@ services:
       dockerfile: ./Dockerfile-dev
     profiles:
       - facade-dev
+      - facade-dev-only
       - dev
       - full-dev
     volumes:
@@ -138,6 +228,8 @@ services:
     profiles:
       - mongo
       - mongo-dev
+      - order
+      - order-dev
       - facade
       - facade-dev
       - dev
@@ -146,10 +238,11 @@ services:
       - balance
       - products
       - products-dev
+      - account
       - full
       - full-dev
     ports:
-      - 27017:27017
+      - 28000:27017
     healthcheck:
       test: echo "db.stats().ok" | mongo mongo:27017/test --quiet # mongo --eval 'db.getCollectionnames()'
       interval: 10s
@@ -174,6 +267,7 @@ services:
       retries: 3
     environment:
       KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 10
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,CONNECTIONS_FROM_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
@@ -194,7 +288,7 @@ services:
       KAFKA_HEAP_OPTS: -Xmx800M -Xms256M
       KAFKA_RETENTION_BYTES: 10000000 # 10Mb
       KAFKA_LOG_RETENTION_HOURS: 5
-      KAFKA_COMPRESSION_TYPE: zstd
+      KAFKA_COMPRESSION_TYPE: gzip
     <<: [*default-svc, *log-driver]
     volumes:
       - kafka1-data:/var/lib/kafka/data

@@ -38,34 +38,141 @@ message GetBalanceRequest {
 
 service ProductsController {
   rpc AddProduct (AddProductRequest) returns (AddProductResponse);
-  rpc GetProducts (GetProductRequest) returns (GetProductResponse);
+  rpc GetProducts (GetProductsRequest) returns (GetProductsResponse);
 }
 
-message Product {
-  string name = 1;
+message Products {
+  string productId = 1;
   uint64 quantity = 2;
 }
 
 message AddProductRequest {
   string user_id = 1;
-  Product product = 2;
+  Products product = 2;
 }
 
-message GetProductResponse {
-  repeated Products product = 1;
+message GetProductsResponse {
+  repeated Product products = 1;
 }
 
-message Products {
+message Product {
   string id = 1;
-  string name = 2;
+  string productId = 2;
   uint64 quantity = 3;
 }
 
 message AddProductResponse {
-  string response = 1;
+  int32 status = 1;
 }
 
-message GetProductRequest {
+message GetProductsRequest {
   string user_id = 1;
+}
+
+service CreateIdController {
+  rpc CreateId (CreateId) returns (CreateIdResult);
+}
+
+message CreateId{
+
+}
+message CreateIdResult {
+  string new_id = 1;
+}
+
+
+service AccountController {
+  rpc SignIn (CredentialsRequest) returns (AuthResponse);
+  rpc SignUp (CredentialsRequest) returns (MessageResponse);
+  rpc Verify (AuthRequest) returns (MessageResponse);
+}
+
+message CredentialsRequest {
+  string login = 1;
+  string password = 2;
+}
+
+message AuthRequest {
+  string token = 1;
+}
+
+// Same as AuthRequest
+message AuthResponse {
+  string token = 1;
+}
+
+message MessageResponse {
+  string message = 1;
+}
+
+
+service OrderController {
+  rpc CreateOrder (OrderRequest) returns (OrderResponse);
+  rpc GetOrdersStatuses (GetOrderStatusesRequest) returns (GetOrderStatusesResponse);
+  rpc GetDoneDeals (GetDoneDealsRequest) returns (GetDoneDealsResponse);
+}
+
+enum OrderType {
+  BUY = 0;
+  SELL = 1;
+}
+
+message OrderRequest {
+  string order_id = 1;
+  string user_id = 2;
+  string product_id = 3;
+  uint64 quantity = 4;
+  uint64 cost = 5;
+  OrderType order_type = 6;
+  bool is_full_size = 7; // сделка должна произойти разом
+}
+
+message OrderResponse {
+  int32 status = 1;
+}
+
+enum OrderStatusEnum {
+  PROCESSING = 0;
+  DONE = 1;
+  CANCELED = 2;
+}
+
+message GetOrderStatusesResponse {
+  repeated OrderStatus orders = 1;
+}
+
+message OrderStatus {
+  string id = 1;
+  OrderStatusEnum status =  2;
+  string created_at = 3;
+  string message = 4;
+  string order_id = 5;
+  string user_id = 6;
+  string product_id = 7;
+  uint64 quantity = 8;
+  uint64 cost = 9;
+  OrderType order_type = 10;
+  bool is_full_size = 11;
+}
+
+message GetOrderStatusesRequest {
+  string user_id = 1;
+}
+
+message DoneDeal {
+  string date = 1;
+  string seller_user_id = 2;
+  string buyer_user_id = 3;
+  string product_id = 4;
+  uint64 quantity = 5;
+  uint64 cost = 6;
+}
+
+message GetDoneDealsRequest {
+  string user_id = 1;
+}
+
+message GetDoneDealsResponse {
+  repeated DoneDeal deals = 1;
 }
 

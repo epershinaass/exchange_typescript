@@ -33,14 +33,20 @@ docker-compose up -d
 docker-compose --profile profile_name1 --profile profile_name2 up -d
 
 Profiles avail:
+- profile-only: facade
+- profile-dev-only: facade-dev
 - balance: balance + mongo
 - balance-dev: balance-dev + mongo
+- account: account + mongo
+- account-dev: account-dev + mongo
+- order: order + mongo
+- order-dev: order-dev + mongo
 - products: products + mongo
 - products-dev: products-dev + mongo
-- mongo: mongo + balance + products
-- mongo-dev: mongo + balance-dev + products-dev
-- facade: facade + balance + products + mongo
-- facade-dev: facade-dev + balance-dev + products-dev + mongo
+- mongo: mongo + balance + products + account
+- mongo-dev: mongo + balance-dev + products-dev + account-dev
+- facade: facade + balance + products + mongo + account
+- facade-dev: facade-dev + balance-dev + products-dev + mongo + account-dev
 - test: facade + balance +  products + mongo + loki + promtail + grafana
 - dev: facade-dev + balance-dev +  products-dev + mongo + loki + promtail + grafana
 - kafka: kafka + schema-registry + kowl
@@ -61,13 +67,15 @@ docker-compose build service_name
 ```md
 - Balance: 5000
 - Products: 5001
+- Account: 5002
+- Order: 5003
 - Facade: 3000
 - Kafka: 29092
 - Schema registry (kafka): 8081
 - Kafdrop(UI for kafka): 9000
 - Kowl(UI for kafka): 9001
 - Grafana: 3001
-- Mongodb: 27017
+- Mongodb: 28000
 ```
 
 #### URls

@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: facade-ingress
+  namespace: application
+  labels:
+    name: facade-ingress
+  annotations:
+    haproxy.org/server-proto: "h2"
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: facade
+            port:
+              name: fs-svc-port

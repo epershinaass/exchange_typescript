@@ -77,11 +77,20 @@ scrape_configs:
     static_configs:
     - targets: ['mongodb-products:9216']
 
+  - job_name: 'mongodb-account'
+    static_configs:
+    - targets: ['mongodb-account:9216']
+
+  - job_name: 'mongodb-order'
+    static_configs:
+    - targets: ['mongodb-order:9216']
+
   - job_name: 'minio-s3'
     metrics_path: /minio/v2/metrics/cluster
     scheme: http
     static_configs:
       - targets: ['minio:9000']
+ 
 alerting:
   alertmanagers:
   - scheme: http

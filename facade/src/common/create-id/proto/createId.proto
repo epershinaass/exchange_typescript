@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+service CreateIdController {
+  rpc CreateId (CreateId) returns (CreateIdResult);
+}
+
+message CreateId{}
+message CreateIdResult {
+  string newId = 1;
+}

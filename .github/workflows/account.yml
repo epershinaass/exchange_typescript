@@ -1,0 +1,173 @@
+name: Account
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+    - "account/**"
+    branches: ["main"]
+  push:
+    paths:
+    - "account/**"
+    branches:
+    - "main"
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      docker-tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+    env:
+      IMAGE_REGISTRY: ${{ secrets.REGISTRY }} # exchangetypescript.jfrog.io
+      IMAGE_REPOSITORY: account-docker
+      DOCKER_IMAGE: account
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx 🐋
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to JFrog 🐸
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ env.IMAGE_REGISTRY }}
+        username: ${{ secrets.JFROG_USERNAME_BUILD_USERNAME }}
+        password: ${{ secrets.JFROG_USERNAME_BUILD_ACCESS_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        tags: |
+          type=edge
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=sha
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Upload Dockerfile as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: Dockerfile
+        retention-days: 1
+
+    - name: Download artifact from previous workflow
+      uses: actions/download-artifact@v3
+      with:
+        name: dockerfile-artifact
+        path: /tmp
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      id: buildx
+      with:
+        context: ./account
+        file: /tmp/Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        push: true
+        cache-from: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache
+        cache-to: type=registry,ref=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}/${{ env.DOCKER_IMAGE }}:buildcache,mode=max
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    needs: build-images
+    env:
+      MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+      MONGO_INITDB_ROOT_USERNAME: "admin"
+      MONGO_MONGODB_EXPORTER_PASSWORD: ${{ secrets.MONGO_MONGODB_EXPORTER_PASSWORD }}
+      MONGO_SERVICE_PASSWORD: ${{ secrets.MONGO_SERVICE_PASSWORD }}
+      ACCOUNT_SECRET_KEY: ${{ secrets.ACCOUNT_SECRET_KEY }}
+      ACCOUNT_SALT: ${{ secrets.ACCOUNT_SALT }}
+      FIRST_USER_PASSWORD: ${{ secrets.FIRST_USER_PASSWORD }}
+      JFROG_USERNAME_DEPLOY_ACCESS_TOKEN: ${{ secrets.JFROG_USERNAME_DEPLOY_ACCESS_TOKEN }}
+      JFROG_USERNAME_DEPLOY_USERNAME: ${{ secrets.JFROG_USERNAME_DEPLOY_USERNAME }}
+      JFROG_URL: ${{ secrets.REGISTRY }} # exchangetypescript.jfrog.io
+
+      PROJECT_DIR: "exchange_typescript"
+      GIT_URL: "https://github.com/epershinaass/exchange_typescript"
+
+      ACCOUNT_DB_URL: "mongo-account"
+      SERVICE_DB_PORT: 27017
+      ACCOUNT_DB_USER: "account"
+      SERVICE_URL: "0.0.0.0"
+      ACCOUNT_SERVICE_PORT: 5002
+      BALANCE_SERVICE_PORT: 5000
+      PRODUCTS_SERVICE_PORT: 5001
+      FACADE_SERVICE_PORT: 3000
+      ORDER_SERVICE_PORT: 5003
+      ACCOUNT_TAG: ${{needs.build-images.outputs.docker-tag}}
+
+    steps:
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER1 }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: MONGO_INITDB_ROOT_PASSWORD,MONGO_MONGODB_EXPORTER_PASSWORD,MONGO_SERVICE_PASSWORD,PROJECT_DIR,GIT_URL,JFROG_USERNAME_DEPLOY_ACCESS_TOKEN,JFROG_USERNAME_DEPLOY_USERNAME,ACCOUNT_DB_URL,SERVICE_DB_PORT,ACCOUNT_DB_USER,SERVICE_URL,ACCOUNT_SERVICE_PORT,MONGO_INITDB_ROOT_USERNAME,ACCOUNT_SECRET_KEY,ACCOUNT_SALT,FIRST_USER_PASSWORD,BALANCE_SERVICE_PORT,FACADE_SERVICE_PORT,PRODUCTS_SERVICE_PORT,JFROG_URL,ACCOUNT_TAG,ORDER_SERVICE_PORT
+          script: |
+            if [ -d $PROJECT_DIR ]; then
+              cd $PROJECT_DIR && git pull
+            else
+              git clone $GIT_URL && cd $PROJECT_DIR
+            fi
+
+            echo $ACCOUNT_TAG
+            echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
+            MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
+            MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
+            MONGO_MONGODB_EXPORTER_PASSWORD=$MONGO_MONGODB_EXPORTER_PASSWORD
+            SERVICE_PASSWORD=$MONGO_SERVICE_PASSWORD
+            JFROG_USERNAME_DEPLOY_ACCESS_TOKEN=$JFROG_USERNAME_DEPLOY_ACCESS_TOKEN
+            JFROG_USERNAME_DEPLOY_USERNAME=$JFROG_USERNAME_DEPLOY_USERNAME
+            JFROG_URL=$JFROG_URL
+            FIRST_USER_PASSWORD=$FIRST_USER_PASSWORD
+            COMPOSE_HTTP_TIMEOUT=500
+            SERVICE_DB_URL=$ACCOUNT_DB_URL
+            SERVICE_USER=$ACCOUNT_DB_USER
+            SERVICE_DB=$ACCOUNT_DB_USER
+            PRODUCTS_SERVICE_PORT=$PRODUCTS_SERVICE_PORT
+            FACADE_SERVICE_PORT=$FACADE_SERVICE_PORT
+            BALANCE_SERVICE_PORT=$BALANCE_SERVICE_PORT
+            ACCOUNT_SERVICE_PORT=$ACCOUNT_SERVICE_PORT
+            ACCOUNT_TAG=$ACCOUNT_TAG
+            ORDER_SERVICE_PORT=$ORDER_SERVICE_PORT" > acc.env
+
+
+            echo "ACC_URL=$SERVICE_URL
+            ACC_PORT=$ACCOUNT_SERVICE_PORT
+            ACC_DB_URL=$ACCOUNT_DB_URL
+            ACC_DB_PORT=$SERVICE_DB_PORT
+            ACC_DB_NAME=$ACCOUNT_DB_USER
+            ACC_DB_USER=$ACCOUNT_DB_USER
+            ACC_DB_PASSWORD=$MONGO_SERVICE_PASSWORD
+            ACC_SECRET_KEY=$ACCOUNT_SECRET_KEY
+            ACC_PASSW_SALT=$ACCOUNT_SALT
+            " > ./account/.env
+
+            export $(cat acc.env | egrep -v "(^#.*|^$)" | xargs)
+            docker login -u $JFROG_USERNAME_DEPLOY_USERNAME -p $JFROG_USERNAME_DEPLOY_ACCESS_TOKEN $JFROG_URL
+            docker ps -a --format "{{.Names}}" | grep $ACCOUNT_DB_URL
+            status=$?
+            if [ $status != 0 ]; then
+              echo "mongo not running"
+              envsubst<infra/mongodb/mongosetup.sh>temp && cat temp > infra/mongodb/mongosetup.sh
+              docker-compose --profile account -f ./infra/docker-compose-app.yaml --env-file acc.env up -d
+              rm temp
+            fi
+            docker-compose --profile account-app -f ./infra/docker-compose-app.yaml --env-file acc.env up -d --force-recreate
+            rm acc.env
+            git restore .
+            docker logout
