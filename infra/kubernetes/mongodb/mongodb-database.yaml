@@ -60,6 +60,18 @@ spec:
         - name: readWrite
           db: products
       scramCredentialsSecretName: products-scram
+    - name: devs
+      db: devs
+      passwordSecretRef:
+        name: devs
+      roles:
+        - name: readWrite
+          db: products
+        - name: readWrite
+          db: balance
+        - name: readWrite
+          db: order
+      scramCredentialsSecretName: devs-scram
   additionalMongodConfig:
     storage.wiredTiger.engineConfig.journalCompressor: zlib
 ---
