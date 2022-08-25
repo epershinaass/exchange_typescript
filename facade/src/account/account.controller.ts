@@ -1,15 +1,19 @@
-import { Body, Controller, Inject, OnModuleInit, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  OnModuleInit,
+  UseGuards,
+} from '@nestjs/common';
 import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
-import { AuthGuard } from '@nestjs/passport';
 import { firstValueFrom } from 'rxjs';
 import { MyAuthGuard } from './auth.guard';
 import { CLIENT_OPTS, MSERVICE_CONTROLLER } from './constants';
-import { CredentialsDto, AuthTokenDto, MessageDto, AuthResponseDto } from './dto/account-dto';
+import { AuthTokenDto, CredentialsDto, MessageDto } from './dto/account-dto';
 import { IAccountGrpcService } from './interface/account-grpc-interface';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Public } from './public';
 //import { JwtAuthGuard } from './jwt-auth.guard';
-
 
 @Controller()
 export class AccountController implements OnModuleInit {
@@ -17,7 +21,8 @@ export class AccountController implements OnModuleInit {
 
   private accountService: IAccountGrpcService;
   onModuleInit() {
-    this.accountService = this.client.getService<IAccountGrpcService>(MSERVICE_CONTROLLER);
+    this.accountService =
+      this.client.getService<IAccountGrpcService>(MSERVICE_CONTROLLER);
   }
 
   @Public()

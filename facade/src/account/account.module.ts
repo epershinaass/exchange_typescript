@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AccountController } from './account.controller';
-import { ClientsModule } from '@nestjs/microservices/module/clients.module';
-import { Transport } from '@nestjs/microservices';
-import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
-import { NAME, CLIENT_OPTS } from './constants';
-import { AuthService } from './auth.service';
+import { Transport } from '@nestjs/microservices';
+import { ClientsModule } from '@nestjs/microservices/module/clients.module';
 import { PassportModule } from '@nestjs/passport';
+import { join } from 'path';
+import { AccountController } from './account.controller';
+import { AuthService } from './auth.service';
+import { CLIENT_OPTS, NAME } from './constants';
 import { JwtStrategy } from './jwt.strategy';
-import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
-import { MyAuthGuard } from './auth.guard';
 
 @Module({
   imports: [

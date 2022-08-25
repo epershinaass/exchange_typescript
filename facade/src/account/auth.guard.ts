@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Inject,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RpcException } from '@nestjs/microservices';
 import { Request } from 'express';
@@ -11,8 +16,7 @@ export class MyAuthGuard implements CanActivate {
   @Inject(AuthService)
   public readonly service: AuthService;
 
-  constructor(private reflector: Reflector) {
-  }
+  constructor(private reflector: Reflector) {}
   public async canActivate(ctx: ExecutionContext): Promise<boolean> | never {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       ctx.getHandler(),
@@ -22,16 +26,18 @@ export class MyAuthGuard implements CanActivate {
       return true;
     }
     const req: Request = ctx.switchToRpc().getData();
-    const meta: Map<string, Array<string>> = ctx.switchToRpc().getContext()['internalRepr'];
+    const meta: Map<string, Array<string>> = ctx.switchToRpc().getContext()[
+      'internalRepr'
+    ];
     const authorization = await meta.get('authorization')[0];
 
     if (!authorization) {
-      throw new RpcException({ code: 16, message: 'I am first'});
+      throw new RpcException({ code: 16, message: 'I am first' });
     }
 
     const bearer: string[] = authorization.split(' ');
     if (!bearer || bearer.length < 2) {
-      throw new RpcException({ status: 16, message: 'I am second'});
+      throw new RpcException({ status: 16, message: 'I am second' });
     }
     const token = new AuthTokenDto(bearer[1]);
 
