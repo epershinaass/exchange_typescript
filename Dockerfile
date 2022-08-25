@@ -19,5 +19,6 @@ RUN yarn install --production=true --frozen-lockfile && \
 
 COPY --from=builder --chown=1000:1000 /app/dist /app/dist
 
-CMD [ "yarn", "start:prod" ]
+# CMD [ "yarn", "start:prod" ]
+CMD [ "node", "dist/main" ]
 
