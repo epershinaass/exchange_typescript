@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: balance
+  name: balance-svc
   namespace: application
 spec:
   selector:
@@ -20,7 +20,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: account
+  name: account-svc
   namespace: application
 spec:
   selector:
@@ -39,7 +39,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: facade
+  name: facade-svc
   namespace: application
 spec:
   selector:
@@ -58,7 +58,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: order
+  name: order-svc
   namespace: application
 spec:
   selector:
@@ -77,7 +77,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: products
+  name: products-svc
   namespace: application
 spec:
   selector:
