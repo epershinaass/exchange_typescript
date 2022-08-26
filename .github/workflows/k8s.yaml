@@ -64,7 +64,8 @@ jobs:
     - name: Change kafka url
       if: ${{ (inputs.service != 'facade') && (inputs.service != 'account') }}
       env:
-        KAFKA_URL: "'kafka-cluster-kafka-brokers.kafka.svc.cluster.local:9092'"
+        # KAFKA_URL: "'kafka-cluster-kafka-brokers.kafka.svc.cluster.local:9092'"
+        KAFKA_URL: "'kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092'"
       run: |
         sed -i -E -e "s/brokers: \[.*\],$/brokers: \[$KAFKA_URL\],/" ./${{ inputs.service }}/src/config/kafka.config.ts
         grep -e brokers ./${{ inputs.service }}/src/config/kafka.config.ts
